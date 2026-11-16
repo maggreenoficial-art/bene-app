@@ -2,613 +2,376 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bené — Aprendendo a ler (protótipo)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7ec8f2">
+<title>Bené — Grafismo Fonético</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bené">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --ink:#4a3426; --sky:#7ec8f2; --sky2:#dcf1fd; --sun:#ffc94a; --coral:#f26b6b; --blue:#5ba8e8;
-  --green:#5fa84f; --grass:#8fcf72; --cream:#fff7ea; --white:#fff;
-  --display:"Baloo 2","Arial Rounded MT Bold",ui-rounded,system-ui,sans-serif;
-  --body:"Nunito",ui-rounded,system-ui,sans-serif;
-}
+:root{--ink:#4a3426;--ink2:#7a6657;--sky:#7ec8f2;--sky2:#e6f5fe;--sun:#ffc94a;--coral:#f26b6b;--blue:#5ba8e8;--green:#5fa84f;--cream:#fff7ea;--line:#eadfce;--white:#fff;
+  --display:"Baloo 2","Arial Rounded MT Bold",ui-rounded,system-ui,sans-serif;--body:"Nunito",ui-rounded,system-ui,sans-serif;--nav:72px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
-body{font-family:var(--body);color:var(--ink);background:linear-gradient(var(--sky) 0%,var(--sky2) 62%,var(--grass) 62%,#7cc063 100%);background-attachment:fixed;
-  display:flex;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-#app{width:100%;max-width:480px;min-height:100%;padding:14px 16px 28px;display:flex;flex-direction:column}
-button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
-h1,h2{font-family:var(--display);margin:0;line-height:1.05}
-.screen{display:none;flex-direction:column;flex:1;gap:14px}
-.screen.on{display:flex}
+body{font-family:var(--body);font-weight:600;color:var(--ink);background:var(--cream);-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.1}
+p{margin:0}
+#app{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--cream)}
 
-/* blocos com contorno, como nas páginas do kit */
-.card{background:var(--white);border:4px solid var(--ink);border-radius:26px;box-shadow:6px 7px 0 var(--ink)}
-.btn{background:var(--sun);border:4px solid var(--ink);border-radius:999px;box-shadow:5px 6px 0 var(--ink);
-  font-family:var(--display);font-weight:800;font-size:26px;padding:12px 28px;min-height:64px;transition:transform .08s,box-shadow .08s}
-.btn:active{transform:translate(4px,5px);box-shadow:1px 1px 0 var(--ink)}
-.btn.small{font-size:18px;min-height:48px;padding:6px 18px;box-shadow:3px 4px 0 var(--ink);background:var(--white)}
-.round{width:56px;height:56px;border-radius:50%;padding:0;display:grid;place-items:center;font-size:24px;flex:none}
+/* cabeçalho */
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:var(--cream);border-bottom:2px solid var(--line)}
+.top img{height:40px}
+.top h1{flex:1;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--ink);background:var(--white);font-family:var(--display);font-size:20px;flex:none}
+.icon svg{width:22px;height:22px}
+main{flex:1;padding:18px 16px calc(var(--nav) + 28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
+main.full{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 
-/* topo */
-.top{display:flex;align-items:center;gap:10px}
-.top .logo{height:50px}
-.top .sp{flex:1}
-.stars{display:flex;gap:4px}
-.stars svg{width:30px;height:30px}
+/* navegação */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;justify-content:center;background:var(--white);border-top:2px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav div{display:flex;width:100%;max-width:560px}
+nav button{flex:1;height:var(--nav);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12.5px;font-weight:800;color:var(--ink2)}
+nav svg{width:26px;height:26px}
+nav button[aria-current=page]{color:var(--ink)}
+nav button[aria-current=page] span{background:var(--sun)}
+nav button span{display:grid;place-items:center;width:56px;height:32px;border-radius:16px}
 
-/* Bené falando */
-.talk{display:flex;align-items:flex-end;gap:8px}
-.talk img{width:96px;flex:none;filter:drop-shadow(3px 4px 0 rgba(74,52,38,.25))}
-.bubble{position:relative;flex:1;padding:12px 14px;font-weight:800;font-size:19px;line-height:1.25}
-.bubble:before{content:"";position:absolute;left:-16px;bottom:22px;border:10px solid transparent;border-right-color:var(--ink)}
-.bubble .say{margin-top:8px}
+/* blocos */
+.card{background:var(--white);border:2px solid var(--ink);border-radius:20px;box-shadow:0 4px 0 var(--ink)}
+.pad{padding:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:10px 22px;border-radius:26px;border:2px solid var(--ink);background:var(--sun);box-shadow:0 4px 0 var(--ink);font-family:var(--display);font-weight:800;font-size:19px;text-decoration:none;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{background:var(--white)}
+.btn.wide{width:100%}
+.btn[disabled]{opacity:.5}
+.sec{font-size:20px;margin-top:6px}
+.muted{color:var(--ink2);font-size:14.5px}
+.row{display:flex;gap:12px;align-items:center}
+.grow{flex:1;min-width:0}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:var(--green)}
+.list{display:flex;flex-direction:column;gap:12px}
+.item{display:flex;align-items:center;gap:14px;padding:14px;text-align:left;width:100%}
+.item .badge{width:56px;height:56px;border-radius:16px;border:2px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-size:26px;color:#fff;flex:none}
+.item img.th{width:56px;height:56px;object-fit:contain;flex:none}
+.item h3{font-size:19px}
+.chev{width:20px;height:20px;flex:none;color:var(--ink2)}
+.hero{display:flex;align-items:center;gap:12px;padding:16px;background:var(--sky2)}
+.hero img{width:92px;flex:none}
+.hero h2{font-size:24px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{position:relative;aspect-ratio:1/1.12;padding:8px 6px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-width:0;border-radius:16px;box-shadow:0 3px 0 var(--ink)}
+.tile img{width:100%;flex:1;min-height:0;object-fit:contain}
+.tile b{font-family:var(--display);font-size:14px;line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile.done{background:#e9f6e2}
+.tile .ok{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:var(--green);border:2px solid var(--ink);display:grid;place-items:center}
+.tile .ok svg{width:14px;height:14px;color:#fff}
+.tile.letter{aspect-ratio:1;justify-content:center;font-family:var(--display);font-size:38px}
 
-/* início */
-.hero{padding:18px;text-align:center}
-.hero h1{font-size:34px}
-.hero p{margin:6px 0 0;font-weight:800;font-size:17px}
-.lesson{display:flex;align-items:center;gap:12px;padding:8px 14px;text-align:left;width:100%;background:var(--cream)}
-.lesson .letter{font-family:var(--display);font-size:60px;line-height:.9;color:var(--coral);-webkit-text-stroke:3px var(--ink);width:78px;text-align:center}
-.lesson img{width:64px;height:64px;object-fit:contain}
-.lesson b{font-family:var(--display);font-size:26px;display:block;line-height:1.05}
-.lesson span{font-weight:800;font-size:15px}
-#lessons{display:flex;flex-direction:column;gap:12px}
-.lesson[disabled]{opacity:.55;box-shadow:none;border-style:dashed;cursor:default}
-.lesson.done{background:#e6f5dd}
-.stages{padding:12px 16px;list-style:none;margin:0}
-.stages li{display:flex;align-items:center;gap:10px;padding:7px 0;font-weight:800;font-size:16px}
-.stages li + li{border-top:2px dashed rgba(74,52,38,.25)}
-.stages .dot{width:30px;height:30px;border-radius:50%;border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-size:16px;background:#eee;flex:none}
-.stages li.now .dot{background:var(--sun)}
-.stages small{font-weight:600;opacity:.75;display:block;font-size:13px}
-
-/* história */
-.story{padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
-.bigA{font-family:var(--display);font-size:120px;line-height:.85;color:var(--coral);-webkit-text-stroke:5px var(--ink);background:none;border:0;padding:0 16px}
-.bigA:active{transform:scale(.94)}
-.story img{width:130px;height:130px;object-fit:contain}
-.story .word{font-family:var(--display);font-size:44px;letter-spacing:2px}
-.story .word i{font-style:normal;color:var(--coral)}
-
-/* jogo 1 */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.pic{aspect-ratio:1;padding:6px;background:var(--white);display:grid;place-items:center;transition:transform .15s,opacity .3s}
-.pic{min-width:0;overflow:hidden}
-.pic img{width:100%;height:100%;object-fit:contain;pointer-events:none}
-.pic.ok{background:#dff3d6;transform:scale(.9);opacity:.55}
-.pic.no{animation:shake .35s}
-.ark{display:flex;align-items:center;justify-content:center;gap:8px;min-height:92px}
-.ark > img{width:96px;height:84px;object-fit:contain}
-.ark .in{display:flex;gap:2px;flex-wrap:wrap;max-width:190px}
-.ark .in img{width:52px;height:52px;object-fit:contain;animation:pop .35s}
-
-/* jogo 2 */
-.letters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.tile{aspect-ratio:1;font-family:var(--display);font-size:46px;line-height:1;background:var(--white);padding:0}
-.tile.ok{background:var(--sun);animation:pop .3s}
-.tile.no{animation:shake .35s}
-.count{text-align:center;font-family:var(--display);font-size:24px}
-
-/* jogo 3 */
-.trace{padding:8px;display:grid;place-items:center;background:var(--cream)}
-canvas{width:100%;max-width:340px;aspect-ratio:10/11;touch-action:none;display:block}
-
-/* fim */
-.end{padding:18px;text-align:center}
-.end h2{font-size:34px}
-.verse{background:var(--cream);padding:14px;margin-top:6px}
-.verse b{font-family:var(--display);font-size:24px;display:block;line-height:1.15}
-.verse b i{font-style:normal;color:var(--coral)}
-.todo{padding:14px;font-weight:800;font-size:17px;text-align:left;display:flex;gap:12px;align-items:center}
-.todo img{width:64px}
-
-/* pais */
-#pais{position:fixed;inset:0;background:rgba(74,52,38,.55);display:none;align-items:flex-end;justify-content:center;z-index:9}
-#pais.on{display:flex}
-#pais .sheet{width:100%;max-width:480px;max-height:88%;overflow:auto;padding:18px;border-radius:26px 26px 0 0;box-shadow:none;border-bottom:0}
-#pais h2{font-size:26px;margin-bottom:8px}
-#pais p,#pais li{font-size:15.5px;line-height:1.45;font-weight:600}
-#pais ul{padding-left:20px;margin:6px 0 12px}
-.center{display:flex;justify-content:center;margin-top:auto;padding-top:6px}
-.confetti{position:fixed;top:-20px;width:14px;height:14px;border:2px solid var(--ink);border-radius:4px;z-index:8;animation:fall 1.6s linear forwards;pointer-events:none}
-@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
-@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
-@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
-/* brincadeiras (sem áudio novo) */
-.sub{font-family:var(--display);font-size:24px;margin:4px 2px -4px}
-.plays{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.play{padding:12px 8px;text-align:center;font-family:var(--display);font-size:20px;line-height:1.1;display:flex;flex-direction:column;align-items:center;gap:6px}
-.play img,.play .ic{width:72px;height:72px;object-fit:contain}
-.play .ic{display:grid;place-items:center;font-size:44px;color:var(--coral);-webkit-text-stroke:2px var(--ink)}
-.bar{display:flex;align-items:center;gap:10px}
-.bar h2{flex:1;font-size:26px}
-.mem{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.mcard{aspect-ratio:1;padding:6px;background:var(--sun);display:grid;place-items:center;min-width:0;overflow:hidden;font-family:var(--display);font-size:40px}
-.mcard img{width:100%;height:100%;object-fit:contain;display:none;pointer-events:none}
-.mcard.up{background:var(--white)} .mcard.up img{display:block} .mcard.up span{display:none}
-.mcard.hit{background:#dff3d6;opacity:.7}
-.qpic{padding:14px;display:grid;place-items:center}
-.qpic img{width:190px;height:190px;object-fit:contain}
-.vbtns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.vbtns .tile{font-size:40px}
-.paintbox{position:relative;padding:0;overflow:hidden;aspect-ratio:1;background:#fff}
-.paintbox canvas{position:absolute;inset:0;width:100%;height:100%;max-width:none;aspect-ratio:auto}
-.paintbox img{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;pointer-events:none}
+/* atividade */
+.stage{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px}
+.stage img{width:150px;height:150px;object-fit:contain}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{min-width:62px;padding:6px 14px;border-radius:14px;border:2px solid var(--ink);box-shadow:0 3px 0 var(--ink);font-family:var(--display);font-size:30px;line-height:1.1;color:#fff}
+.chip.pop{animation:pop .3s}
+.chip.empty{background:var(--white);color:transparent;border-style:dashed;box-shadow:none}
+.chip.no{animation:shake .3s}
+.hint{font-size:15px;color:var(--ink2);text-align:center}
+.trace{padding:6px;background:var(--white);touch-action:none}
+.trace canvas,.paint canvas{display:block;width:100%;touch-action:none}
+.paint{position:relative;overflow:hidden;padding:0}
+.paint img{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;pointer-events:none}
 .pal{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.pal button{width:46px;height:46px;border-radius:50%;border:4px solid var(--ink);padding:0}
-.pal button.sel{box-shadow:0 0 0 4px var(--white),0 0 0 8px var(--ink)}
-.puz{display:grid;gap:4px;padding:6px;aspect-ratio:1;background:var(--ink)}
-.ptile{border:0;padding:0;background-repeat:no-repeat;border-radius:8px;min-width:0}
-.ptile.sel{outline:6px solid var(--sun);outline-offset:-6px}
-.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.pal button{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink)}
+.pal button.sel{box-shadow:0 0 0 3px var(--cream),0 0 0 6px var(--ink)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.win{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;background:#e9f6e2;text-align:center}
+.win h2{font-size:26px}
+.verse{font-family:var(--display);font-size:22px;text-align:center;line-height:1.2}
+.lyrics p{font-size:18px;line-height:1.5;text-align:center}
+.lyrics h3{font-size:16px;color:var(--coral);text-align:center;margin:14px 0 4px}
+
+/* entrada */
+.gate{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:28px 20px calc(28px + env(safe-area-inset-bottom));background:linear-gradient(var(--sky),var(--sky2) 55%,var(--cream) 55%)}
+.gate .brand{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gate .brand img{width:200px}
+.gate form{padding:20px;display:flex;flex-direction:column;gap:14px}
+.gate h1{font-size:26px;text-align:center}
+label{display:flex;flex-direction:column;gap:6px;font-weight:800;font-size:15px}
+input{height:52px;border-radius:14px;border:2px solid var(--ink);padding:0 14px;font-size:17px;font-weight:700;background:var(--white);-webkit-user-select:text;user-select:text}
+input:focus{outline:3px solid var(--blue);outline-offset:1px}
+.err{color:#b3261e;font-size:14px;font-weight:800;min-height:18px}
+.fine{font-size:13px;color:var(--ink2);text-align:center;line-height:1.4}
+
+/* folha */
+.sheet{position:fixed;inset:0;z-index:9;background:rgba(74,52,38,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet>div{width:100%;max-width:560px;background:var(--cream);border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;max-height:88%;overflow:auto}
+.sheet h2{font-size:22px}
+.steps{margin:0;padding-left:22px;line-height:1.6}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="top">
-    <img class="logo" src="img/logo.webp" alt="Bené">
-    <div class="sp"></div>
-    <div class="stars" id="stars" aria-label="Estrelas da lição"></div>
-    <button class="btn small" id="btnPais">Pais</button>
-  </div>
-
-  <section class="screen on" id="home">
-    <div class="card hero">
-      <h1>Vamos ler com a Bené</h1>
-      <p>Uma lição por dia, de 10 minutinhos.</p>
-    </div>
-    <div id="lessons"></div>
-    <h2 class="sub">Brincar</h2>
-    <div class="plays">
-      <button class="card play" data-play="mem"><span class="ic">?</span>Jogo da memória</button>
-      <button class="card play" data-play="quiz"><span class="ic">A?</span>Qual é a letra</button>
-      <button class="card play" data-play="paint"><img src="img/pintar_bene.webp" alt="">Pintar</button>
-      <button class="card play" data-play="puz"><img src="img/quebra_arca.webp" alt="">Quebra-cabeça</button>
-    </div>
-    <ol class="card stages">
-      <li><span class="dot">1</span><div>Ouvir e rimar<small>3 a 4 anos · em breve</small></div></li>
-      <li class="now"><span class="dot">2</span><div>Vogais e som das letras<small>você está aqui</small></div></li>
-      <li><span class="dot">3</span><div>Sílabas<small>em breve</small></div></li>
-      <li><span class="dot">4</span><div>Palavras<small>em breve</small></div></li>
-      <li><span class="dot">5</span><div>Frases e versículos<small>em breve</small></div></li>
-    </ol>
-  </section>
-
-  <section class="screen" id="story">
-    <div class="talk"><img src="img/bene.webp" alt="Bené, a ovelhinha"><div class="card bubble"><div id="storyTxt"></div><button class="btn small say" data-say="story">Ouvir de novo</button></div></div>
-    <div class="card story">
-      <button class="bigA" id="bigA"></button>
-      <img id="storyPic" alt="">
-      <div class="word" id="storyWord"></div>
-    </div>
-    <div class="center"><button class="btn" data-go="g1">Vamos brincar</button></div>
-  </section>
-
-  <section class="screen" id="g1">
-    <div class="talk"><img src="img/bene.webp" alt=""><div class="card bubble"><div id="g1Txt"></div><button class="btn small say" data-say="g1">Ouvir de novo</button></div></div>
-    <div class="grid" id="g1grid"></div>
-    <div class="card ark"><img id="arkPic" alt=""><div class="in" id="arkIn"></div></div>
-  </section>
-
-  <section class="screen" id="g2">
-    <div class="talk"><img src="img/bene.webp" alt=""><div class="card bubble"><div id="g2Txt"></div><button class="btn small say" data-say="g2">Ouvir de novo</button></div></div>
-    <div class="letters" id="g2grid"></div>
-    <div class="count" id="g2count"></div>
-  </section>
-
-  <section class="screen" id="g3">
-    <div class="talk"><img src="img/bene.webp" alt=""><div class="card bubble"><div id="g3Txt"></div><button class="btn small say" data-say="g3">Ouvir de novo</button></div></div>
-    <div class="card trace"><canvas id="cv" width="600" height="660" aria-label="Letra pontilhada para cobrir com o dedo"></canvas></div>
-    <div class="center"><button class="btn small" id="clearTrace">Apagar e tentar de novo</button></div>
-  </section>
-
-  <section class="screen" id="end">
-    <div class="card end">
-      <h2>Você conseguiu!</h2>
-      <div class="stars" id="endStars" style="justify-content:center;margin:8px 0"></div>
-      <div class="card verse">
-        <b id="verseTxt"></b>
-        <span style="font-weight:800" id="verseRef"></span><br>
-        <button class="btn small" data-say="verso" style="margin-top:8px">Ouvir o versículo</button>
-      </div>
-    </div>
-    <div class="card todo"><img src="img/coracao.webp" alt=""><div id="todoTxt"></div></div>
-    <div class="center"><button class="btn" data-go="home">Voltar ao início</button></div>
-  </section>
-
-  <section class="screen" id="mem">
-    <div class="bar"><h2>Jogo da memória</h2><button class="btn small" data-go="home">Voltar</button></div>
-    <div class="mem" id="memGrid"></div>
-    <div class="center"><button class="btn small" id="memNew">Embaralhar de novo</button></div>
-  </section>
-
-  <section class="screen" id="quiz">
-    <div class="bar"><h2>Qual é a letra?</h2><button class="btn small" data-go="home">Voltar</button></div>
-    <div class="stars" id="quizStars" style="justify-content:center"></div>
-    <div class="card qpic"><img id="quizPic" alt=""></div>
-    <div class="vbtns" id="quizBtns"></div>
-  </section>
-
-  <section class="screen" id="paint">
-    <div class="bar"><h2>Pintar</h2><button class="btn small" data-go="home">Voltar</button></div>
-    <div class="card paintbox"><canvas id="pcv" width="720" height="720"></canvas><img id="pimg" alt="Desenho para pintar"></div>
-    <div class="pal" id="pal"></div>
-    <div class="row"><button class="btn small" id="pClear">Apagar tudo</button><button class="btn small" id="pNext">Outro desenho</button></div>
-  </section>
-
-  <section class="screen" id="puz">
-    <div class="bar"><h2>Quebra-cabeça</h2><button class="btn small" data-go="home">Voltar</button></div>
-    <div class="card puz" id="puzGrid"></div>
-    <div class="row"><button class="btn small" id="puzNext">Outra figura</button></div>
-  </section>
-</div>
-
-<div id="pais" role="dialog" aria-modal="true" aria-labelledby="paisT">
-  <div class="card sheet">
-    <h2 id="paisT">Área dos pais</h2>
-    <p id="paisProg"></p>
-    <p><b>Como cada lição funciona</b></p>
-    <ul>
-      <li>História bíblica curta apresenta a letra e o som.</li>
-      <li>Jogo 1 treina o ouvido: qual palavra começa com o som?</li>
-      <li>Jogo 2 treina o olho: reconhecer a letra maiúscula e minúscula.</li>
-      <li>Jogo 3 treina a mão: cobrir a letra na ordem certa dos traços.</li>
-      <li>As brincadeiras (memória, qual é a letra, pintar e quebra-cabeça) ficam sempre liberadas.</li>
-    </ul>
-    <p><b>Para dar resultado:</b> uma lição por dia, sentado junto com a criança, e depois a atividade fora da tela. O aplicativo complementa a escola, não substitui.</p>
-    <p style="opacity:.75" id="voiceNote"></p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn small" id="unlockAll">Liberar todas as lições</button>
-      <button class="btn small" id="resetProg">Zerar progresso</button>
-      <button class="btn small" id="closePais" style="background:var(--sun)">Fechar</button>
-    </div>
-  </div>
-</div>
-
+<div id="app"></div>
+<script src="data.js"></script>
 <script>
 (function(){
 'use strict';
-var D={"lessons": [{"v": "A", "fala": "A", "nome": "Arca", "pic": "arca", "resto": "RCA", "verse": ["Amem uns aos outros.", "João 13:34"], "ins": ["abelha", "abacaxi", "abacate", "arvore", "arcoiris", "apito", "abobora"]}, {"v": "E", "fala": "É", "nome": "Estrela", "pic": "estrela", "resto": "STRELA", "verse": ["Eu sou a luz do mundo.", "João 8:12"], "ins": ["estrela", "escova", "escada", "envelope", "escudo"]}, {"v": "I", "fala": "I", "nome": "Igreja", "pic": "igreja", "resto": "GREJA", "verse": ["Ide por todo o mundo.", "Marcos 16:15"], "ins": ["igreja", "ioio", "ilha", "ima", "iglu"]}, {"v": "O", "fala": "Ó", "nome": "Ovelha", "pic": "ovelha", "resto": "VELHA", "verse": ["O Senhor é o meu pastor.", "Salmo 23:1"], "ins": ["ovo", "ovelha", "olho", "oculos", "onda", "osso"]}, {"v": "U", "fala": "U", "nome": "Uva", "pic": "uva", "resto": "VA", "verse": ["Um só Deus e Pai de todos.", "Efésios 4:6"], "ins": ["uva", "urso", "um"]}], "words": {"abelha": "abelha", "abacaxi": "abacaxi", "abacate": "abacate", "arvore": "árvore", "arcoiris": "arco-íris", "apito": "apito", "abobora": "abóbora", "estrela": "estrela", "escova": "escova", "escada": "escada", "envelope": "envelope", "escudo": "escudo", "igreja": "igreja", "ioio": "ioiô", "ilha": "ilha", "ima": "ímã", "iglu": "iglu", "ovo": "ovo", "ovelha": "ovelha", "olho": "olho", "oculos": "óculos", "onda": "onda", "osso": "osso", "uva": "uva", "urso": "urso", "um": "um", "bola": "bola", "peixe": "peixe", "lua": "lua", "sol": "sol", "casa": "casa", "pato": "pato"}, "out": ["bola", "peixe", "lua", "sol", "casa", "pato"], "say": {"A_story": "A de Arca! Deus pediu para Noé construir uma arca bem grande, e os bichinhos entraram nela. Toque na letra A para ouvir o som.", "A_g1": "Ajude os amigos a entrar na arca! Toque só nas figuras que começam com o som A.", "A_g2": "Agora ache a letra A! Toque em todas as letras A, grandes e pequenas.", "A_g3": "Cubra a letra A com o dedo. Comece na bolinha verde e siga os pontinhos.", "A_som": "A", "A_sim": "Começa com A!", "A_nao": "Não começa com A.", "A_fim": "Parabéns! Você aprendeu a letra A.", "A_verso": "Amem uns aos outros. João, capítulo treze, versículo trinta e quatro.", "E_story": "E de Estrela! Uma estrela bem brilhante mostrou o caminho até o menino Jesus. Toque na letra E para ouvir o som.", "E_g1": "Vamos procurar! Toque só nas figuras que começam com o som É.", "E_g2": "Agora ache a letra É! Toque em todas as letras É, grandes e pequenas.", "E_g3": "Cubra a letra É com o dedo. Comece na bolinha verde e siga os pontinhos.", "E_som": "É", "E_sim": "Começa com É!", "E_nao": "Não começa com É.", "E_fim": "Parabéns! Você aprendeu a letra É.", "E_verso": "Eu sou a luz do mundo. João, capítulo oito, versículo doze.", "I_story": "I de Igreja! Na igreja a gente canta, ora e aprende sobre Jesus. Toque na letra I para ouvir o som.", "I_g1": "Vamos procurar! Toque só nas figuras que começam com o som I.", "I_g2": "Agora ache a letra I! Toque em todas as letras I, grandes e pequenas.", "I_g3": "Cubra a letra I com o dedo. Comece na bolinha verde e siga os pontinhos.", "I_som": "I", "I_sim": "Começa com I!", "I_nao": "Não começa com I.", "I_fim": "Parabéns! Você aprendeu a letra I.", "I_verso": "Ide por todo o mundo. Marcos, capítulo dezesseis, versículo quinze.", "O_story": "O de Ovelha! Jesus é o bom pastor, e cuida de cada ovelhinha com muito amor. Toque na letra O para ouvir o som.", "O_g1": "Vamos procurar! Toque só nas figuras que começam com o som Ó.", "O_g2": "Agora ache a letra Ó! Toque em todas as letras Ó, grandes e pequenas.", "O_g3": "Cubra a letra Ó com o dedo. Comece na bolinha verde e siga os pontinhos.", "O_som": "Ó", "O_sim": "Começa com Ó!", "O_nao": "Não começa com Ó.", "O_fim": "Parabéns! Você aprendeu a letra Ó.", "O_verso": "O Senhor é o meu pastor. Salmo vinte e três, versículo um.", "U_story": "U de Uva! Na terra que Deus prometeu, o povo achou um cacho de uvas bem grande. Toque na letra U para ouvir o som.", "U_g1": "Vamos procurar! Toque só nas figuras que começam com o som U.", "U_g2": "Agora ache a letra U! Toque em todas as letras U, grandes e pequenas.", "U_g3": "Cubra a letra U com o dedo. Comece na bolinha verde e siga os pontinhos.", "U_som": "U", "U_sim": "Começa com U!", "U_nao": "Não começa com U.", "U_fim": "Parabéns! Você aprendeu a letra U.", "U_verso": "Um só Deus e Pai de todos. Efésios, capítulo quatro, versículo seis.", "w_abelha": "Abelha.", "w_abacaxi": "Abacaxi.", "w_abacate": "Abacate.", "w_arvore": "Árvore.", "w_arcoiris": "Arco-íris.", "w_apito": "Apito.", "w_abobora": "Abóbora.", "w_estrela": "Estrela.", "w_escova": "Escova.", "w_escada": "Escada.", "w_envelope": "Envelope.", "w_escudo": "Escudo.", "w_igreja": "Igreja.", "w_ioio": "Ioiô.", "w_ilha": "Ilha.", "w_ima": "Ímã.", "w_iglu": "Iglu.", "w_ovo": "Ovo.", "w_ovelha": "Ovelha.", "w_olho": "Olho.", "w_oculos": "Óculos.", "w_onda": "Onda.", "w_osso": "Osso.", "w_uva": "Uva.", "w_urso": "Urso.", "w_um": "Um.", "w_bola": "Bola.", "w_peixe": "Peixe.", "w_lua": "Lua.", "w_sol": "Sol.", "w_casa": "Casa.", "w_pato": "Pato."}};
-var AUDIO='https://acbksachtpypwtbgwyxh.supabase.co/storage/v1/object/public/bene-audio/v1/';
-var SVG={escada:1,envelope:1,escudo:1,ilha:1,ima:1,iglu:1,olho:1,oculos:1,onda:1,osso:1,urso:1,um:1};
-function pic(id){return 'img/'+id+(SVG[id]?'.svg':'.webp');}
-var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-
-/* progresso (só neste aparelho) */
-var KEY='bene_proto_v2', prog={done:{},stars:{},open:false};
-try{var s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&s.done&&s.stars)prog=s;}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(prog));}catch(e){}}
-var L=null, run=0, inLesson=false;
-
-/* voz: toca o áudio gravado; se não houver, usa a voz do aparelho */
-var voices=[], audioOK=true, cur=null, tok=0;
-function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){}}
-try{loadVoices(); speechSynthesis.onvoiceschanged=loadVoices;}catch(e){}
-function speak(t){
-  try{
-    if(!('speechSynthesis' in window))return;
-    speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance(t); u.lang='pt-BR'; u.rate=.92; u.pitch=1.2;
-    var v=voices.filter(function(v){return /pt[-_]BR/i.test(v.lang)})[0]||voices.filter(function(v){return /^pt/i.test(v.lang)})[0];
-    if(v)u.voice=v; speechSynthesis.speak(u);
-  }catch(e){}
-}
-function hush(){tok++;try{if(cur){cur.pause();cur=null;}}catch(e){}try{speechSynthesis.cancel();}catch(e){}}
-function say(keys){
-  hush(); var my=tok, text=keys.map(function(k){return D.say[k]}).join(' ');
-  if(!audioOK){speak(text);return;}
-  var i=0, failed=false;
-  function fail(){if(failed||my!==tok)return;failed=true;if(i===0)audioOK=false;speak(keys.slice(i).map(function(k){return D.say[k]}).join(' '));}
-  function next(){
-    if(my!==tok||i>=keys.length)return;
-    var a; try{a=new Audio(AUDIO+keys[i]+'.mp3');}catch(e){fail();return;}
-    cur=a; var started=false;
-    a.onplaying=function(){started=true;};
-    a.onended=function(){i++;next();};
-    a.onerror=fail;
-    var p; try{p=a.play();}catch(e){fail();return;}
-    if(p&&p.catch)p.catch(fail);
-    setTimeout(function(){if(!started&&my===tok&&cur===a){try{a.pause();}catch(e){}fail();}},2500);
-  }
-  next();
-}
-var ac=null;
-function tone(freqs,dur){
-  try{
-    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-    freqs.forEach(function(f,i){
-      var o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime+i*(dur||.11);
-      o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(ac.destination);
-      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.2,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.11)+.08);
-      o.start(t); o.stop(t+(dur||.11)+.1);
-    });
-  }catch(e){}
-}
-var good=function(){tone([660,880])}, bad=function(){tone([220],.16)}, win=function(){tone([523,659,784,1047],.13)};
-$$('[data-say]').forEach(function(b){b.addEventListener('click',function(){say([L.v+'_'+b.dataset.say]);});});
-
-/* estrelas */
-function starSvg(on){return '<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" fill="'+(on?'#ffc94a':'#fff')+'" stroke="#4a3426" stroke-width="2" stroke-linejoin="round"/></svg>';}
-function drawStars(){
-  var h=''; for(var i=0;i<3;i++)h+=starSvg(i<run);
-  $('#stars').innerHTML=inLesson?h:''; $('#endStars').innerHTML=h;
-}
-function confetti(){
-  if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;
-  var c=['#f26b6b','#5ba8e8','#ffc94a','#5fa84f'];
-  for(var i=0;i<26;i++){var d=document.createElement('div');d.className='confetti';d.style.left=(Math.random()*100)+'vw';d.style.background=c[i%4];
-    d.style.animationDelay=(Math.random()*.5)+'s';document.body.appendChild(d);(function(d){setTimeout(function(){d.remove();},2400);})(d);}
-}
-
-/* início: lista de lições */
-function renderHome(){
-  var box=$('#lessons'); box.innerHTML='';
-  D.lessons.forEach(function(l,i){
-    var open=prog.open||i===0||prog.done[D.lessons[i-1].v], done=prog.done[l.v];
-    var b=document.createElement('button'); b.className='card lesson'+(done?' done':''); if(!open)b.disabled=true;
-    var st=done?('Feita · '+(prog.stars[l.v]||0)+' de 3 estrelas'):(open?'Toque para começar':'Termine a lição anterior');
-    b.innerHTML='<div class="letter">'+l.v+'</div><div style="flex:1"><b>'+l.v+' de '+l.nome+'</b><span>'+st+'</span></div><img src="'+pic(l.pic)+'" alt="">';
-    b.addEventListener('click',function(){startLesson(l);});
-    box.appendChild(b);
-  });
-}
-function startLesson(l){
-  L=l; run=0;
-  ['story','g1','g2','g3'].forEach(function(k){$('#'+k+'Txt').textContent=D.say[l.v+'_'+k].replace(/ É([ !.,])/g,' E$1').replace(/ Ó([ !.,])/g,' O$1');});
-  $('#bigA').textContent=l.v; $('#bigA').setAttribute('aria-label','Letra '+l.v+', toque para ouvir');
-  $('#storyPic').src=pic(l.pic); $('#storyPic').alt=l.nome;
-  $('#storyWord').innerHTML='<i>'+l.v+'</i>'+l.resto;
-  $('#arkPic').src=pic(l.pic);
-  $('#verseTxt').innerHTML='<i>'+l.verse[0].charAt(0)+'</i>'+l.verse[0].slice(1); $('#verseRef').textContent=l.verse[1];
-  $('#todoTxt').textContent='Agora, longe da tela: ache com a mamãe ou o papai 3 coisas da casa que começam com '+l.v+'.';
-  go('story');
-}
-
-/* navegação */
-function go(id){
-  $$('.screen').forEach(function(s){s.classList.toggle('on',s.id===id);});
-  window.scrollTo(0,0);
-  if(id==='home'){inLesson=false;hush();renderHome();}
-  if(id==='story'){inLesson=true;say([L.v+'_story']);}
-  if(id==='g1'){startG1();say([L.v+'_g1']);}
-  if(id==='g2'){startG2();say([L.v+'_g2']);}
-  if(id==='g3'){startG3();say([L.v+'_g3']);}
-  if(id==='end'){prog.done[L.v]=true;prog.stars[L.v]=Math.max(prog.stars[L.v]||0,run);save();win();confetti();say([L.v+'_fim',L.v+'_verso']);}
-  drawStars();
-}
-$$('[data-go]').forEach(function(b){b.addEventListener('click',function(){go(b.dataset.go);});});
-$('#bigA').addEventListener('click',function(){say([L.v+'_som']);});
-function finish(next){run++;drawStars();win();confetti();setTimeout(function(){go(next);},1500);}
-function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
-
-/* jogo 1: som inicial */
-var g1left=0, g1round=0, g1rounds=1;
-function startG1(){g1round=0;g1rounds=L.ins.length>=5?2:1;$('#arkIn').innerHTML='';roundG1();}
-function roundG1(){
-  var a=shuffle(L.ins.slice()).slice(0,3), b=shuffle(D.out.slice()).slice(0,3);
-  var all=shuffle(a.map(function(x){return [x,true]}).concat(b.map(function(x){return [x,false]})));
-  g1left=3; var grid=$('#g1grid'); grid.innerHTML='';
-  all.forEach(function(it){
-    var bt=document.createElement('button'); bt.className='card pic'; bt.setAttribute('aria-label',D.words[it[0]]);
-    bt.innerHTML='<img src="'+pic(it[0])+'" alt="">';
-    bt.addEventListener('click',function(){
-      if(bt.classList.contains('ok'))return;
-      if(it[1]){
-        bt.classList.add('ok'); good(); say(['w_'+it[0],L.v+'_sim']);
-        var im=document.createElement('img'); im.src=pic(it[0]); im.alt=''; $('#arkIn').appendChild(im);
-        if(--g1left===0){ if(++g1round<g1rounds)setTimeout(roundG1,1600); else setTimeout(function(){finish('g2');},1400); }
-      }else{
-        bad(); say(['w_'+it[0],L.v+'_nao']); bt.classList.remove('no'); void bt.offsetWidth; bt.classList.add('no');
-      }
-    });
-    grid.appendChild(bt);
-  });
-}
-
-/* jogo 2: achar a letra */
-var g2left=0;
-function startG2(){
-  var v=L.v, lo=v.toLowerCase();
-  var others=shuffle(['A','E','I','O','U','a','e','o','u','M','V','T'].filter(function(x){return x.toLowerCase()!==lo;})).slice(0,7);
-  var ls=shuffle([v,v,v,lo,lo].concat(others)); g2left=5;
-  var grid=$('#g2grid'); grid.innerHTML='';
-  ls.forEach(function(l){
-    var bt=document.createElement('button'); bt.className='card tile'; bt.textContent=l;
-    bt.addEventListener('click',function(){
-      if(bt.classList.contains('ok'))return;
-      if(l.toLowerCase()===lo){bt.classList.add('ok');good();say([v+'_som']);g2left--;g2count();if(g2left===0)setTimeout(function(){finish('g3');},900);}
-      else{bad();bt.classList.remove('no');void bt.offsetWidth;bt.classList.add('no');}
-    });
-    grid.appendChild(bt);
-  });
-  g2count();
-}
-function g2count(){$('#g2count').textContent=g2left?('Faltam '+g2left):'Achou todas!';}
-
-/* jogo 3: cobrir a letra */
-var cv=$('#cv'), cx=cv.getContext('2d'), W=600, H=660;
-function arc(cxx,cyy,rx,ry,a0,a1,n){var a=[];for(var i=0;i<=n;i++){var t=(a0+(a1-a0)*i/n)*Math.PI/180;a.push([cxx+rx*Math.cos(t),cyy+ry*Math.sin(t)]);}return a;}
-var STROKES={
-  A:[[[300,80],[110,580]],[[300,80],[490,580]],[[178,400],[422,400]]],
-  E:[[[170,80],[170,580]],[[170,80],[440,80]],[[170,330],[400,330]],[[170,580],[440,580]]],
-  I:[[[300,80],[300,580]]],
-  O:[arc(300,330,190,250,-90,-450,36)],
-  U:[[[150,80],[150,400]].concat(arc(300,400,150,180,180,0,14)).concat([[450,80]])]
+var D=window.BENE, API='https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-lead';
+var app=document.getElementById('app');
+var LS={get:function(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:function(k){try{localStorage.removeItem(k);}catch(e){}}};
+var user=LS.get('bene_user',null), prog=LS.get('bene_prog',{});
+function done(k,i){return !!(prog[k]&&prog[k][i]);}
+function mark(k,i){prog[k]=prog[k]||{};prog[k][i]=1;LS.set('bene_prog',prog);}
+function count(k){return prog[k]?Object.keys(prog[k]).length:0;}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function h(html){var t=document.createElement('template');t.innerHTML=html.trim();return t.content;}
+var SYL=['#f26b6b','#5ba8e8','#5fa84f','#f2ae16'];
+var IC={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+ pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></svg>',
+ gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12M12 9c-4 0-5-5-2-5s2 5 2 5zm0 0c4 0 5-5 2-5s-2 5-2 5z"/></svg>',
+ print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3h10v5M7 17H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-3"/><rect x="7" y="14" width="10" height="7" rx="1"/></svg>',
+ back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ chev:'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+ ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4 10-11"/></svg>',
+ down:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>'
 };
-var pts=[], curS=0, hit=0, ink=[], drawing=false, doneTrace=false;
-function buildPts(){
-  pts=STROKES[L.v].map(function(poly){
-    var out=[poly[0]], carry=0, step=42;
-    for(var i=1;i<poly.length;i++){
-      var a=poly[i-1], b=poly[i], len=Math.hypot(b[0]-a[0],b[1]-a[1]), t=step-carry;
-      while(t<=len){out.push([a[0]+(b[0]-a[0])*t/len,a[1]+(b[1]-a[1])*t/len]);t+=step;}
-      carry=len-(t-step);
-    }
-    var last=poly[poly.length-1], e=out[out.length-1];
-    if(Math.hypot(last[0]-e[0],last[1]-e[1])>14)out.push(last); else out[out.length-1]=last;
-    return out;
-  });
+var ac=null;
+function tone(fs,d){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();fs.forEach(function(f,i){var o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+i*(d||.11);o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+(d||.11)+.08);o.start(t);o.stop(t+(d||.11)+.1);});}catch(e){}}
+var good=function(){tone([660,880]);},bad=function(){tone([220],.16);},win=function(){tone([523,659,784,1047],.13);};
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ---------- navegação ---------- */
+var route={v:'home'}, stack=[];
+function go(r,replace){if(!replace)stack.push(route);route=r;render();window.scrollTo(0,0);}
+function back(){route=stack.pop()||{v:'home'};render();window.scrollTo(0,0);}
+function tab(v){stack=[];route={v:v};render();window.scrollTo(0,0);}
+var TABS=[['home','Início',IC.home],['levels','Atividades',IC.pen],['bonus','Bônus',IC.gift],['print','Imprimir',IC.print]];
+function shell(title,body,opts){
+  opts=opts||{};
+  var top=opts.back?'<button class="icon" id="bk" aria-label="Voltar">'+IC.back+'</button><h1>'+esc(title)+'</h1>'
+    :'<img src="img/logo.webp" alt="Bené"><h1></h1><button class="icon" id="acct" aria-label="Minha conta">'+esc((user.nome||'?').charAt(0).toUpperCase())+'</button>';
+  var nav=opts.back?'':'<nav aria-label="Menu"><div>'+TABS.map(function(t){return '<button data-tab="'+t[0]+'"'+(route.v===t[0]?' aria-current="page"':'')+'><span>'+t[2]+'</span>'+t[1]+'</button>';}).join('')+'</div></nav>';
+  app.innerHTML='<header class="top">'+top+'</header><main'+(opts.back?' class="full"':'')+'>'+body+'</main>'+nav;
+  var b=document.getElementById('bk'); if(b)b.onclick=back;
+  var a=document.getElementById('acct'); if(a)a.onclick=account;
+  [].forEach.call(app.querySelectorAll('[data-tab]'),function(x){x.onclick=function(){tab(x.dataset.tab);};});
+  [].forEach.call(app.querySelectorAll('[data-go]'),function(x){x.onclick=function(){go(JSON.parse(x.dataset.go));};});
 }
-function startG3(){buildPts();curS=0;hit=0;ink=[];doneTrace=false;paint();}
-function paint(){
-  cx.clearRect(0,0,W,H); cx.lineCap='round'; cx.lineJoin='round';
-  pts.forEach(function(st,si){st.forEach(function(p,pi){
-    if(si<curS||(si===curS&&pi<hit))return;
-    cx.beginPath();cx.arc(p[0],p[1],9,0,7);cx.fillStyle='rgba(74,52,38,.35)';cx.fill();
-  });});
-  cx.strokeStyle='#f26b6b';cx.lineWidth=46;
-  pts.forEach(function(st,si){
-    var upto=si<curS?st.length-1:(si===curS?hit-1:-1); if(upto<1)return;
-    cx.beginPath();cx.moveTo(st[0][0],st[0][1]);for(var i=1;i<=upto;i++)cx.lineTo(st[i][0],st[i][1]);cx.stroke();
-  });
-  cx.strokeStyle='rgba(74,52,38,.55)';cx.lineWidth=10;
-  ink.forEach(function(l){if(l.length<2)return;cx.beginPath();cx.moveTo(l[0][0],l[0][1]);for(var i=1;i<l.length;i++)cx.lineTo(l[i][0],l[i][1]);cx.stroke();});
-  if(!doneTrace){
-    var p=pts[curS][hit]; cx.beginPath();cx.arc(p[0],p[1],26,0,7);cx.fillStyle='#5fa84f';cx.fill();cx.lineWidth=6;cx.strokeStyle='#4a3426';cx.stroke();
-    if(hit===0){cx.fillStyle='#fff';cx.font='800 30px "Baloo 2",sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(String(curS+1),p[0],p[1]+2);}
+function goAttr(o){return " data-go='"+JSON.stringify(o).replace(/'/g,'&#39;')+"'";}
+
+/* ---------- entrada ---------- */
+function gate(){
+  app.innerHTML='<div class="gate"><div class="brand"><img src="img/logo.webp" alt="Bené, a Ovelhinha"></div>'
+   +'<form class="card" novalidate><h1>Acesse seu material</h1><p class="muted" style="text-align:center">Preencha uma vez e o acesso fica liberado neste aparelho.</p>'
+   +'<label>Seu nome<input name="nome" autocomplete="name" maxlength="120" required></label>'
+   +'<label>E-mail<input name="email" type="email" inputmode="email" autocomplete="email" maxlength="160" required></label>'
+   +'<label>WhatsApp com DDD<input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(67) 99999-9999" maxlength="16" required></label>'
+   +'<div class="err" role="alert"></div><button class="btn wide">Entrar</button>'
+   +'<p class="fine">Dados do responsável, não da criança. Usamos só para liberar o acesso e avisar das novidades da Bené.</p></form></div>';
+  var f=app.querySelector('form'), err=f.querySelector('.err'), w=f.whatsapp;
+  w.oninput=function(){var d=w.value.replace(/\D/g,'').slice(0,11),o=d;if(d.length>2)o='('+d.slice(0,2)+') '+d.slice(2);if(d.length>7)o='('+d.slice(0,2)+') '+d.slice(2,d.length-4)+'-'+d.slice(-4);w.value=o;};
+  f.onsubmit=function(e){
+    e.preventDefault();
+    var u={nome:f.nome.value.trim(),email:f.email.value.trim().toLowerCase(),whatsapp:w.value.replace(/\D/g,''),sent:false};
+    if(u.nome.length<2){err.textContent='Digite seu nome.';f.nome.focus();return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u.email)){err.textContent='Confira o e-mail.';f.email.focus();return;}
+    if(u.whatsapp.length<10){err.textContent='Digite o WhatsApp com DDD.';w.focus();return;}
+    var b=f.querySelector('.btn'); b.disabled=true; b.textContent='Entrando…';
+    user=u; LS.set('bene_user',u);
+    sendLead().then(function(){route={v:'home'};render();});
+  };
+}
+function sendLead(){
+  if(!user||user.sent)return Promise.resolve();
+  var ctl=window.AbortController?new AbortController():null, tm=setTimeout(function(){if(ctl)ctl.abort();},6000);
+  return fetch(API,{method:'POST',headers:{'content-type':'application/json'},signal:ctl?ctl.signal:undefined,
+    body:JSON.stringify({nome:user.nome,email:user.email,whatsapp:user.whatsapp,origem:location.hostname})})
+   .then(function(r){if(r.ok){user.sent=true;LS.set('bene_user',user);}}).catch(function(){}).then(function(){clearTimeout(tm);});
+}
+function sheet(html){var s=document.createElement('div');s.className='sheet';s.innerHTML='<div role="dialog" aria-modal="true">'+html+'</div>';s.onclick=function(e){if(e.target===s)s.remove();};document.body.appendChild(s);return s;}
+function account(){
+  var s=sheet('<h2>Minha conta</h2><p><b>'+esc(user.nome)+'</b><br><span class="muted">'+esc(user.email)+'</span></p>'
+   +'<button class="btn ghost wide" id="rst">Zerar o progresso das atividades</button><button class="btn ghost wide" id="out">Sair deste aparelho</button><button class="btn wide" id="cls">Fechar</button>');
+  s.querySelector('#cls').onclick=function(){s.remove();};
+  s.querySelector('#rst').onclick=function(){prog={};LS.set('bene_prog',prog);s.remove();render();};
+  s.querySelector('#out').onclick=function(){user=null;LS.del('bene_user');s.remove();render();};
+}
+
+/* ---------- instalar ---------- */
+var deferred=null, standalone=window.matchMedia&&matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;if(route.v==='home')render();});
+window.addEventListener('appinstalled',function(){standalone=true;deferred=null;if(route.v==='home')render();});
+function install(){
+  if(deferred){deferred.prompt();deferred.userChoice.then(function(){deferred=null;render();});return;}
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var s=sheet('<h2>Instalar no celular</h2>'+(ios
+   ?'<ol class="steps"><li>Abra esta página no Safari.</li><li>Toque no botão Compartilhar, o quadradinho com a seta para cima.</li><li>Escolha "Adicionar à Tela de Início".</li></ol>'
+   :'<ol class="steps"><li>Abra esta página no Chrome.</li><li>Toque nos três pontinhos, no canto de cima.</li><li>Escolha "Instalar aplicativo" ou "Adicionar à tela inicial".</li></ol>')
+   +'<button class="btn wide" id="cls">Entendi</button>');
+  s.querySelector('#cls').onclick=function(){s.remove();};
+}
+
+/* ---------- telas ---------- */
+function nextUp(){for(var i=0;i<D.levels.length;i++){var L=D.levels[i];for(var j=0;j<L.itens.length;j++)if(!done(L.id,j))return {L:L,j:j,li:i};}return null;}
+function home(){
+  var n=nextUp(), tot=0, dn=0; D.levels.forEach(function(L){tot+=L.itens.length;dn+=count(L.id);});
+  var body='<div class="card hero"><img src="img/bene.webp" alt=""><div class="grow"><h2>Oi, '+esc(user.nome.split(' ')[0])+'!</h2><p class="muted">'+dn+' de '+tot+' atividades feitas</p><div class="bar" style="margin-top:8px"><i style="width:'+(dn/tot*100)+'%"></i></div></div></div>';
+  if(n)body+='<h2 class="sec">Continuar</h2><button class="card item"'+goAttr({v:'act',l:n.li,i:n.j})+'><img class="th" src="img/p/'+n.L.itens[n.j].p+'.webp" alt=""><div class="grow"><h3>'+esc(n.L.itens[n.j].w)+'</h3><p class="muted">'+n.L.nome+' · atividade '+(n.j+1)+' de '+n.L.itens.length+'</p></div>'+IC.chev+'</button>';
+  else body+='<div class="card win"><h2>Kit completo!</h2><p>Todas as atividades foram feitas. Parabéns!</p></div>';
+  body+='<h2 class="sec">Seu material</h2><div class="list">'
+   +'<button class="card item" data-tab="levels"><div class="badge" style="background:var(--blue)">'+IC.pen+'</div><div class="grow"><h3>Fazer no aplicativo</h3><p class="muted">120 atividades e 4 bônus para fazer com o dedo</p></div>'+IC.chev+'</button>'
+   +'<button class="card item" data-tab="print"><div class="badge" style="background:var(--coral)">'+IC.print+'</div><div class="grow"><h3>Baixar para imprimir</h3><p class="muted">Kit completo e bônus em PDF</p></div>'+IC.chev+'</button></div>';
+  if(!standalone)body+='<div class="card pad row"><div class="grow"><h3 style="font-size:18px">Instale no celular</h3><p class="muted">Fica na tela inicial, como um aplicativo.</p></div><button class="btn" id="inst">Instalar</button></div>';
+  shell('',body);
+  [].forEach.call(app.querySelectorAll('.badge svg'),function(s){s.style.width='28px';s.style.height='28px';});
+  var b=document.getElementById('inst'); if(b)b.onclick=install;
+}
+function levels(){
+  var body='<h2 class="sec">Grafismo fonético</h2><p class="muted">Bata palma em cada pedacinho e cubra a palavra com o dedo.</p><div class="list">'+D.levels.map(function(L,i){
+    var c=count(L.id);return '<button class="card item"'+goAttr({v:'level',l:i})+'><div class="badge" style="background:'+L.cor+'">'+(i+1)+'</div><div class="grow"><h3>'+L.nome+'</h3><p class="muted">'+L.sub+' · '+c+' de '+L.itens.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(c/L.itens.length*100)+'%"></i></div></div>'+IC.chev+'</button>';}).join('')+'</div>';
+  shell('',body);
+}
+function level(){
+  var L=D.levels[route.l];
+  var body='<p class="muted">'+L.sub+'. Toque em uma figura para começar.</p><div class="grid">'+L.itens.map(function(it,j){
+    return '<button class="card tile'+(done(L.id,j)?' done':'')+'"'+goAttr({v:'act',l:route.l,i:j})+' aria-label="'+esc(it.w)+'">'+(done(L.id,j)?'<span class="ok">'+IC.ok+'</span>':'')+'<img src="img/p/'+it.p+'.webp" alt="" loading="lazy"><b>'+esc(it.s?it.w:(j+1)+'ª frase')+'</b></button>';}).join('')+'</div>';
+  shell(L.nome,body,{back:true});
+}
+
+/* traçado: pintar por dentro das letras; conclui com 80% coberto */
+function tracer(box,text,color,onDone){
+  var W=900,cv=document.createElement('canvas'),cx,lines=[],size,H,pts=[],cov=0,ink=[],down=false,fin=false;
+  function layout(){
+    var m=document.createElement('canvas').getContext('2d'), words=text.split(' ');
+    function fits(s){m.font='800 '+s+'px "Baloo 2",sans-serif';var out=[],cur='';for(var i=0;i<words.length;i++){var t=cur?cur+' '+words[i]:words[i];if(m.measureText(t).width>W-60&&cur){out.push(cur);cur=words[i];}else cur=t;}out.push(cur);
+      for(var k=0;k<out.length;k++)if(m.measureText(out[k]).width>W-60)return null;return out;}
+    for(size=text.length<=2?420:230;size>60;size-=6){var o=fits(size);if(o&&o.length<=(text.length>12?3:1)){lines=o;break;}}
+    if(!lines.length)lines=[text];
+    H=Math.round(lines.length*size*1.0+70); cv.width=W;cv.height=H;cx=cv.getContext('2d');
+    var off=document.createElement('canvas');off.width=W;off.height=H;var o=off.getContext('2d');draw(o,'#000',false);
+    var d=o.getImageData(0,0,W,H).data;pts=[];for(var y=6;y<H;y+=12)for(var x=6;x<W;x+=12)if(d[(y*W+x)*4+3]>128)pts.push([x,y,0]);
   }
-}
-function pos(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height];}
-function check(p){
-  var moved=true;
-  while(moved&&!doneTrace){
-    moved=false; var t=pts[curS][hit];
-    if(Math.hypot(p[0]-t[0],p[1]-t[1])<58){
-      hit++; moved=true;
-      if(hit>=pts[curS].length){curS++;hit=0;good();moved=false;
-        if(curS>=pts.length){doneTrace=true;paint();setTimeout(function(){finish('end');},500);return;}
-      }
-    }
+  function draw(c,fill,dots){
+    c.font='800 '+size+'px "Baloo 2",sans-serif';c.textAlign='center';c.textBaseline='alphabetic';
+    lines.forEach(function(s,i){var y=40+size*.78+i*size*1.0;
+      if(dots){c.setLineDash([3,13]);c.lineWidth=5;c.lineCap='round';c.strokeStyle='#4a3426';c.strokeText(s,W/2,y);c.setLineDash([]);}
+      else{c.fillStyle=fill;c.fillText(s,W/2,y);}});
   }
+  function paint(){
+    cx.clearRect(0,0,W,H);draw(cx,'#efe6d8',false);
+    cx.globalCompositeOperation='source-atop';cx.strokeStyle=color;cx.lineWidth=74;cx.lineCap='round';cx.lineJoin='round';
+    ink.forEach(function(l){cx.beginPath();cx.moveTo(l[0][0],l[0][1]);for(var i=1;i<l.length;i++)cx.lineTo(l[i][0],l[i][1]);if(l.length===1)cx.lineTo(l[0][0]+.1,l[0][1]);cx.stroke();});
+    cx.globalCompositeOperation='source-over';draw(cx,null,true);
+  }
+  function hit(p){for(var i=0;i<pts.length;i++){var q=pts[i];if(!q[2]&&Math.abs(q[0]-p[0])<40&&Math.abs(q[1]-p[1])<40){q[2]=1;cov++;}}
+    if(!fin&&cov>=pts.length*.8){fin=true;pts.forEach(function(q){q[2]=1;});ink=[[[0,H/2],[W,H/2]]];cx.lineWidth=H*2;paintAll();onDone();}}
+  function paintAll(){cx.clearRect(0,0,W,H);draw(cx,color,false);draw(cx,null,true);}
+  function pos(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height];}
+  cv.addEventListener('pointerdown',function(e){if(fin)return;e.preventDefault();down=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}var p=pos(e);ink.push([p]);hit(p);if(!fin)paint();});
+  cv.addEventListener('pointermove',function(e){if(!down||fin)return;e.preventDefault();var p=pos(e),l=ink[ink.length-1],a=l[l.length-1],n=Math.ceil(Math.hypot(p[0]-a[0],p[1]-a[1])/30);
+    for(var i=1;i<=n;i++)hit([a[0]+(p[0]-a[0])*i/n,a[1]+(p[1]-a[1])*i/n]);l.push(p);if(!fin)paint();});
+  ['pointerup','pointercancel'].forEach(function(ev){cv.addEventListener(ev,function(){down=false;});});
+  cv.setAttribute('role','img');cv.setAttribute('aria-label','Palavra pontilhada para cobrir com o dedo: '+text);
+  box.appendChild(cv);
+  function start(){layout();paint();}
+  if(document.fonts&&document.fonts.load)document.fonts.load('800 100px "Baloo 2"').then(start,start);else start();
+  return {reset:function(){ink=[];cov=0;fin=false;pts.forEach(function(q){q[2]=0;});paint();}};
 }
-cv.addEventListener('pointerdown',function(e){e.preventDefault();drawing=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}var p=pos(e);ink.push([p]);check(p);paint();});
-cv.addEventListener('pointermove',function(e){if(!drawing)return;e.preventDefault();var p=pos(e);ink[ink.length-1].push(p);check(p);paint();});
-['pointerup','pointercancel','pointerleave'].forEach(function(ev){cv.addEventListener(ev,function(){drawing=false;});});
-$('#clearTrace').addEventListener('click',startG3);
-
-/* pais */
-function openPais(){
-  var n=D.lessons.filter(function(l){return prog.done[l.v]}).length;
-  $('#paisProg').textContent=n+' de '+D.lessons.length+' lições de vogais concluídas.';
-  $('#voiceNote').textContent=audioOK?'A voz gravada da Bené toca quando os áudios estiverem disponíveis; sem eles, entra a voz do próprio aparelho.':'Neste aparelho os áudios gravados não carregaram, então está tocando a voz do próprio aparelho.';
-  $('#unlockAll').textContent=prog.open?'Voltar a liberar uma por vez':'Liberar todas as lições';
-  $('#pais').classList.add('on'); $('#closePais').focus();
-}
-function closePais(){$('#pais').classList.remove('on');$('#btnPais').focus();}
-$('#btnPais').addEventListener('click',openPais);
-$('#closePais').addEventListener('click',closePais);
-$('#pais').addEventListener('click',function(e){if(e.target.id==='pais')closePais();});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closePais();});
-$('#resetProg').addEventListener('click',function(){prog={done:{},stars:{},open:prog.open};save();if(!inLesson)renderHome();openPais();});
-$('#unlockAll').addEventListener('click',function(){prog.open=!prog.open;save();if(!inLesson)renderHome();openPais();});
-
-
-/* ---------- brincadeiras: usam só os áudios que já existem ---------- */
-var VOWELS=D.lessons.map(function(l){return l.v;});
-var VW=[]; D.lessons.forEach(function(l){l.ins.forEach(function(w){VW.push([w,l.v]);});});
-$$('[data-play]').forEach(function(b){b.addEventListener('click',function(){
-  var id=b.dataset.play; inLesson=false; drawStars();
-  $$('.screen').forEach(function(s){s.classList.toggle('on',s.id===id);}); window.scrollTo(0,0);
-  if(id==='mem')memStart(); if(id==='quiz')quizStart(); if(id==='paint')paintStart(); if(id==='puz')puzStart();
-});});
-
-/* memória */
-var memOpen=[], memLock=false, memLeft=0;
-function memStart(){
-  var ws=shuffle(Object.keys(D.words)).slice(0,6), cards=shuffle(ws.concat(ws));
-  memOpen=[]; memLock=false; memLeft=6; var g=$('#memGrid'); g.innerHTML='';
-  cards.forEach(function(w){
-    var b=document.createElement('button'); b.className='card mcard'; b.setAttribute('aria-label','Carta');
-    b.innerHTML='<span>?</span><img src="'+pic(w)+'" alt="">';
-    b.addEventListener('click',function(){
-      if(memLock||b.classList.contains('up'))return;
-      b.classList.add('up'); b.setAttribute('aria-label',D.words[w]); say(['w_'+w]); memOpen.push([b,w]);
-      if(memOpen.length<2)return;
-      var a=memOpen[0], c=memOpen[1]; memOpen=[];
-      if(a[1]===c[1]){a[0].classList.add('hit');c[0].classList.add('hit');good();if(--memLeft===0){win();confetti();}}
-      else{memLock=true;setTimeout(function(){a[0].classList.remove('up');c[0].classList.remove('up');a[0].setAttribute('aria-label','Carta');c[0].setAttribute('aria-label','Carta');memLock=false;},1000);}
-    });
-    g.appendChild(b);
+function chipsHtml(syl){return '<div class="chips">'+syl.map(function(s,i){return '<button class="chip" style="background:'+SYL[i%4]+'">'+esc(s)+'</button>';}).join('')+'</div>';}
+function bindClap(){[].forEach.call(app.querySelectorAll('.chips .chip'),function(c,i){c.onclick=function(){c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');tone([440+i*90]);};});}
+function act(){
+  var L=D.levels[route.l], it=L.itens[route.i], last=route.i>=L.itens.length-1;
+  var body='<div class="card stage"><img src="img/p/'+it.p+'.webp" alt="'+esc(it.w)+'">'+(it.s?chipsHtml(it.s)+'<p class="hint">Toque em cada pedacinho e bata palma.</p>':'<p class="hint">Leia a frase junto com a criança.</p>')+'</div>'
+   +'<div class="card trace" id="tr"></div><p class="hint" id="th">Agora cubra '+(it.s?'a palavra':'a frase')+' com o dedo, por dentro das letras.</p>'
+   +'<div id="after" class="actions"><button class="btn ghost" id="again">Apagar</button></div>';
+  shell(L.nome+' · '+(route.i+1)+' de '+L.itens.length,body,{back:true});
+  bindClap();
+  var t=tracer(document.getElementById('tr'),it.w,L.cor,function(){
+    mark(L.id,route.i);win();
+    document.getElementById('th').textContent='';
+    document.getElementById('after').outerHTML='<div class="card win"><h2>Muito bem!</h2><div class="actions"><button class="btn ghost" id="again2">Fazer de novo</button>'+(last?'<button class="btn" id="nx">Ver o nível</button>':'<button class="btn" id="nx">Próxima</button>')+'</div></div>';
+    document.getElementById('again2').onclick=function(){go({v:'act',l:route.l,i:route.i},true);};
+    document.getElementById('nx').onclick=function(){if(last)back();else go({v:'act',l:route.l,i:route.i+1},true);};
   });
+  document.getElementById('again').onclick=function(){t.reset();};
 }
-$('#memNew').addEventListener('click',memStart);
 
-/* qual é a letra */
-var quizN=0, quizCur=null, quizBag=[], quizBusy=false;
-function quizStars(){var h='';for(var i=0;i<5;i++)h+=starSvg(i<quizN);$('#quizStars').innerHTML=h;}
-function quizStart(){quizN=0;quizBag=shuffle(VW.slice());quizNext();}
-function quizNext(){
-  if(!quizBag.length)quizBag=shuffle(VW.slice());
-  quizCur=quizBag.pop(); quizBusy=false; quizStars();
-  $('#quizPic').src=pic(quizCur[0]); $('#quizPic').alt=D.words[quizCur[0]];
-  var box=$('#quizBtns'); box.innerHTML='';
-  VOWELS.forEach(function(v){
-    var b=document.createElement('button'); b.className='card tile'; b.textContent=v;
-    b.addEventListener('click',function(){
-      if(quizBusy)return;
-      if(v===quizCur[1]){quizBusy=true;b.classList.add('ok');good();say(['w_'+quizCur[0],v+'_sim']);quizN++;quizStars();
-        if(quizN>=5){setTimeout(function(){win();confetti();quizN=0;},900);setTimeout(quizNext,2600);} else setTimeout(quizNext,2200);}
-      else{bad();say([v+'_nao']);b.classList.remove('no');void b.offsetWidth;b.classList.add('no');}
-    });
-    box.appendChild(b);
+function bonus(){
+  var B=[['alpha','Alfabeto da Bené','26 letras para cobrir, com uma palavra cada','arca','var(--blue)'],['verses','Versículos para colorir','12 versículos para pintar com o dedo','coracao','var(--coral)'],
+    ['puzzle','Quebra-cabeça de sílabas','Monte a palavra na ordem certa','estrela','var(--green)'],['songs','Cantando com a Bené','As letras das músicas','nuvem','var(--sun)']];
+  shell('','<h2 class="sec">Bônus</h2><div class="list">'+B.map(function(b){return '<button class="card item"'+goAttr({v:b[0]})+'><img class="th" src="img/p/'+b[3]+'.webp" alt=""><div class="grow"><h3>'+b[1]+'</h3><p class="muted">'+b[2]+'</p></div>'+IC.chev+'</button>';}).join('')+'</div>');
+}
+function alpha(){
+  shell('Alfabeto da Bené','<p class="muted">Toque em uma letra para cobrir.</p><div class="grid" style="grid-template-columns:repeat(4,1fr)">'+D.alpha.map(function(a,i){
+    return '<button class="card tile letter'+(done('alpha',i)?' done':'')+'"'+goAttr({v:'letter',i:i})+'>'+(done('alpha',i)?'<span class="ok">'+IC.ok+'</span>':'')+a.l+'</button>';}).join('')+'</div>',{back:true});
+}
+function letter(){
+  var a=D.alpha[route.i], last=route.i>=D.alpha.length-1;
+  shell('Letra '+a.l,'<div class="card stage"><img src="img/p/'+a.p+'.webp" alt=""><h2 style="font-size:28px">'+a.l+' de '+esc(a.w)+'</h2><p class="hint">'+esc(a.t)+'</p></div><div class="card trace" id="tr"></div><div id="after" class="actions"><button class="btn ghost" id="again">Apagar</button></div>',{back:true});
+  var t=tracer(document.getElementById('tr'),a.l,SYL[route.i%4],function(){
+    mark('alpha',route.i);win();
+    document.getElementById('after').outerHTML='<div class="card win"><h2>Muito bem!</h2><div class="actions"><button class="btn" id="nx">'+(last?'Ver o alfabeto':'Próxima letra')+'</button></div></div>';
+    document.getElementById('nx').onclick=function(){if(last)back();else go({v:'letter',i:route.i+1},true);};
   });
-  say(['w_'+quizCur[0]]);
+  document.getElementById('again').onclick=function(){t.reset();};
 }
-$('#quizPic').addEventListener('click',function(){if(quizCur)say(['w_'+quizCur[0]]);});
-
-/* pintar */
-var PAINT=['bene','arca','estrela','igreja','uva','abelha','peixe','casa'], pIdx=0, pcv=$('#pcv'), pcx=pcv.getContext('2d'), pCol='#f26b6b', pDown=false, pLast=null;
-var PCOLS=['#f26b6b','#ff9f40','#ffd94a','#8fcf72','#5ba8e8','#b08ae0','#b97f4f','#ffffff'];
-function paintStart(){
-  $('#pimg').src='img/pintar_'+PAINT[pIdx]+'.webp'; pcx.clearRect(0,0,720,720);
-  var pal=$('#pal'); pal.innerHTML='';
-  PCOLS.forEach(function(c,i){
-    var b=document.createElement('button'); b.style.background=c; b.setAttribute('aria-label',i===7?'Borracha':'Cor '+(i+1)); if(c===pCol)b.className='sel';
-    b.addEventListener('click',function(){pCol=c;$$('#pal button').forEach(function(x){x.classList.toggle('sel',x===b);});});
-    pal.appendChild(b);
-  });
+function verses(){
+  shell('Versículos para colorir','<div class="list">'+D.verses.map(function(v,i){return '<button class="card item"'+goAttr({v:'paint',i:i})+'><div class="badge" style="background:'+SYL[i%4]+'">'+(i+1)+'</div><div class="grow"><h3 style="font-size:17px">'+esc(v.t)+'</h3><p class="muted">'+esc(v.r)+'</p></div>'+IC.chev+'</button>';}).join('')+'</div>',{back:true});
 }
-function ppos(e){var r=pcv.getBoundingClientRect();return [(e.clientX-r.left)*720/r.width,(e.clientY-r.top)*720/r.height];}
-function pdraw(a,b){pcx.strokeStyle=pCol;pcx.lineWidth=pCol==='#ffffff'?60:44;pcx.lineCap='round';pcx.lineJoin='round';pcx.beginPath();pcx.moveTo(a[0],a[1]);pcx.lineTo(b[0],b[1]);pcx.stroke();}
-pcv.style.touchAction='none';
-pcv.addEventListener('pointerdown',function(e){e.preventDefault();pDown=true;try{pcv.setPointerCapture(e.pointerId);}catch(x){}pLast=ppos(e);pdraw(pLast,[pLast[0]+.1,pLast[1]]);});
-pcv.addEventListener('pointermove',function(e){if(!pDown)return;e.preventDefault();var p=ppos(e);pdraw(pLast,p);pLast=p;});
-['pointerup','pointercancel','pointerleave'].forEach(function(ev){pcv.addEventListener(ev,function(){pDown=false;});});
-$('#pClear').addEventListener('click',function(){pcx.clearRect(0,0,720,720);});
-$('#pNext').addEventListener('click',function(){pIdx=(pIdx+1)%PAINT.length;paintStart();});
-
-/* quebra-cabeça: toque em duas peças para trocar de lugar */
-var PUZ=['arca','arcoiris','igreja'], puzI=0, puzN=2, puzOrder=[], puzSel=-1, puzDone=false;
-function puzStart(){
-  var n=puzN*puzN; puzOrder=[]; for(var i=0;i<n;i++)puzOrder.push(i);
-  do{shuffle(puzOrder);}while(puzOrder.every(function(v,i){return v===i;}));
-  puzSel=-1; puzDone=false; puzPaint();
+function paintView(){
+  var v=D.verses[route.i], COLS=['#f26b6b','#ff9f40','#ffd94a','#8fcf72','#5ba8e8','#b08ae0','#b97f4f','#ffffff'], col=COLS[0];
+  shell(v.r,'<div class="card paint" style="aspect-ratio:662/936"><canvas width="662" height="936"></canvas><img src="img/v/'+(route.i+1)+'.webp" alt="'+esc(v.t)+'"></div><div class="pal">'+COLS.map(function(c,i){return '<button style="background:'+c+'" aria-label="'+(i===7?'Borracha':'Cor '+(i+1))+'"'+(i===0?' class="sel"':'')+'></button>';}).join('')+'</div><div class="actions"><button class="btn ghost" id="clr">Apagar tudo</button></div>',{back:true});
+  var cv=app.querySelector('canvas'),cx=cv.getContext('2d'),down=false,lp;
+  function pos(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*662/r.width,(e.clientY-r.top)*936/r.height];}
+  function seg(a,b){cx.strokeStyle=col;cx.lineWidth=col==='#ffffff'?46:30;cx.lineCap='round';cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.stroke();}
+  cv.addEventListener('pointerdown',function(e){e.preventDefault();down=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}lp=pos(e);seg(lp,[lp[0]+.1,lp[1]]);});
+  cv.addEventListener('pointermove',function(e){if(!down)return;e.preventDefault();var p=pos(e);seg(lp,p);lp=p;});
+  ['pointerup','pointercancel'].forEach(function(ev){cv.addEventListener(ev,function(){down=false;});});
+  [].forEach.call(app.querySelectorAll('.pal button'),function(b,i){b.onclick=function(){col=COLS[i];[].forEach.call(app.querySelectorAll('.pal button'),function(x){x.classList.toggle('sel',x===b);});};});
+  document.getElementById('clr').onclick=function(){cx.clearRect(0,0,662,936);};
 }
-function puzPaint(){
-  var g=$('#puzGrid'); g.style.gridTemplateColumns='repeat('+puzN+',1fr)'; g.style.gridTemplateRows='repeat('+puzN+',1fr)'; g.innerHTML='';
-  puzOrder.forEach(function(piece,slot){
-    var b=document.createElement('button'); b.className='ptile'+(slot===puzSel?' sel':''); b.setAttribute('aria-label','Peça '+(piece+1));
-    b.style.backgroundImage='url(img/quebra_'+PUZ[puzI]+'.webp)'; b.style.backgroundSize=(puzN*100)+'% '+(puzN*100)+'%';
-    b.style.backgroundPosition=((piece%puzN)/(puzN-1)*100)+'% '+(Math.floor(piece/puzN)/(puzN-1)*100)+'%';
-    b.addEventListener('click',function(){
-      if(puzDone)return;
-      if(puzSel<0){puzSel=slot;puzPaint();return;}
-      var t=puzOrder[puzSel];puzOrder[puzSel]=puzOrder[slot];puzOrder[slot]=t;puzSel=-1;tone([520]);puzPaint();
-      if(puzOrder.every(function(v,i){return v===i;})){puzDone=true;win();confetti();
-        setTimeout(function(){if(puzN===2)puzN=3;else{puzN=2;puzI=(puzI+1)%PUZ.length;}puzStart();},2200);}
-    });
-    g.appendChild(b);
-  });
+var pz={n:0};
+function puzzle(){
+  var pool=[];D.levels.slice(0,3).forEach(function(L){pool=pool.concat(L.itens);});
+  var it=pool[Math.floor(Math.random()*pool.length)], order=shuffle(it.s.map(function(s,i){return i;})), at=0;
+  if(it.s.length>1)while(order.every(function(v,i){return v===i;}))order=shuffle(order);
+  shell('Quebra-cabeça de sílabas','<p class="hint">Acertos: <b>'+pz.n+'</b></p><div class="card stage"><img src="img/p/'+it.p+'.webp" alt=""><div class="chips" id="slots">'+it.s.map(function(){return '<span class="chip empty">–</span>';}).join('')+'</div></div><p class="hint">Toque nos pedacinhos na ordem certa.</p><div class="chips" id="pool">'+order.map(function(i){return '<button class="chip" data-i="'+i+'" style="background:'+SYL[i%4]+'">'+esc(it.s[i])+'</button>';}).join('')+'</div><div id="after"></div>',{back:true});
+  [].forEach.call(app.querySelectorAll('#pool .chip'),function(c){c.onclick=function(){
+    var i=+c.dataset.i;
+    if(it.s[i]!==it.s[at]){bad();c.classList.remove('no');void c.offsetWidth;c.classList.add('no');return;}
+    var sl=app.querySelectorAll('#slots .chip')[at];sl.className='chip pop';sl.style.background=SYL[at%4];sl.textContent=it.s[at];c.style.visibility='hidden';good();at++;
+    if(at>=it.s.length){pz.n++;win();document.getElementById('after').innerHTML='<div class="card win"><h2>'+esc(it.w)+'!</h2><button class="btn" id="nx">Outra palavra</button></div>';document.getElementById('nx').onclick=function(){go({v:'puzzle'},true);};}
+  };});
 }
-$('#puzNext').addEventListener('click',function(){puzI=(puzI+1)%PUZ.length;puzN=2;puzStart();});
-
-renderHome(); drawStars();
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if($('#g3').classList.contains('on'))paint();});
+function songs(){
+  shell('Cantando com a Bené','<div class="list">'+D.songs.map(function(s,i){return '<button class="card item"'+goAttr({v:'song',i:i})+'><img class="th" src="img/p/'+s.p+'.webp" alt=""><div class="grow"><h3>'+esc(s.t)+'</h3><p class="muted">'+esc(s.sub)+'</p></div>'+IC.chev+'</button>';}).join('')+'</div>',{back:true});
+}
+function song(){
+  var s=D.songs[route.i];
+  shell(s.t,'<div class="card pad lyrics">'+s.parts.map(function(p){return (p.h?'<h3>'+esc(p.h)+'</h3>':'<h3>&nbsp;</h3>')+p.l.map(function(l){return '<p>'+esc(l)+'</p>';}).join('');}).join('')+'</div>',{back:true});
+}
+function printView(){
+  var P=[['kit-completo.pdf','Kit completo','127 páginas · os 4 níveis de atividades','var(--blue)'],['alfabeto.pdf','Bônus: Alfabeto da Bené','27 páginas','var(--green)'],['versiculos.pdf','Bônus: Versículos para colorir','13 páginas','var(--coral)'],
+    ['quebra-cabeca.pdf','Bônus: Quebra-cabeça de sílabas','11 páginas · para recortar','var(--sun)'],['musicas.pdf','Bônus: Cantando com a Bené','4 páginas · letras das músicas','var(--blue)']];
+  shell('','<h2 class="sec">Baixar para imprimir</h2><p class="muted">Arquivos em PDF, no tamanho A4. Imprima quantas vezes quiser.</p><div class="list">'+P.map(function(p){
+    return '<div class="card pad"><div class="row"><div class="badge" style="width:48px;height:48px;border-radius:14px;border:2px solid var(--ink);display:grid;place-items:center;color:#fff;background:'+p[3]+'">'+IC.print.replace('<svg','<svg width="24" height="24"')+'</div><div class="grow"><h3 style="font-size:18px">'+p[1]+'</h3><p class="muted">'+p[2]+'</p></div></div><div class="actions" style="margin-top:12px;justify-content:flex-start"><a class="btn" href="pdf/'+p[0]+'" download>'+IC.down+'Baixar PDF</a><a class="btn ghost" href="pdf/'+p[0]+'" target="_blank" rel="noopener">Abrir</a></div></div>';}).join('')+'</div>');
+}
+var VIEWS={home:home,levels:levels,level:level,act:act,bonus:bonus,alpha:alpha,letter:letter,verses:verses,paint:paintView,puzzle:puzzle,songs:songs,song:song,print:printView};
+function render(){[].forEach.call(document.querySelectorAll('.sheet'),function(s){s.remove();});if(!user){gate();return;}(VIEWS[route.v]||home)();}
+render(); sendLead();
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
 </script>
 </body>
