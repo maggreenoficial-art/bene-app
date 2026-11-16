@@ -118,6 +118,34 @@ canvas{width:100%;max-width:340px;aspect-ratio:10/11;touch-action:none;display:b
 @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* brincadeiras (sem áudio novo) */
+.sub{font-family:var(--display);font-size:24px;margin:4px 2px -4px}
+.plays{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.play{padding:12px 8px;text-align:center;font-family:var(--display);font-size:20px;line-height:1.1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.play img,.play .ic{width:72px;height:72px;object-fit:contain}
+.play .ic{display:grid;place-items:center;font-size:44px;color:var(--coral);-webkit-text-stroke:2px var(--ink)}
+.bar{display:flex;align-items:center;gap:10px}
+.bar h2{flex:1;font-size:26px}
+.mem{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mcard{aspect-ratio:1;padding:6px;background:var(--sun);display:grid;place-items:center;min-width:0;overflow:hidden;font-family:var(--display);font-size:40px}
+.mcard img{width:100%;height:100%;object-fit:contain;display:none;pointer-events:none}
+.mcard.up{background:var(--white)} .mcard.up img{display:block} .mcard.up span{display:none}
+.mcard.hit{background:#dff3d6;opacity:.7}
+.qpic{padding:14px;display:grid;place-items:center}
+.qpic img{width:190px;height:190px;object-fit:contain}
+.vbtns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.vbtns .tile{font-size:40px}
+.paintbox{position:relative;padding:0;overflow:hidden;aspect-ratio:1;background:#fff}
+.paintbox canvas{position:absolute;inset:0;width:100%;height:100%;max-width:none;aspect-ratio:auto}
+.paintbox img{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;pointer-events:none}
+.pal{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pal button{width:46px;height:46px;border-radius:50%;border:4px solid var(--ink);padding:0}
+.pal button.sel{box-shadow:0 0 0 4px var(--white),0 0 0 8px var(--ink)}
+.puz{display:grid;gap:4px;padding:6px;aspect-ratio:1;background:var(--ink)}
+.ptile{border:0;padding:0;background-repeat:no-repeat;border-radius:8px;min-width:0}
+.ptile.sel{outline:6px solid var(--sun);outline-offset:-6px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -135,6 +163,13 @@ canvas{width:100%;max-width:340px;aspect-ratio:10/11;touch-action:none;display:b
       <p>Uma lição por dia, de 10 minutinhos.</p>
     </div>
     <div id="lessons"></div>
+    <h2 class="sub">Brincar</h2>
+    <div class="plays">
+      <button class="card play" data-play="mem"><span class="ic">?</span>Jogo da memória</button>
+      <button class="card play" data-play="quiz"><span class="ic">A?</span>Qual é a letra</button>
+      <button class="card play" data-play="paint"><img src="img/pintar_bene.webp" alt="">Pintar</button>
+      <button class="card play" data-play="puz"><img src="img/quebra_arca.webp" alt="">Quebra-cabeça</button>
+    </div>
     <ol class="card stages">
       <li><span class="dot">1</span><div>Ouvir e rimar<small>3 a 4 anos · em breve</small></div></li>
       <li class="now"><span class="dot">2</span><div>Vogais e som das letras<small>você está aqui</small></div></li>
@@ -185,6 +220,32 @@ canvas{width:100%;max-width:340px;aspect-ratio:10/11;touch-action:none;display:b
     <div class="card todo"><img src="img/coracao.webp" alt=""><div id="todoTxt"></div></div>
     <div class="center"><button class="btn" data-go="home">Voltar ao início</button></div>
   </section>
+
+  <section class="screen" id="mem">
+    <div class="bar"><h2>Jogo da memória</h2><button class="btn small" data-go="home">Voltar</button></div>
+    <div class="mem" id="memGrid"></div>
+    <div class="center"><button class="btn small" id="memNew">Embaralhar de novo</button></div>
+  </section>
+
+  <section class="screen" id="quiz">
+    <div class="bar"><h2>Qual é a letra?</h2><button class="btn small" data-go="home">Voltar</button></div>
+    <div class="stars" id="quizStars" style="justify-content:center"></div>
+    <div class="card qpic"><img id="quizPic" alt=""></div>
+    <div class="vbtns" id="quizBtns"></div>
+  </section>
+
+  <section class="screen" id="paint">
+    <div class="bar"><h2>Pintar</h2><button class="btn small" data-go="home">Voltar</button></div>
+    <div class="card paintbox"><canvas id="pcv" width="720" height="720"></canvas><img id="pimg" alt="Desenho para pintar"></div>
+    <div class="pal" id="pal"></div>
+    <div class="row"><button class="btn small" id="pClear">Apagar tudo</button><button class="btn small" id="pNext">Outro desenho</button></div>
+  </section>
+
+  <section class="screen" id="puz">
+    <div class="bar"><h2>Quebra-cabeça</h2><button class="btn small" data-go="home">Voltar</button></div>
+    <div class="card puz" id="puzGrid"></div>
+    <div class="row"><button class="btn small" id="puzNext">Outra figura</button></div>
+  </section>
 </div>
 
 <div id="pais" role="dialog" aria-modal="true" aria-labelledby="paisT">
@@ -197,6 +258,7 @@ canvas{width:100%;max-width:340px;aspect-ratio:10/11;touch-action:none;display:b
       <li>Jogo 1 treina o ouvido: qual palavra começa com o som?</li>
       <li>Jogo 2 treina o olho: reconhecer a letra maiúscula e minúscula.</li>
       <li>Jogo 3 treina a mão: cobrir a letra na ordem certa dos traços.</li>
+      <li>As brincadeiras (memória, qual é a letra, pintar e quebra-cabeça) ficam sempre liberadas.</li>
     </ul>
     <p><b>Para dar resultado:</b> uma lição por dia, sentado junto com a criança, e depois a atividade fora da tela. O aplicativo complementa a escola, não substitui.</p>
     <p style="opacity:.75" id="voiceNote"></p>
@@ -444,6 +506,106 @@ $('#pais').addEventListener('click',function(e){if(e.target.id==='pais')closePai
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closePais();});
 $('#resetProg').addEventListener('click',function(){prog={done:{},stars:{},open:prog.open};save();if(!inLesson)renderHome();openPais();});
 $('#unlockAll').addEventListener('click',function(){prog.open=!prog.open;save();if(!inLesson)renderHome();openPais();});
+
+
+/* ---------- brincadeiras: usam só os áudios que já existem ---------- */
+var VOWELS=D.lessons.map(function(l){return l.v;});
+var VW=[]; D.lessons.forEach(function(l){l.ins.forEach(function(w){VW.push([w,l.v]);});});
+$$('[data-play]').forEach(function(b){b.addEventListener('click',function(){
+  var id=b.dataset.play; inLesson=false; drawStars();
+  $$('.screen').forEach(function(s){s.classList.toggle('on',s.id===id);}); window.scrollTo(0,0);
+  if(id==='mem')memStart(); if(id==='quiz')quizStart(); if(id==='paint')paintStart(); if(id==='puz')puzStart();
+});});
+
+/* memória */
+var memOpen=[], memLock=false, memLeft=0;
+function memStart(){
+  var ws=shuffle(Object.keys(D.words)).slice(0,6), cards=shuffle(ws.concat(ws));
+  memOpen=[]; memLock=false; memLeft=6; var g=$('#memGrid'); g.innerHTML='';
+  cards.forEach(function(w){
+    var b=document.createElement('button'); b.className='card mcard'; b.setAttribute('aria-label','Carta');
+    b.innerHTML='<span>?</span><img src="'+pic(w)+'" alt="">';
+    b.addEventListener('click',function(){
+      if(memLock||b.classList.contains('up'))return;
+      b.classList.add('up'); b.setAttribute('aria-label',D.words[w]); say(['w_'+w]); memOpen.push([b,w]);
+      if(memOpen.length<2)return;
+      var a=memOpen[0], c=memOpen[1]; memOpen=[];
+      if(a[1]===c[1]){a[0].classList.add('hit');c[0].classList.add('hit');good();if(--memLeft===0){win();confetti();}}
+      else{memLock=true;setTimeout(function(){a[0].classList.remove('up');c[0].classList.remove('up');a[0].setAttribute('aria-label','Carta');c[0].setAttribute('aria-label','Carta');memLock=false;},1000);}
+    });
+    g.appendChild(b);
+  });
+}
+$('#memNew').addEventListener('click',memStart);
+
+/* qual é a letra */
+var quizN=0, quizCur=null, quizBag=[], quizBusy=false;
+function quizStars(){var h='';for(var i=0;i<5;i++)h+=starSvg(i<quizN);$('#quizStars').innerHTML=h;}
+function quizStart(){quizN=0;quizBag=shuffle(VW.slice());quizNext();}
+function quizNext(){
+  if(!quizBag.length)quizBag=shuffle(VW.slice());
+  quizCur=quizBag.pop(); quizBusy=false; quizStars();
+  $('#quizPic').src=pic(quizCur[0]); $('#quizPic').alt=D.words[quizCur[0]];
+  var box=$('#quizBtns'); box.innerHTML='';
+  VOWELS.forEach(function(v){
+    var b=document.createElement('button'); b.className='card tile'; b.textContent=v;
+    b.addEventListener('click',function(){
+      if(quizBusy)return;
+      if(v===quizCur[1]){quizBusy=true;b.classList.add('ok');good();say(['w_'+quizCur[0],v+'_sim']);quizN++;quizStars();
+        if(quizN>=5){setTimeout(function(){win();confetti();quizN=0;},900);setTimeout(quizNext,2600);} else setTimeout(quizNext,2200);}
+      else{bad();say([v+'_nao']);b.classList.remove('no');void b.offsetWidth;b.classList.add('no');}
+    });
+    box.appendChild(b);
+  });
+  say(['w_'+quizCur[0]]);
+}
+$('#quizPic').addEventListener('click',function(){if(quizCur)say(['w_'+quizCur[0]]);});
+
+/* pintar */
+var PAINT=['bene','arca','estrela','igreja','uva','abelha','peixe','casa'], pIdx=0, pcv=$('#pcv'), pcx=pcv.getContext('2d'), pCol='#f26b6b', pDown=false, pLast=null;
+var PCOLS=['#f26b6b','#ff9f40','#ffd94a','#8fcf72','#5ba8e8','#b08ae0','#b97f4f','#ffffff'];
+function paintStart(){
+  $('#pimg').src='img/pintar_'+PAINT[pIdx]+'.webp'; pcx.clearRect(0,0,720,720);
+  var pal=$('#pal'); pal.innerHTML='';
+  PCOLS.forEach(function(c,i){
+    var b=document.createElement('button'); b.style.background=c; b.setAttribute('aria-label',i===7?'Borracha':'Cor '+(i+1)); if(c===pCol)b.className='sel';
+    b.addEventListener('click',function(){pCol=c;$$('#pal button').forEach(function(x){x.classList.toggle('sel',x===b);});});
+    pal.appendChild(b);
+  });
+}
+function ppos(e){var r=pcv.getBoundingClientRect();return [(e.clientX-r.left)*720/r.width,(e.clientY-r.top)*720/r.height];}
+function pdraw(a,b){pcx.strokeStyle=pCol;pcx.lineWidth=pCol==='#ffffff'?60:44;pcx.lineCap='round';pcx.lineJoin='round';pcx.beginPath();pcx.moveTo(a[0],a[1]);pcx.lineTo(b[0],b[1]);pcx.stroke();}
+pcv.style.touchAction='none';
+pcv.addEventListener('pointerdown',function(e){e.preventDefault();pDown=true;try{pcv.setPointerCapture(e.pointerId);}catch(x){}pLast=ppos(e);pdraw(pLast,[pLast[0]+.1,pLast[1]]);});
+pcv.addEventListener('pointermove',function(e){if(!pDown)return;e.preventDefault();var p=ppos(e);pdraw(pLast,p);pLast=p;});
+['pointerup','pointercancel','pointerleave'].forEach(function(ev){pcv.addEventListener(ev,function(){pDown=false;});});
+$('#pClear').addEventListener('click',function(){pcx.clearRect(0,0,720,720);});
+$('#pNext').addEventListener('click',function(){pIdx=(pIdx+1)%PAINT.length;paintStart();});
+
+/* quebra-cabeça: toque em duas peças para trocar de lugar */
+var PUZ=['arca','arcoiris','igreja'], puzI=0, puzN=2, puzOrder=[], puzSel=-1, puzDone=false;
+function puzStart(){
+  var n=puzN*puzN; puzOrder=[]; for(var i=0;i<n;i++)puzOrder.push(i);
+  do{shuffle(puzOrder);}while(puzOrder.every(function(v,i){return v===i;}));
+  puzSel=-1; puzDone=false; puzPaint();
+}
+function puzPaint(){
+  var g=$('#puzGrid'); g.style.gridTemplateColumns='repeat('+puzN+',1fr)'; g.style.gridTemplateRows='repeat('+puzN+',1fr)'; g.innerHTML='';
+  puzOrder.forEach(function(piece,slot){
+    var b=document.createElement('button'); b.className='ptile'+(slot===puzSel?' sel':''); b.setAttribute('aria-label','Peça '+(piece+1));
+    b.style.backgroundImage='url(img/quebra_'+PUZ[puzI]+'.webp)'; b.style.backgroundSize=(puzN*100)+'% '+(puzN*100)+'%';
+    b.style.backgroundPosition=((piece%puzN)/(puzN-1)*100)+'% '+(Math.floor(piece/puzN)/(puzN-1)*100)+'%';
+    b.addEventListener('click',function(){
+      if(puzDone)return;
+      if(puzSel<0){puzSel=slot;puzPaint();return;}
+      var t=puzOrder[puzSel];puzOrder[puzSel]=puzOrder[slot];puzOrder[slot]=t;puzSel=-1;tone([520]);puzPaint();
+      if(puzOrder.every(function(v,i){return v===i;})){puzDone=true;win();confetti();
+        setTimeout(function(){if(puzN===2)puzN=3;else{puzN=2;puzI=(puzI+1)%PUZ.length;}puzStart();},2200);}
+    });
+    g.appendChild(b);
+  });
+}
+$('#puzNext').addEventListener('click',function(){puzI=(puzI+1)%PUZ.length;puzN=2;puzStart();});
 
 renderHome(); drawStars();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if($('#g3').classList.contains('on'))paint();});
