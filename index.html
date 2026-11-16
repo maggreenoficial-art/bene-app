@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bené — Aprendendo a ler (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#4a3426; --sky:#7ec8f2; --sky2:#dcf1fd; --sun:#ffc94a; --coral:#f26b6b; --blue:#5ba8e8;
+  --green:#5fa84f; --grass:#8fcf72; --cream:#fff7ea; --white:#fff;
+  --display:"Baloo 2","Arial Rounded MT Bold",ui-rounded,system-ui,sans-serif;
+  --body:"Nunito",ui-rounded,system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:var(--body);color:var(--ink);background:linear-gradient(var(--sky) 0%,var(--sky2) 62%,var(--grass) 62%,#7cc063 100%);background-attachment:fixed;
+  display:flex;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#app{width:100%;max-width:480px;min-height:100%;padding:14px 16px 28px;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+h1,h2{font-family:var(--display);margin:0;line-height:1.05}
+.screen{display:none;flex-direction:column;flex:1;gap:14px}
+.screen.on{display:flex}
+
+/* blocos com contorno, como nas páginas do kit */
+.card{background:var(--white);border:4px solid var(--ink);border-radius:26px;box-shadow:6px 7px 0 var(--ink)}
+.btn{background:var(--sun);border:4px solid var(--ink);border-radius:999px;box-shadow:5px 6px 0 var(--ink);
+  font-family:var(--display);font-weight:800;font-size:26px;padding:12px 28px;min-height:64px;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translate(4px,5px);box-shadow:1px 1px 0 var(--ink)}
+.btn.small{font-size:18px;min-height:48px;padding:6px 18px;box-shadow:3px 4px 0 var(--ink);background:var(--white)}
+.round{width:56px;height:56px;border-radius:50%;padding:0;display:grid;place-items:center;font-size:24px;flex:none}
+
+/* topo */
+.top{display:flex;align-items:center;gap:10px}
+.top .logo{height:50px}
+.top .sp{flex:1}
+.stars{display:flex;gap:4px}
+.stars svg{width:30px;height:30px}
+
+/* Bené falando */
+.talk{display:flex;align-items:flex-end;gap:8px}
+.talk img{width:96px;flex:none;filter:drop-shadow(3px 4px 0 rgba(74,52,38,.25))}
+.bubble{position:relative;flex:1;padding:12px 14px;font-weight:800;font-size:19px;line-height:1.25}
+.bubble:before{content:"";position:absolute;left:-16px;bottom:22px;border:10px solid transparent;border-right-color:var(--ink)}
+.bubble .say{margin-top:8px}
+
+/* início */
+.hero{padding:18px;text-align:center}
+.hero h1{font-size:34px}
+.hero p{margin:6px 0 0;font-weight:800;font-size:17px}
+.lesson{display:flex;align-items:center;gap:12px;padding:8px 14px;text-align:left;width:100%;background:var(--cream)}
+.lesson .letter{font-family:var(--display);font-size:60px;line-height:.9;color:var(--coral);-webkit-text-stroke:3px var(--ink);width:78px;text-align:center}
+.lesson img{width:64px;height:64px;object-fit:contain}
+.lesson b{font-family:var(--display);font-size:26px;display:block;line-height:1.05}
+.lesson span{font-weight:800;font-size:15px}
+#lessons{display:flex;flex-direction:column;gap:12px}
+.lesson[disabled]{opacity:.55;box-shadow:none;border-style:dashed;cursor:default}
+.lesson.done{background:#e6f5dd}
+.stages{padding:12px 16px;list-style:none;margin:0}
+.stages li{display:flex;align-items:center;gap:10px;padding:7px 0;font-weight:800;font-size:16px}
+.stages li + li{border-top:2px dashed rgba(74,52,38,.25)}
+.stages .dot{width:30px;height:30px;border-radius:50%;border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--display);font-size:16px;background:#eee;flex:none}
+.stages li.now .dot{background:var(--sun)}
+.stages small{font-weight:600;opacity:.75;display:block;font-size:13px}
+
+/* história */
+.story{padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.bigA{font-family:var(--display);font-size:120px;line-height:.85;color:var(--coral);-webkit-text-stroke:5px var(--ink);background:none;border:0;padding:0 16px}
+.bigA:active{transform:scale(.94)}
+.story img{width:130px;height:130px;object-fit:contain}
+.story .word{font-family:var(--display);font-size:44px;letter-spacing:2px}
+.story .word i{font-style:normal;color:var(--coral)}
+
+/* jogo 1 */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pic{aspect-ratio:1;padding:6px;background:var(--white);display:grid;place-items:center;transition:transform .15s,opacity .3s}
+.pic{min-width:0;overflow:hidden}
+.pic img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.pic.ok{background:#dff3d6;transform:scale(.9);opacity:.55}
+.pic.no{animation:shake .35s}
+.ark{display:flex;align-items:center;justify-content:center;gap:8px;min-height:92px}
+.ark > img{width:96px;height:84px;object-fit:contain}
+.ark .in{display:flex;gap:2px;flex-wrap:wrap;max-width:190px}
+.ark .in img{width:52px;height:52px;object-fit:contain;animation:pop .35s}
+
+/* jogo 2 */
+.letters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tile{aspect-ratio:1;font-family:var(--display);font-size:46px;line-height:1;background:var(--white);padding:0}
+.tile.ok{background:var(--sun);animation:pop .3s}
+.tile.no{animation:shake .35s}
+.count{text-align:center;font-family:var(--display);font-size:24px}
+
+/* jogo 3 */
+.trace{padding:8px;display:grid;place-items:center;background:var(--cream)}
+canvas{width:100%;max-width:340px;aspect-ratio:10/11;touch-action:none;display:block}
+
+/* fim */
+.end{padding:18px;text-align:center}
+.end h2{font-size:34px}
+.verse{background:var(--cream);padding:14px;margin-top:6px}
+.verse b{font-family:var(--display);font-size:24px;display:block;line-height:1.15}
+.verse b i{font-style:normal;color:var(--coral)}
+.todo{padding:14px;font-weight:800;font-size:17px;text-align:left;display:flex;gap:12px;align-items:center}
+.todo img{width:64px}
+
+/* pais */
+#pais{position:fixed;inset:0;background:rgba(74,52,38,.55);display:none;align-items:flex-end;justify-content:center;z-index:9}
+#pais.on{display:flex}
+#pais .sheet{width:100%;max-width:480px;max-height:88%;overflow:auto;padding:18px;border-radius:26px 26px 0 0;box-shadow:none;border-bottom:0}
+#pais h2{font-size:26px;margin-bottom:8px}
+#pais p,#pais li{font-size:15.5px;line-height:1.45;font-weight:600}
+#pais ul{padding-left:20px;margin:6px 0 12px}
+.center{display:flex;justify-content:center;margin-top:auto;padding-top:6px}
+.confetti{position:fixed;top:-20px;width:14px;height:14px;border:2px solid var(--ink);border-radius:4px;z-index:8;animation:fall 1.6s linear forwards;pointer-events:none}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top">
+    <img class="logo" src="img/logo.webp" alt="Bené">
+    <div class="sp"></div>
+    <div class="stars" id="stars" aria-label="Estrelas da lição"></div>
+    <button class="btn small" id="btnPais">Pais</button>
+  </div>
+
+  <section class="screen on" id="home">
+    <div class="card hero">
+      <h1>Vamos ler com a Bené</h1>
+      <p>Uma lição por dia, de 10 minutinhos.</p>
+    </div>
+    <div id="lessons"></div>
+    <ol class="card stages">
+      <li><span class="dot">1</span><div>Ouvir e rimar<small>3 a 4 anos · em breve</small></div></li>
+      <li class="now"><span class="dot">2</span><div>Vogais e som das letras<small>você está aqui</small></div></li>
+      <li><span class="dot">3</span><div>Sílabas<small>em breve</small></div></li>
+      <li><span class="dot">4</span><div>Palavras<small>em breve</small></div></li>
+      <li><span class="dot">5</span><div>Frases e versículos<small>em breve</small></div></li>
+    </ol>
+  </section>
+
+  <section class="screen" id="story">
+    <div class="talk"><img src="img/bene.webp" alt="Bené, a ovelhinha"><div class="card bubble"><div id="storyTxt"></div><button class="btn small say" data-say="story">Ouvir de novo</button></div></div>
+    <div class="card story">
+      <button class="bigA" id="bigA"></button>
+      <img id="storyPic" alt="">
+      <div class="word" id="storyWord"></div>
+    </div>
+    <div class="center"><button class="btn" data-go="g1">Vamos brincar</button></div>
+  </section>
+
+  <section class="screen" id="g1">
+    <div class="talk"><img src="img/bene.webp" alt=""><div class="card bubble"><div id="g1Txt"></div><button class="btn small say" data-say="g1">Ouvir de novo</button></div></div>
+    <div class="grid" id="g1grid"></div>
+    <div class="card ark"><img id="arkPic" alt=""><div class="in" id="arkIn"></div></div>
+  </section>
+
+  <section class="screen" id="g2">
+    <div class="talk"><img src="img/bene.webp" alt=""><div class="card bubble"><div id="g2Txt"></div><button class="btn small say" data-say="g2">Ouvir de novo</button></div></div>
+    <div class="letters" id="g2grid"></div>
+    <div class="count" id="g2count"></div>
+  </section>
+
+  <section class="screen" id="g3">
+    <div class="talk"><img src="img/bene.webp" alt=""><div class="card bubble"><div id="g3Txt"></div><button class="btn small say" data-say="g3">Ouvir de novo</button></div></div>
+    <div class="card trace"><canvas id="cv" width="600" height="660" aria-label="Letra pontilhada para cobrir com o dedo"></canvas></div>
+    <div class="center"><button class="btn small" id="clearTrace">Apagar e tentar de novo</button></div>
+  </section>
+
+  <section class="screen" id="end">
+    <div class="card end">
+      <h2>Você conseguiu!</h2>
+      <div class="stars" id="endStars" style="justify-content:center;margin:8px 0"></div>
+      <div class="card verse">
+        <b id="verseTxt"></b>
+        <span style="font-weight:800" id="verseRef"></span><br>
+        <button class="btn small" data-say="verso" style="margin-top:8px">Ouvir o versículo</button>
+      </div>
+    </div>
+    <div class="card todo"><img src="img/coracao.webp" alt=""><div id="todoTxt"></div></div>
+    <div class="center"><button class="btn" data-go="home">Voltar ao início</button></div>
+  </section>
+</div>
+
+<div id="pais" role="dialog" aria-modal="true" aria-labelledby="paisT">
+  <div class="card sheet">
+    <h2 id="paisT">Área dos pais</h2>
+    <p id="paisProg"></p>
+    <p><b>Como cada lição funciona</b></p>
+    <ul>
+      <li>História bíblica curta apresenta a letra e o som.</li>
+      <li>Jogo 1 treina o ouvido: qual palavra começa com o som?</li>
+      <li>Jogo 2 treina o olho: reconhecer a letra maiúscula e minúscula.</li>
+      <li>Jogo 3 treina a mão: cobrir a letra na ordem certa dos traços.</li>
+    </ul>
+    <p><b>Para dar resultado:</b> uma lição por dia, sentado junto com a criança, e depois a atividade fora da tela. O aplicativo complementa a escola, não substitui.</p>
+    <p style="opacity:.75" id="voiceNote"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn small" id="unlockAll">Liberar todas as lições</button>
+      <button class="btn small" id="resetProg">Zerar progresso</button>
+      <button class="btn small" id="closePais" style="background:var(--sun)">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var D={"lessons": [{"v": "A", "fala": "A", "nome": "Arca", "pic": "arca", "resto": "RCA", "verse": ["Amem uns aos outros.", "João 13:34"], "ins": ["abelha", "abacaxi", "abacate", "arvore", "arcoiris", "apito", "abobora"]}, {"v": "E", "fala": "É", "nome": "Estrela", "pic": "estrela", "resto": "STRELA", "verse": ["Eu sou a luz do mundo.", "João 8:12"], "ins": ["estrela", "escova", "escada", "envelope", "escudo"]}, {"v": "I", "fala": "I", "nome": "Igreja", "pic": "igreja", "resto": "GREJA", "verse": ["Ide por todo o mundo.", "Marcos 16:15"], "ins": ["igreja", "ioio", "ilha", "ima", "iglu"]}, {"v": "O", "fala": "Ó", "nome": "Ovelha", "pic": "ovelha", "resto": "VELHA", "verse": ["O Senhor é o meu pastor.", "Salmo 23:1"], "ins": ["ovo", "ovelha", "olho", "oculos", "onda", "osso"]}, {"v": "U", "fala": "U", "nome": "Uva", "pic": "uva", "resto": "VA", "verse": ["Um só Deus e Pai de todos.", "Efésios 4:6"], "ins": ["uva", "urso", "um"]}], "words": {"abelha": "abelha", "abacaxi": "abacaxi", "abacate": "abacate", "arvore": "árvore", "arcoiris": "arco-íris", "apito": "apito", "abobora": "abóbora", "estrela": "estrela", "escova": "escova", "escada": "escada", "envelope": "envelope", "escudo": "escudo", "igreja": "igreja", "ioio": "ioiô", "ilha": "ilha", "ima": "ímã", "iglu": "iglu", "ovo": "ovo", "ovelha": "ovelha", "olho": "olho", "oculos": "óculos", "onda": "onda", "osso": "osso", "uva": "uva", "urso": "urso", "um": "um", "bola": "bola", "peixe": "peixe", "lua": "lua", "sol": "sol", "casa": "casa", "pato": "pato"}, "out": ["bola", "peixe", "lua", "sol", "casa", "pato"], "say": {"A_story": "A de Arca! Deus pediu para Noé construir uma arca bem grande, e os bichinhos entraram nela. Toque na letra A para ouvir o som.", "A_g1": "Ajude os amigos a entrar na arca! Toque só nas figuras que começam com o som A.", "A_g2": "Agora ache a letra A! Toque em todas as letras A, grandes e pequenas.", "A_g3": "Cubra a letra A com o dedo. Comece na bolinha verde e siga os pontinhos.", "A_som": "A", "A_sim": "Começa com A!", "A_nao": "Não começa com A.", "A_fim": "Parabéns! Você aprendeu a letra A.", "A_verso": "Amem uns aos outros. João, capítulo treze, versículo trinta e quatro.", "E_story": "E de Estrela! Uma estrela bem brilhante mostrou o caminho até o menino Jesus. Toque na letra E para ouvir o som.", "E_g1": "Vamos procurar! Toque só nas figuras que começam com o som É.", "E_g2": "Agora ache a letra É! Toque em todas as letras É, grandes e pequenas.", "E_g3": "Cubra a letra É com o dedo. Comece na bolinha verde e siga os pontinhos.", "E_som": "É", "E_sim": "Começa com É!", "E_nao": "Não começa com É.", "E_fim": "Parabéns! Você aprendeu a letra É.", "E_verso": "Eu sou a luz do mundo. João, capítulo oito, versículo doze.", "I_story": "I de Igreja! Na igreja a gente canta, ora e aprende sobre Jesus. Toque na letra I para ouvir o som.", "I_g1": "Vamos procurar! Toque só nas figuras que começam com o som I.", "I_g2": "Agora ache a letra I! Toque em todas as letras I, grandes e pequenas.", "I_g3": "Cubra a letra I com o dedo. Comece na bolinha verde e siga os pontinhos.", "I_som": "I", "I_sim": "Começa com I!", "I_nao": "Não começa com I.", "I_fim": "Parabéns! Você aprendeu a letra I.", "I_verso": "Ide por todo o mundo. Marcos, capítulo dezesseis, versículo quinze.", "O_story": "O de Ovelha! Jesus é o bom pastor, e cuida de cada ovelhinha com muito amor. Toque na letra O para ouvir o som.", "O_g1": "Vamos procurar! Toque só nas figuras que começam com o som Ó.", "O_g2": "Agora ache a letra Ó! Toque em todas as letras Ó, grandes e pequenas.", "O_g3": "Cubra a letra Ó com o dedo. Comece na bolinha verde e siga os pontinhos.", "O_som": "Ó", "O_sim": "Começa com Ó!", "O_nao": "Não começa com Ó.", "O_fim": "Parabéns! Você aprendeu a letra Ó.", "O_verso": "O Senhor é o meu pastor. Salmo vinte e três, versículo um.", "U_story": "U de Uva! Na terra que Deus prometeu, o povo achou um cacho de uvas bem grande. Toque na letra U para ouvir o som.", "U_g1": "Vamos procurar! Toque só nas figuras que começam com o som U.", "U_g2": "Agora ache a letra U! Toque em todas as letras U, grandes e pequenas.", "U_g3": "Cubra a letra U com o dedo. Comece na bolinha verde e siga os pontinhos.", "U_som": "U", "U_sim": "Começa com U!", "U_nao": "Não começa com U.", "U_fim": "Parabéns! Você aprendeu a letra U.", "U_verso": "Um só Deus e Pai de todos. Efésios, capítulo quatro, versículo seis.", "w_abelha": "Abelha.", "w_abacaxi": "Abacaxi.", "w_abacate": "Abacate.", "w_arvore": "Árvore.", "w_arcoiris": "Arco-íris.", "w_apito": "Apito.", "w_abobora": "Abóbora.", "w_estrela": "Estrela.", "w_escova": "Escova.", "w_escada": "Escada.", "w_envelope": "Envelope.", "w_escudo": "Escudo.", "w_igreja": "Igreja.", "w_ioio": "Ioiô.", "w_ilha": "Ilha.", "w_ima": "Ímã.", "w_iglu": "Iglu.", "w_ovo": "Ovo.", "w_ovelha": "Ovelha.", "w_olho": "Olho.", "w_oculos": "Óculos.", "w_onda": "Onda.", "w_osso": "Osso.", "w_uva": "Uva.", "w_urso": "Urso.", "w_um": "Um.", "w_bola": "Bola.", "w_peixe": "Peixe.", "w_lua": "Lua.", "w_sol": "Sol.", "w_casa": "Casa.", "w_pato": "Pato."}};
+var AUDIO='https://acbksachtpypwtbgwyxh.supabase.co/storage/v1/object/public/bene-audio/v1/';
+var SVG={escada:1,envelope:1,escudo:1,ilha:1,ima:1,iglu:1,olho:1,oculos:1,onda:1,osso:1,urso:1,um:1};
+function pic(id){return 'img/'+id+(SVG[id]?'.svg':'.webp');}
+var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+
+/* progresso (só neste aparelho) */
+var KEY='bene_proto_v2', prog={done:{},stars:{},open:false};
+try{var s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&s.done&&s.stars)prog=s;}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(prog));}catch(e){}}
+var L=null, run=0, inLesson=false;
+
+/* voz: toca o áudio gravado; se não houver, usa a voz do aparelho */
+var voices=[], audioOK=true, cur=null, tok=0;
+function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){}}
+try{loadVoices(); speechSynthesis.onvoiceschanged=loadVoices;}catch(e){}
+function speak(t){
+  try{
+    if(!('speechSynthesis' in window))return;
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(t); u.lang='pt-BR'; u.rate=.92; u.pitch=1.2;
+    var v=voices.filter(function(v){return /pt[-_]BR/i.test(v.lang)})[0]||voices.filter(function(v){return /^pt/i.test(v.lang)})[0];
+    if(v)u.voice=v; speechSynthesis.speak(u);
+  }catch(e){}
+}
+function hush(){tok++;try{if(cur){cur.pause();cur=null;}}catch(e){}try{speechSynthesis.cancel();}catch(e){}}
+function say(keys){
+  hush(); var my=tok, text=keys.map(function(k){return D.say[k]}).join(' ');
+  if(!audioOK){speak(text);return;}
+  var i=0, failed=false;
+  function fail(){if(failed||my!==tok)return;failed=true;if(i===0)audioOK=false;speak(keys.slice(i).map(function(k){return D.say[k]}).join(' '));}
+  function next(){
+    if(my!==tok||i>=keys.length)return;
+    var a; try{a=new Audio(AUDIO+keys[i]+'.mp3');}catch(e){fail();return;}
+    cur=a; var started=false;
+    a.onplaying=function(){started=true;};
+    a.onended=function(){i++;next();};
+    a.onerror=fail;
+    var p; try{p=a.play();}catch(e){fail();return;}
+    if(p&&p.catch)p.catch(fail);
+    setTimeout(function(){if(!started&&my===tok&&cur===a){try{a.pause();}catch(e){}fail();}},2500);
+  }
+  next();
+}
+var ac=null;
+function tone(freqs,dur){
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    freqs.forEach(function(f,i){
+      var o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime+i*(dur||.11);
+      o.type='triangle'; o.frequency.value=f; o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.2,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.11)+.08);
+      o.start(t); o.stop(t+(dur||.11)+.1);
+    });
+  }catch(e){}
+}
+var good=function(){tone([660,880])}, bad=function(){tone([220],.16)}, win=function(){tone([523,659,784,1047],.13)};
+$$('[data-say]').forEach(function(b){b.addEventListener('click',function(){say([L.v+'_'+b.dataset.say]);});});
+
+/* estrelas */
+function starSvg(on){return '<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" fill="'+(on?'#ffc94a':'#fff')+'" stroke="#4a3426" stroke-width="2" stroke-linejoin="round"/></svg>';}
+function drawStars(){
+  var h=''; for(var i=0;i<3;i++)h+=starSvg(i<run);
+  $('#stars').innerHTML=inLesson?h:''; $('#endStars').innerHTML=h;
+}
+function confetti(){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var c=['#f26b6b','#5ba8e8','#ffc94a','#5fa84f'];
+  for(var i=0;i<26;i++){var d=document.createElement('div');d.className='confetti';d.style.left=(Math.random()*100)+'vw';d.style.background=c[i%4];
+    d.style.animationDelay=(Math.random()*.5)+'s';document.body.appendChild(d);(function(d){setTimeout(function(){d.remove();},2400);})(d);}
+}
+
+/* início: lista de lições */
+function renderHome(){
+  var box=$('#lessons'); box.innerHTML='';
+  D.lessons.forEach(function(l,i){
+    var open=prog.open||i===0||prog.done[D.lessons[i-1].v], done=prog.done[l.v];
+    var b=document.createElement('button'); b.className='card lesson'+(done?' done':''); if(!open)b.disabled=true;
+    var st=done?('Feita · '+(prog.stars[l.v]||0)+' de 3 estrelas'):(open?'Toque para começar':'Termine a lição anterior');
+    b.innerHTML='<div class="letter">'+l.v+'</div><div style="flex:1"><b>'+l.v+' de '+l.nome+'</b><span>'+st+'</span></div><img src="'+pic(l.pic)+'" alt="">';
+    b.addEventListener('click',function(){startLesson(l);});
+    box.appendChild(b);
+  });
+}
+function startLesson(l){
+  L=l; run=0;
+  ['story','g1','g2','g3'].forEach(function(k){$('#'+k+'Txt').textContent=D.say[l.v+'_'+k].replace(/ É([ !.,])/g,' E$1').replace(/ Ó([ !.,])/g,' O$1');});
+  $('#bigA').textContent=l.v; $('#bigA').setAttribute('aria-label','Letra '+l.v+', toque para ouvir');
+  $('#storyPic').src=pic(l.pic); $('#storyPic').alt=l.nome;
+  $('#storyWord').innerHTML='<i>'+l.v+'</i>'+l.resto;
+  $('#arkPic').src=pic(l.pic);
+  $('#verseTxt').innerHTML='<i>'+l.verse[0].charAt(0)+'</i>'+l.verse[0].slice(1); $('#verseRef').textContent=l.verse[1];
+  $('#todoTxt').textContent='Agora, longe da tela: ache com a mamãe ou o papai 3 coisas da casa que começam com '+l.v+'.';
+  go('story');
+}
+
+/* navegação */
+function go(id){
+  $$('.screen').forEach(function(s){s.classList.toggle('on',s.id===id);});
+  window.scrollTo(0,0);
+  if(id==='home'){inLesson=false;hush();renderHome();}
+  if(id==='story'){inLesson=true;say([L.v+'_story']);}
+  if(id==='g1'){startG1();say([L.v+'_g1']);}
+  if(id==='g2'){startG2();say([L.v+'_g2']);}
+  if(id==='g3'){startG3();say([L.v+'_g3']);}
+  if(id==='end'){prog.done[L.v]=true;prog.stars[L.v]=Math.max(prog.stars[L.v]||0,run);save();win();confetti();say([L.v+'_fim',L.v+'_verso']);}
+  drawStars();
+}
+$$('[data-go]').forEach(function(b){b.addEventListener('click',function(){go(b.dataset.go);});});
+$('#bigA').addEventListener('click',function(){say([L.v+'_som']);});
+function finish(next){run++;drawStars();win();confetti();setTimeout(function(){go(next);},1500);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* jogo 1: som inicial */
+var g1left=0, g1round=0, g1rounds=1;
+function startG1(){g1round=0;g1rounds=L.ins.length>=5?2:1;$('#arkIn').innerHTML='';roundG1();}
+function roundG1(){
+  var a=shuffle(L.ins.slice()).slice(0,3), b=shuffle(D.out.slice()).slice(0,3);
+  var all=shuffle(a.map(function(x){return [x,true]}).concat(b.map(function(x){return [x,false]})));
+  g1left=3; var grid=$('#g1grid'); grid.innerHTML='';
+  all.forEach(function(it){
+    var bt=document.createElement('button'); bt.className='card pic'; bt.setAttribute('aria-label',D.words[it[0]]);
+    bt.innerHTML='<img src="'+pic(it[0])+'" alt="">';
+    bt.addEventListener('click',function(){
+      if(bt.classList.contains('ok'))return;
+      if(it[1]){
+        bt.classList.add('ok'); good(); say(['w_'+it[0],L.v+'_sim']);
+        var im=document.createElement('img'); im.src=pic(it[0]); im.alt=''; $('#arkIn').appendChild(im);
+        if(--g1left===0){ if(++g1round<g1rounds)setTimeout(roundG1,1600); else setTimeout(function(){finish('g2');},1400); }
+      }else{
+        bad(); say(['w_'+it[0],L.v+'_nao']); bt.classList.remove('no'); void bt.offsetWidth; bt.classList.add('no');
+      }
+    });
+    grid.appendChild(bt);
+  });
+}
+
+/* jogo 2: achar a letra */
+var g2left=0;
+function startG2(){
+  var v=L.v, lo=v.toLowerCase();
+  var others=shuffle(['A','E','I','O','U','a','e','o','u','M','V','T'].filter(function(x){return x.toLowerCase()!==lo;})).slice(0,7);
+  var ls=shuffle([v,v,v,lo,lo].concat(others)); g2left=5;
+  var grid=$('#g2grid'); grid.innerHTML='';
+  ls.forEach(function(l){
+    var bt=document.createElement('button'); bt.className='card tile'; bt.textContent=l;
+    bt.addEventListener('click',function(){
+      if(bt.classList.contains('ok'))return;
+      if(l.toLowerCase()===lo){bt.classList.add('ok');good();say([v+'_som']);g2left--;g2count();if(g2left===0)setTimeout(function(){finish('g3');},900);}
+      else{bad();bt.classList.remove('no');void bt.offsetWidth;bt.classList.add('no');}
+    });
+    grid.appendChild(bt);
+  });
+  g2count();
+}
+function g2count(){$('#g2count').textContent=g2left?('Faltam '+g2left):'Achou todas!';}
+
+/* jogo 3: cobrir a letra */
+var cv=$('#cv'), cx=cv.getContext('2d'), W=600, H=660;
+function arc(cxx,cyy,rx,ry,a0,a1,n){var a=[];for(var i=0;i<=n;i++){var t=(a0+(a1-a0)*i/n)*Math.PI/180;a.push([cxx+rx*Math.cos(t),cyy+ry*Math.sin(t)]);}return a;}
+var STROKES={
+  A:[[[300,80],[110,580]],[[300,80],[490,580]],[[178,400],[422,400]]],
+  E:[[[170,80],[170,580]],[[170,80],[440,80]],[[170,330],[400,330]],[[170,580],[440,580]]],
+  I:[[[300,80],[300,580]]],
+  O:[arc(300,330,190,250,-90,-450,36)],
+  U:[[[150,80],[150,400]].concat(arc(300,400,150,180,180,0,14)).concat([[450,80]])]
+};
+var pts=[], curS=0, hit=0, ink=[], drawing=false, doneTrace=false;
+function buildPts(){
+  pts=STROKES[L.v].map(function(poly){
+    var out=[poly[0]], carry=0, step=42;
+    for(var i=1;i<poly.length;i++){
+      var a=poly[i-1], b=poly[i], len=Math.hypot(b[0]-a[0],b[1]-a[1]), t=step-carry;
+      while(t<=len){out.push([a[0]+(b[0]-a[0])*t/len,a[1]+(b[1]-a[1])*t/len]);t+=step;}
+      carry=len-(t-step);
+    }
+    var last=poly[poly.length-1], e=out[out.length-1];
+    if(Math.hypot(last[0]-e[0],last[1]-e[1])>14)out.push(last); else out[out.length-1]=last;
+    return out;
+  });
+}
+function startG3(){buildPts();curS=0;hit=0;ink=[];doneTrace=false;paint();}
+function paint(){
+  cx.clearRect(0,0,W,H); cx.lineCap='round'; cx.lineJoin='round';
+  pts.forEach(function(st,si){st.forEach(function(p,pi){
+    if(si<curS||(si===curS&&pi<hit))return;
+    cx.beginPath();cx.arc(p[0],p[1],9,0,7);cx.fillStyle='rgba(74,52,38,.35)';cx.fill();
+  });});
+  cx.strokeStyle='#f26b6b';cx.lineWidth=46;
+  pts.forEach(function(st,si){
+    var upto=si<curS?st.length-1:(si===curS?hit-1:-1); if(upto<1)return;
+    cx.beginPath();cx.moveTo(st[0][0],st[0][1]);for(var i=1;i<=upto;i++)cx.lineTo(st[i][0],st[i][1]);cx.stroke();
+  });
+  cx.strokeStyle='rgba(74,52,38,.55)';cx.lineWidth=10;
+  ink.forEach(function(l){if(l.length<2)return;cx.beginPath();cx.moveTo(l[0][0],l[0][1]);for(var i=1;i<l.length;i++)cx.lineTo(l[i][0],l[i][1]);cx.stroke();});
+  if(!doneTrace){
+    var p=pts[curS][hit]; cx.beginPath();cx.arc(p[0],p[1],26,0,7);cx.fillStyle='#5fa84f';cx.fill();cx.lineWidth=6;cx.strokeStyle='#4a3426';cx.stroke();
+    if(hit===0){cx.fillStyle='#fff';cx.font='800 30px "Baloo 2",sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(String(curS+1),p[0],p[1]+2);}
+  }
+}
+function pos(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height];}
+function check(p){
+  var moved=true;
+  while(moved&&!doneTrace){
+    moved=false; var t=pts[curS][hit];
+    if(Math.hypot(p[0]-t[0],p[1]-t[1])<58){
+      hit++; moved=true;
+      if(hit>=pts[curS].length){curS++;hit=0;good();moved=false;
+        if(curS>=pts.length){doneTrace=true;paint();setTimeout(function(){finish('end');},500);return;}
+      }
+    }
+  }
+}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();drawing=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}var p=pos(e);ink.push([p]);check(p);paint();});
+cv.addEventListener('pointermove',function(e){if(!drawing)return;e.preventDefault();var p=pos(e);ink[ink.length-1].push(p);check(p);paint();});
+['pointerup','pointercancel','pointerleave'].forEach(function(ev){cv.addEventListener(ev,function(){drawing=false;});});
+$('#clearTrace').addEventListener('click',startG3);
+
+/* pais */
+function openPais(){
+  var n=D.lessons.filter(function(l){return prog.done[l.v]}).length;
+  $('#paisProg').textContent=n+' de '+D.lessons.length+' lições de vogais concluídas.';
+  $('#voiceNote').textContent=audioOK?'A voz gravada da Bené toca quando os áudios estiverem disponíveis; sem eles, entra a voz do próprio aparelho.':'Neste aparelho os áudios gravados não carregaram, então está tocando a voz do próprio aparelho.';
+  $('#unlockAll').textContent=prog.open?'Voltar a liberar uma por vez':'Liberar todas as lições';
+  $('#pais').classList.add('on'); $('#closePais').focus();
+}
+function closePais(){$('#pais').classList.remove('on');$('#btnPais').focus();}
+$('#btnPais').addEventListener('click',openPais);
+$('#closePais').addEventListener('click',closePais);
+$('#pais').addEventListener('click',function(e){if(e.target.id==='pais')closePais();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closePais();});
+$('#resetProg').addEventListener('click',function(){prog={done:{},stars:{},open:prog.open};save();if(!inLesson)renderHome();openPais();});
+$('#unlockAll').addEventListener('click',function(){prog.open=!prog.open;save();if(!inLesson)renderHome();openPais();});
+
+renderHome(); drawStars();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if($('#g3').classList.contains('on'))paint();});
+})();
+</script>
+</body>
+</html>
