@@ -1,9 +1,8 @@
 /* ====== CONFIGURE AQUI (vale para a página de vendas e para o quiz) ====== */
 window.BENE_CONFIG = {
-  // Opção A (sua API Stripe): endpoint que recebe {nome,email,whats,utm} e responde {url: "https://checkout.stripe.com/..."}
-  checkoutApi: "",
-  // Opção B (link de pagamento do Stripe), usado se checkoutApi estiver vazio
-  checkoutUrl: "https://buy.stripe.com/SEU_LINK_AQUI",
+  // Checkout transparente (cartão, Pix, Apple Pay e Google Pay) na página /checkout/.
+  // As chaves do Stripe NÃO ficam aqui: ficam nos secrets do Supabase (STRIPE_SECRET_KEY e STRIPE_PUBLISHABLE_KEY).
+  checkoutEndpoint: "https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-checkout",
   // Salva o lead antes do pagamento
   leadEndpoint: "https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-lead",
   // ID do Pixel da Meta (só os números)
@@ -31,17 +30,9 @@ window.BENE_CONFIG = {
   C.trackCustom = function (ev, data) { if (window.fbq) fbq('trackCustom', ev, data || {}); };
   C.variante = function () { try { return localStorage.getItem("bene_variante") || ""; } catch (e) { return ""; } };
   C.irParaPagamento = async function (lead) {
-    if (C.checkoutApi) {
-      var r = await fetch(C.checkoutApi, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lead) });
-      var j = await r.json();
-      if (!j.url) throw new Error("sem url");
-      location.href = j.url; return;
-    }
-    var u = new URL(C.checkoutUrl);
-    if (lead && lead.email) u.searchParams.set("prefilled_email", lead.email);
-    Object.keys(utm).forEach(function (k) { if (k.indexOf("utm_") === 0) u.searchParams.set(k, utm[k]); });
-    var v = (lead && lead.variante) || C.variante(); if (v) u.searchParams.set("client_reference_id", v);
-    location.href = u.toString();
+    var dados = { nome: lead.nome, email: lead.email, whats: lead.whats || lead.whatsapp, variante: lead.variante || C.variante() };
+    try { localStorage.setItem("bene_checkout", JSON.stringify(dados)); } catch (e) {}
+    location.href = "/checkout/" + location.search;
   };
   C.salvarLead = async function (lead) {
     if (!C.leadEndpoint) return;

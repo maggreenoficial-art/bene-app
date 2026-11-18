@@ -379,7 +379,7 @@
       <p class="preco-nota">Pagamento único, não é assinatura. Acesso imediato e para sempre.</p>
       <button class="botao botao-largo abrir-checkout" type="button">Quero o app da Bené</button>
       <div class="seguro" style="justify-content:center">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pagamento processado pelo Stripe</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix, cartão, Apple Pay e Google Pay</span>
       </div>
     </div>
   </div>
@@ -415,7 +415,8 @@
     <details><summary>Preciso de impressora?</summary><p>Não. Todas as atividades são feitas na tela. O kit em PDF é um bônus para quando quiser trocar a tela pelo papel, e funciona bem em preto e branco.</p></details>
     <details><summary>O conteúdo é de alguma denominação?</summary><p>Não. As palavras e versículos são das histórias bíblicas que todas as igrejas cristãs conhecem, como a arca de Noé e o Bom Pastor.</p></details>
     <details><summary>Posso usar com mais de um filho ou com alunos?</summary><p>Sim, pode imprimir para os seus filhos e para usar com as crianças da sua turma ou do ministério infantil. Só não é permitido revender ou compartilhar o acesso e os arquivos.</p></details>
-    <details><summary>O pagamento é seguro?</summary><p>Sim. O pagamento é feito pelo Stripe, uma das maiores empresas de pagamento do mundo. Nós não vemos nem guardamos os dados do seu cartão.</p></details>
+    <details><summary>Quais as formas de pagamento?</summary><p>Pix, cartão de crédito, Apple Pay e Google Pay. O acesso é liberado assim que o pagamento é confirmado; no Pix, em poucos segundos.</p></details>
+    <details><summary>O pagamento é seguro?</summary><p>Sim. O pagamento é criptografado e processado pelo Stripe, uma das maiores empresas de pagamento do mundo. Nós não vemos nem guardamos os dados do seu cartão.</p></details>
   </div>
 </section>
 
@@ -454,7 +455,7 @@
     <input id="whats" name="whats" type="tel" autocomplete="tel" inputmode="tel" placeholder="(00) 00000-0000" required>
     <p class="erro" id="erro" role="alert"></p>
     <button class="botao botao-largo" type="submit" id="continuar">Continuar para o pagamento</button>
-    <p class="mini">No passo 2 você faz o pagamento seguro pelo Stripe.</p>
+    <p class="mini">No passo 2 você paga com Pix, cartão, Apple Pay ou Google Pay, em ambiente seguro.</p>
   </form>
 </dialog>
 
@@ -472,7 +473,6 @@ const CONFIG = window.BENE_CONFIG;
   const btn = document.getElementById("continuar");
 
   document.querySelectorAll(".abrir-checkout").forEach(b => b.addEventListener("click", () => {
-    track("InitiateCheckout", {value: CONFIG.preco, currency: "BRL"});
     if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
     setTimeout(() => document.getElementById("nome").focus(), 50);
   }));
