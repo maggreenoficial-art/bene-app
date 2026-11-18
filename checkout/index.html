@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://js.stripe.com/v3/"></script>
 <script src="/config.js"></script>
+<script src="https://www.metricasrapida.cloud/t.js" async></script>
 <style>
   :root{
     --ceu:#7EC8F2; --ceu-claro:#EAF6FE; --ceu-fundo:#F4FAFF;
@@ -223,6 +224,13 @@
     const id = C.utm && C.utm.fbclid; return id ? "fb.1." + Date.now() + "." + id : "";
   }
 
+  // UTMs do Métricas Rápida (t.js) + as que o site guardou na entrada
+  function rastreio() {
+    let t = {};
+    try { t = window.ltUtm ? (window.ltUtm() || {}) : {}; } catch (e) {}
+    return Object.assign({}, C.utm || {}, t);
+  }
+
   async function criarPagamento() {
     // reaproveita o mesmo pagamento se a página for recarregada
     try {
@@ -230,7 +238,7 @@
       if (s && s.email === lead.email && s.clientSecret) return s;
     } catch (e) {}
     const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: C.utm, fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
+      body: JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.clientSecret) throw new Error(j.erro || "falha");
     const s = { email: lead.email, clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
