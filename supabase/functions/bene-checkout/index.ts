@@ -32,6 +32,15 @@ Deno.serve(async (req: Request) => {
   f.set("metadata[email]", email);
   f.set("metadata[whatsapp]", whatsapp);
   if (variante) f.set("metadata[variante]", variante);
+  // dados para a API de Conversões da Meta (o webhook manda a compra pelo servidor)
+  const fbp = String(b.fbp ?? "").slice(0, 200), fbc = String(b.fbc ?? "").slice(0, 300), url = String(b.url ?? "").slice(0, 400);
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim().slice(0, 64);
+  const ua = (req.headers.get("user-agent") ?? "").slice(0, 450);
+  if (fbp) f.set("metadata[fbp]", fbp);
+  if (fbc) f.set("metadata[fbc]", fbc);
+  if (url) f.set("metadata[url]", url);
+  if (ip) f.set("metadata[ip]", ip);
+  if (ua) f.set("metadata[ua]", ua);
   for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
     if (utm[k]) f.set(`metadata[${k}]`, String(utm[k]).slice(0, 200));
   }

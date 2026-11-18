@@ -217,6 +217,12 @@
     setTimeout(() => $("d-nome").focus(), 50);
   }
 
+  function cookie(n) { const m = document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)")); return m ? decodeURIComponent(m[1]) : ""; }
+  function fbc() {
+    const c = cookie("_fbc"); if (c) return c;
+    const id = C.utm && C.utm.fbclid; return id ? "fb.1." + Date.now() + "." + id : "";
+  }
+
   async function criarPagamento() {
     // reaproveita o mesmo pagamento se a página for recarregada
     try {
@@ -224,7 +230,7 @@
       if (s && s.email === lead.email && s.clientSecret) return s;
     } catch (e) {}
     const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: C.utm }) });
+      body: JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: C.utm, fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.clientSecret) throw new Error(j.erro || "falha");
     const s = { email: lead.email, clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
