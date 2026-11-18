@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bené</title>
+<script>window.BENE_SEM_PIXEL = true;</script>
+<script src="/config.js"></script>
+<script>
+// Teste A/B: cada visitante cai sempre na mesma versão (guardada no aparelho)
+(function () {
+  var v = "";
+  try { v = localStorage.getItem("bene_variante") || ""; } catch (e) {}
+  if (v !== "quiz" && v !== "oferta") {
+    v = Math.random() * 100 < (window.BENE_CONFIG.quizPct || 50) ? "quiz" : "oferta";
+    try { localStorage.setItem("bene_variante", v); } catch (e) {}
+  }
+  location.replace("/" + v + "/" + location.search);
+})();
+</script>
+<style>body{margin:0;background:#F4FAFF}</style>
+</head>
+<body></body>
+</html>

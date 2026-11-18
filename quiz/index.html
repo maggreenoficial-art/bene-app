@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teste de leitura da Bené: o plano certo para o seu filho</title>
+<meta name="description" content="Responda 9 perguntas rápidas e receba um plano de leitura de 7 dias com o Método Fono-Fé, feito para a idade e a fase do seu filho.">
+<meta property="og:title" content="Seu filho está pronto para começar a ler?">
+<meta property="og:description" content="Teste de 1 minuto com a ovelhinha Bené. No final, um plano de 7 dias para fazer em casa.">
+<meta property="og:image" content="/oferta/img/og.jpg">
+<meta name="theme-color" content="#7EC8F2">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
+<style>
+  :root{
+    --ceu:#7EC8F2; --ceu-claro:#EAF6FE; --ceu-fundo:#F4FAFF;
+    --tinta:#4A3426; --tinta-suave:#6B5546;
+    --sol:#FFC94A; --sol-escuro:#F2AE16; --sol-claro:#FFF4D6;
+    --pasto:#8BD17C; --pasto-escuro:#5FA84F;
+    --bochecha:#F7A8B8; --coral:#F26B6B; --azul:#5BA8E8;
+    --papel:#FFFFFF;
+    --contorno:3px solid var(--tinta);
+    --sombra:5px 5px 0 var(--tinta);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:'Nunito',system-ui,sans-serif;color:var(--tinta);background:var(--ceu);font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh}
+  body.resultado{background:var(--ceu-fundo)}
+  img{max-width:100%;display:block}
+  h1,h2,h3{font-family:'Baloo 2',system-ui,sans-serif;line-height:1.12;margin:0;letter-spacing:-.01em}
+  h1{font-size:clamp(2rem,8vw,2.7rem);font-weight:800}
+  h2{font-size:clamp(1.6rem,6.4vw,2.1rem);font-weight:800}
+  h3{font-size:1.25rem;font-weight:700}
+  p{margin:0 0 .9em}
+  b{font-weight:800}
+  :focus-visible{outline:4px solid var(--azul);outline-offset:3px;border-radius:10px}
+
+  /* topo */
+  .topo{position:sticky;top:0;z-index:5;background:var(--ceu);padding:12px 16px 10px;padding-top:max(12px,env(safe-area-inset-top))}
+  body.resultado .topo{background:var(--ceu-fundo)}
+  .topo-in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  .topo .logo{width:64px;height:auto}
+  .voltar{appearance:none;border:0;background:none;font:inherit;font-weight:800;color:var(--tinta);padding:8px 6px;cursor:pointer;font-size:.95rem;visibility:hidden}
+  .voltar.ver{visibility:visible}
+  .barra{flex:1;height:14px;border:var(--contorno);border-radius:99px;background:var(--papel);overflow:hidden}
+  .barra i{display:block;height:100%;width:0;background:var(--sol);border-right:3px solid var(--tinta);transition:width .35s ease}
+  .barra.oculta{visibility:hidden}
+
+  main{max-width:560px;margin:0 auto;padding:8px 16px 120px}
+  .tela{animation:entra .28s ease both}
+  @keyframes entra{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.tela,.chip-palma,.carrega li{animation:none!important}.barra i{transition:none}}
+
+  .cartao{background:var(--papel);border:var(--contorno);border-radius:26px;box-shadow:var(--sombra);padding:24px 20px}
+  .pergunta{margin:6px 0 18px}
+  .pergunta h2{margin-bottom:6px}
+  .pergunta p{color:var(--tinta-suave);margin:0}
+  .opcoes{display:grid;gap:12px}
+  .op{appearance:none;width:100%;text-align:left;font:inherit;font-weight:800;color:var(--tinta);background:var(--papel);border:var(--contorno);border-radius:18px;box-shadow:4px 4px 0 var(--tinta);padding:16px 18px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:transform .08s,box-shadow .08s,background .15s;font-size:1.05rem;line-height:1.3}
+  .op:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--tinta)}
+  .op .bolinha{flex:none;width:24px;height:24px;border:3px solid var(--tinta);border-radius:50%;background:var(--papel)}
+  .op.marcada{background:var(--sol)}
+  .op.marcada .bolinha{background:var(--tinta);box-shadow:inset 0 0 0 4px var(--sol)}
+  .op small{display:block;font-weight:600;color:var(--tinta-suave);font-size:.9rem;margin-top:2px}
+  .op.marcada small{color:var(--tinta)}
+
+  .botao{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.3rem;color:var(--tinta);background:var(--sol);border:var(--contorno);border-radius:18px;box-shadow:var(--sombra);padding:14px 26px;cursor:pointer;text-decoration:none;line-height:1.2;transition:transform .08s,box-shadow .08s}
+  .botao:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--tinta)}
+  .botao[disabled]{opacity:.7;cursor:wait}
+  .largo{width:100%}
+  .verde{background:var(--pasto)}
+  .link{appearance:none;background:none;border:0;font:inherit;font-weight:700;color:var(--tinta-suave);text-decoration:underline;cursor:pointer;padding:10px;display:block;margin:6px auto 0}
+
+  /* abertura */
+  .abre{text-align:center;padding-top:6px}
+  .abre .bene{width:180px;margin:0 auto -6px;position:relative;z-index:1}
+  .abre .cartao{padding-top:26px}
+  .abre h1{margin-bottom:10px}
+  .abre .sub{font-size:1.1rem}
+  .fatos{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 16px;margin:16px 0 0;padding:0;list-style:none;font-weight:700;font-size:.92rem;color:var(--tinta-suave)}
+  .fatos li{display:flex;align-items:center;gap:6px}
+  .fatos svg{width:18px;height:18px}
+
+  /* campos */
+  label{display:block;font-weight:800;margin:14px 0 6px}
+  input[type=text],input[type=email],input[type=tel]{width:100%;font:inherit;font-weight:700;color:var(--tinta);background:var(--ceu-claro);border:var(--contorno);border-radius:14px;padding:14px 16px;font-size:1.05rem}
+  input:focus{outline:none;background:#fff;box-shadow:0 0 0 4px var(--azul)}
+  .erro{color:#B3261E;font-weight:800;min-height:1.4em;margin:10px 0 6px;font-size:.95rem}
+  .mini{font-size:.85rem;color:var(--tinta-suave);text-align:center;margin:12px 0 0}
+
+  /* telas que ensinam */
+  .ensina .selo{display:inline-block;background:var(--azul);color:#fff;font-weight:800;border:var(--contorno);border-radius:99px;padding:4px 14px;font-size:.9rem;margin-bottom:12px}
+  .ensina h2{margin-bottom:12px}
+  .ensina .bene-mini{float:right;width:92px;margin:-8px -6px 6px 10px}
+  .palmas{display:flex;justify-content:center;gap:14px;margin:18px 0 6px;clear:both}
+  .chip{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:2rem;color:#fff;padding:4px 20px;border:var(--contorno);border-radius:14px;box-shadow:4px 4px 0 var(--tinta);line-height:1.2;min-width:72px;text-align:center}
+  .c1{background:var(--coral)} .c2{background:var(--azul)} .c3{background:var(--pasto-escuro)} .c4{background:var(--sol-escuro)}
+  .chip-palma{animation:palma 2.4s ease-in-out infinite}
+  .chip-palma:nth-child(2){animation-delay:.6s}
+  .chip-palma:nth-child(3){animation-delay:1.2s}
+  @keyframes palma{0%,30%,100%{transform:none}10%{transform:scale(1.14) rotate(-3deg)}}
+  .legenda{text-align:center;font-weight:800;color:var(--tinta-suave);font-size:.95rem;margin:4px 0 16px}
+  .caixa{background:var(--sol-claro);border:3px dashed var(--tinta);border-radius:18px;padding:14px 16px;margin:16px 0;font-size:.98rem}
+  .caixa p:last-child{margin:0}
+  .conta{display:flex;align-items:center;gap:14px;margin:16px 0}
+  .conta .num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:3rem;line-height:1;color:var(--tinta);background:var(--pasto);border:var(--contorno);border-radius:18px;padding:6px 14px;flex:none}
+
+  /* carregando */
+  .carrega{text-align:center}
+  .carrega .bene{width:150px;margin:6px auto 10px;animation:pula 1s ease-in-out infinite}
+  @keyframes pula{0%,100%{transform:none}50%{transform:translateY(-10px)}}
+  .carrega ul{list-style:none;padding:0;margin:20px 0 0;text-align:left;display:grid;gap:10px}
+  .carrega li{display:flex;align-items:center;gap:12px;font-weight:800;opacity:.35;transition:opacity .3s}
+  .carrega li.ok{opacity:1}
+  .carrega li .v{flex:none;width:28px;height:28px;border:3px solid var(--tinta);border-radius:50%;background:#fff;display:grid;place-items:center}
+  .carrega li.ok .v{background:var(--pasto)}
+  .carrega li .v svg{width:16px;height:16px;opacity:0}
+  .carrega li.ok .v svg{opacity:1}
+
+  /* resultado */
+  .res-topo{text-align:center;margin:4px 0 22px}
+  .res-topo .selo{display:inline-block;background:var(--pasto);font-weight:800;border:var(--contorno);border-radius:99px;padding:4px 14px;font-size:.92rem;margin-bottom:10px}
+  .pilulas{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 0 0;padding:0;list-style:none}
+  .pilulas li{background:var(--papel);border:var(--contorno);border-radius:99px;padding:4px 14px;font-weight:800;font-size:.92rem}
+  .bloco{margin:0 0 20px}
+  .bloco h2{margin-bottom:10px}
+  .fase-cartao{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+  .degraus{display:flex;gap:6px;margin:14px 0 4px}
+  .degraus span{flex:1;height:12px;border:2.5px solid var(--tinta);border-radius:99px;background:#fff}
+  .degraus span.on{background:var(--sol)}
+  .degraus-nomes{display:flex;gap:6px;font-size:.72rem;font-weight:800;color:var(--tinta-suave);line-height:1.2}
+  .degraus-nomes span{flex:1;text-align:center}
+  .degraus-nomes span.aqui{color:var(--tinta)}
+  .comeca{display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding-top:14px;border-top:3px dotted var(--tinta)}
+  .comeca .n{flex:none;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.3rem;width:46px;height:46px;border:var(--contorno);border-radius:14px;background:var(--azul);color:#fff;display:grid;place-items:center}
+
+  /* experimente */
+  .teste-fig{width:150px;height:150px;margin:6px auto 8px;border:var(--contorno);border-radius:22px;background:var(--ceu-claro);display:grid;place-items:center;overflow:hidden}
+  .teste-fig img{width:84%;height:84%;object-fit:contain}
+  .vagas{display:flex;justify-content:center;gap:10px;margin:14px 0}
+  .vaga{min-width:78px;height:58px;border:3px dashed var(--tinta);border-radius:14px;display:grid;place-items:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.8rem;background:#fff}
+  .vaga.cheia{border-style:solid;color:#fff}
+  .pecas{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;min-height:66px}
+  .peca{appearance:none;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.8rem;color:#fff;border:var(--contorno);border-radius:14px;box-shadow:4px 4px 0 var(--tinta);padding:4px 20px;min-width:78px;cursor:pointer;line-height:1.2}
+  .peca.errou{animation:treme .3s}
+  @keyframes treme{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .muito-bem{text-align:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.6rem;color:var(--pasto-escuro);min-height:1.3em;margin:8px 0 0}
+
+  .dias{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+  .dia{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;background:var(--papel);border:var(--contorno);border-radius:18px;padding:10px 12px}
+  .dia img{width:56px;height:56px;object-fit:contain;background:var(--ceu-claro);border-radius:12px;border:2.5px solid var(--tinta)}
+  .dia .t{font-size:.8rem;font-weight:800;color:var(--tinta-suave);display:block}
+  .dia .w{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.25rem;line-height:1.15;display:block}
+  .dia .s{font-size:.9rem;color:var(--tinta-suave);display:block;line-height:1.35}
+
+  .estimulos{list-style:none;padding:0;margin:0;display:grid;gap:10px;counter-reset:e}
+  .estimulos li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+  .estimulos .ic{width:44px;height:44px;border:var(--contorno);border-radius:14px;display:grid;place-items:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.2rem;color:#fff}
+  .estimulos b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.15rem;line-height:1.2}
+  .estimulos span{font-size:.95rem;color:var(--tinta-suave);line-height:1.4}
+
+  .oferta-box{background:var(--papel);border:4px solid var(--tinta);border-radius:28px;box-shadow:7px 7px 0 var(--tinta);padding:24px 20px;position:relative}
+  .oferta-box .app-img{width:min(240px,70%);margin:0 auto 14px}
+  .oferta-box h2{text-align:center;margin-bottom:8px}
+  .oferta-box .apoio{text-align:center;color:var(--tinta-suave)}
+  .itens{list-style:none;padding:0;margin:16px 0;display:grid;gap:10px}
+  .itens li{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start;font-weight:700;line-height:1.35}
+  .itens li .ok{width:26px;height:26px;border:2.5px solid var(--tinta);border-radius:8px;background:var(--pasto);display:grid;place-items:center}
+  .itens li .ok svg{width:16px;height:16px}
+  .itens li small{font-weight:800;font-size:.8rem;background:var(--sol);border:2px solid var(--tinta);border-radius:99px;padding:1px 9px;white-space:nowrap}
+  .itens li.principal{font-size:1.05rem}
+  .itens li.principal small{background:var(--azul);color:#fff}
+  .itens li.titulo-bonus{display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.15rem;margin-top:6px}
+  .preco{text-align:center;margin:18px 0 0;font-family:'Baloo 2',sans-serif;font-weight:800;line-height:1}
+  .preco .rs{font-size:1.6rem;vertical-align:top;position:relative;top:10px}
+  .preco .v{font-size:4.6rem}
+  .preco-nota{text-align:center;font-weight:700;color:var(--tinta-suave);margin:6px 0 16px}
+  .seguro{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin:14px 0 0;font-size:.85rem;font-weight:700;color:var(--tinta-suave)}
+  .seguro span{display:flex;align-items:center;gap:5px}
+  .seguro svg{width:16px;height:16px}
+  .garantia{display:grid;grid-template-columns:76px 1fr;gap:14px;align-items:center}
+  .garantia svg{width:76px;height:76px}
+
+  details{background:var(--papel);border:var(--contorno);border-radius:16px;padding:12px 16px;margin-bottom:10px}
+  summary{font-weight:800;cursor:pointer}
+  details p{margin:10px 0 2px;color:var(--tinta-suave)}
+
+  .fixa{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--papel);border-top:var(--contorno);padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;justify-content:center;transform:translateY(110%);transition:transform .25s}
+  .fixa.ver{transform:none}
+  .fixa .p{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.4rem;line-height:1}
+  .fixa .p small{display:block;font-family:'Nunito',sans-serif;font-size:.75rem;color:var(--tinta-suave)}
+  .fixa .botao{font-size:1.1rem;padding:11px 18px;box-shadow:3px 3px 0 var(--tinta)}
+  .rodape{text-align:center;font-size:.8rem;color:var(--tinta-suave);margin-top:30px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="topo">
+  <div class="topo-in">
+    <button class="voltar" id="voltar" type="button" aria-label="Voltar para a pergunta anterior">Voltar</button>
+    <div class="barra oculta" id="barra" role="progressbar" aria-label="Progresso do teste" aria-valuemin="0" aria-valuemax="100"><i></i></div>
+    <img class="logo" src="/oferta/img/logo.webp" alt="Bené" width="64" height="52">
+  </div>
+</div>
+<main id="app" aria-live="polite"></main>
+
+<div class="fixa" id="fixa" aria-hidden="true">
+  <div class="p">R$ 37<small>pagamento único</small></div>
+  <button class="botao comprar" type="button" tabindex="-1">Começar o plano</button>
+</div>
+
+<script>
+(function () {
+  const C = window.BENE_CONFIG;
+  const app = document.getElementById("app");
+  const barra = document.getElementById("barra");
+  const voltar = document.getElementById("voltar");
+  const fixa = document.getElementById("fixa");
+  try { localStorage.setItem("bene_variante", "quiz"); } catch (e) {}
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
+  const BENE = '/oferta/img/bene.webp';
+
+  /* ---------- respostas ---------- */
+  const A = { quem: "", nome: "", idade: "", fase: "", dif: "", tela: "", tempo: "", fe: "", obj: "" };
+
+  // gênero e jeito de chamar a criança
+  const G = () => ({ filho: "o", filha: "a", neto: "o", neta: "a", aluno: "x" }[A.quem] || "o");
+  const rotulo = () => ({ filho: "seu filho", filha: "sua filha", neto: "seu neto", neta: "sua neta", aluno: "seu aluno" }[A.quem] || "seu filho");
+  const N = () => A.nome ? esc(A.nome) : rotulo();             // "Davi" ou "seu filho"
+  const NM = () => A.nome ? esc(A.nome) : cap(rotulo());       // começo de frase
+  const ele = () => G() === "a" ? "ela" : G() === "x" ? "ele(a)" : "ele";
+  const dele = () => G() === "a" ? "dela" : G() === "x" ? "dele(a)" : "dele";
+  const o = () => G() === "a" ? "a" : G() === "x" ? "o(a)" : "o";
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const idadeTxt = () => A.idade === "7" ? "7 anos ou mais" : A.idade + " anos";
+
+  /* ---------- fases e plano ---------- */
+  const FASES = {
+    nao:      { nome: "Descobrindo os sons", deg: 0 },
+    algumas:  { nome: "Descobrindo os sons", deg: 0 },
+    letras:   { nome: "Juntando os sons", deg: 1 },
+    silabas:  { nome: "Primeiras palavras", deg: 2 },
+    palavras: { nome: "Primeiras frases", deg: 3 }
+  };
+  const DEGRAUS = ["Sons", "Sílabas", "Palavras", "Frases"];
+  const PLANOS = {
+    0: [["ARCA",["AR","CA"],"arca","Letra A"],["BOLA",["BO","LA"],"bola","Letra B"],["CASA",["CA","SA"],"casa","Letra C"],["DADO",["DA","DO"],"dado","Letra D"],["FOGO",["FO","GO"],"fogo","Letra F"],["LUA",["LU","A"],"lua","Letra L"]],
+    1: [["BOLA",["BO","LA"],"bola","2 palmas"],["LUA",["LU","A"],"lua","2 palmas"],["PATO",["PA","TO"],"pato","2 palmas"],["CASA",["CA","SA"],"casa","2 palmas"],["PIPA",["PI","PA"],"pipa","2 palmas"],["UVA",["U","VA"],"uva","2 palmas"]],
+    2: [["BANANA",["BA","NA","NA"],"banana","3 palmas"],["SAPATO",["SA","PA","TO"],"sapato","3 palmas"],["JANELA",["JA","NE","LA"],"janela","3 palmas"],["PANELA",["PA","NE","LA"],"panela","3 palmas"],["CANETA",["CA","NE","TA"],"caneta","3 palmas"],["OVELHA",["O","VE","LHA"],"bene","3 palmas"]],
+    3: [["PIRULITO",["PI","RU","LI","TO"],"pirulito","4 palmas"],["ABACATE",["A","BA","CA","TE"],"abacate","4 palmas"],["BORBOLETA",["BOR","BO","LE","TA"],"borboleta","4 palmas"],["DEUS ME AMA.",null,"coracao","Primeira frase"],["A LUA BRILHA.",null,"lua","Frase"],["O SOL É DE DEUS.",null,"sol","Frase"]]
+  };
+  const COMECO = {
+    0: ["Alfabeto da Bené + Nível 1", "Uma letra por dia, sempre com uma palavra de 2 pedacinhos: A de ARCA, B de BOLA."],
+    1: ["Nível 1: palavras de 2 pedacinhos", "BOLA, LUA, PATO. Duas palmas, dois pedacinhos, uma palavra inteira."],
+    2: ["Nível 2: palavras de 3 pedacinhos", "BANANA, SAPATO, JANELA. Palavras maiores para ganhar segurança."],
+    3: ["Níveis 3 e 4: palavras grandes e frases", "BORBOLETA, PIRULITO e as primeiras frases, como \"Deus me ama.\""]
+  };
+  const fase = () => FASES[A.fase] || FASES.letras;
+
+  /* ---------- telas ---------- */
+  const PERGUNTAS = ["quem","nome","idade","fase","dif","tela","tempo","fe","obj"];
+  const ORDEM = ["abre","quem","nome","idade","fase","info1","dif","tela","info2","tempo","fe","obj","carrega","lead","resultado"];
+  let pos = 0;
+  const hist = [];
+
+  function progresso() {
+    const nome = ORDEM[pos];
+    const idx = ORDEM.indexOf(nome);
+    const ini = ORDEM.indexOf("quem"), fim = ORDEM.indexOf("lead");
+    const visivel = idx >= ini && idx <= fim;
+    barra.classList.toggle("oculta", !visivel);
+    const pct = visivel ? Math.round(((idx - ini + 1) / (fim - ini + 1)) * 100) : 0;
+    barra.querySelector("i").style.width = pct + "%";
+    barra.setAttribute("aria-valuenow", pct);
+    voltar.classList.toggle("ver", hist.length > 0 && !["carrega","resultado"].includes(nome));
+  }
+
+  function ir(i, empilhar = true) {
+    if (empilhar) hist.push(pos);
+    pos = i;
+    render();
+    window.scrollTo(0, 0);
+  }
+  const prox = () => ir(pos + 1);
+  voltar.addEventListener("click", () => {
+    let p = hist.pop();
+    while (p !== undefined && ORDEM[p] === "carrega") p = hist.pop();
+    if (p !== undefined) ir(p, false);
+  });
+
+  function pergunta(chave, titulo, apoio, ops) {
+    const html = `<section class="tela">
+      <div class="pergunta"><h2 id="q">${titulo}</h2>${apoio ? `<p>${apoio}</p>` : ""}</div>
+      <div class="opcoes" role="radiogroup" aria-labelledby="q">
+        ${ops.map(([v, t, s]) => `<button class="op${A[chave] === v ? " marcada" : ""}" type="button" role="radio" aria-checked="${A[chave] === v}" data-v="${v}"><span class="bolinha"></span><span>${t}${s ? `<small>${s}</small>` : ""}</span></button>`).join("")}
+      </div></section>`;
+    app.innerHTML = html;
+    app.querySelectorAll(".op").forEach(b => b.addEventListener("click", () => {
+      A[chave] = b.dataset.v;
+      app.querySelectorAll(".op").forEach(x => { x.classList.toggle("marcada", x === b); x.setAttribute("aria-checked", x === b); });
+      C.trackCustom("QuizResposta", { pergunta: chave, resposta: A[chave] });
+      setTimeout(prox, 260);
+    }));
+    const m = app.querySelector(".op.marcada") || app.querySelector(".op");
+    m && m.focus({ preventScroll: true });
+  }
+
+  const T = {
+    abre() {
+      app.innerHTML = `<section class="tela abre">
+        <img class="bene" src="${BENE}" alt="A ovelhinha Bené acenando" width="180" height="240">
+        <div class="cartao">
+          <h1>Seu filho está pronto para começar a ler?</h1>
+          <p class="sub">Responda 9 perguntas rápidas e receba um <b>plano de leitura de 7 dias</b>, feito para a idade e a fase do seu filho.</p>
+          <button class="botao largo" id="comecar" type="button">Começar o teste</button>
+          <ul class="fatos">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Leva 1 minuto</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>Gratuito</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 2"/></svg>Para crianças de 3 a 7 anos</li>
+          </ul>
+        </div></section>`;
+      document.getElementById("comecar").addEventListener("click", () => { C.trackCustom("QuizInicio"); prox(); });
+    },
+    quem() {
+      pergunta("quem", "Para quem é o plano de leitura?", "Assim a Bené já chama a criança do jeito certo.", [
+        ["filho", "Para o meu filho"], ["filha", "Para a minha filha"], ["neto", "Para o meu neto"], ["neta", "Para a minha neta"], ["aluno", "Para uma criança da minha turma"]
+      ]);
+    },
+    nome() {
+      app.innerHTML = `<section class="tela">
+        <div class="pergunta"><h2>Qual é o nome ${dele()}?</h2><p>Vamos colocar o nome no plano. Só o primeiro nome já basta.</p></div>
+        <form class="cartao" id="f-nome">
+          <label for="nome-crianca">Primeiro nome</label>
+          <input type="text" id="nome-crianca" maxlength="24" autocomplete="off" autocapitalize="words" value="${esc(A.nome)}" placeholder="Ex.: Davi">
+          <p class="erro" id="erro-nome" role="alert"></p>
+          <button class="botao largo" type="submit">Continuar</button>
+          <button class="link" type="button" id="pular">Prefiro não dizer</button>
+        </form></section>`;
+      const f = document.getElementById("f-nome"), i = document.getElementById("nome-crianca");
+      f.addEventListener("submit", e => {
+        e.preventDefault();
+        const v = i.value.trim().replace(/\s+/g, " ").split(" ")[0] || "";
+        if (v.length < 2) { document.getElementById("erro-nome").textContent = "Escreva o nome ou toque em \"Prefiro não dizer\"."; i.focus(); return; }
+        A.nome = cap(v.toLowerCase()); prox();
+      });
+      document.getElementById("pular").addEventListener("click", () => { A.nome = ""; prox(); });
+      setTimeout(() => i.focus(), 80);
+    },
+    idade() {
+      pergunta("idade", `Quantos anos ${N()} tem?`, "", [["3","3 anos"],["4","4 anos"],["5","5 anos"],["6","6 anos"],["7","7 anos ou mais"]]);
+    },
+    fase() {
+      pergunta("fase", `Hoje, o que ${N()} já consegue fazer?`, "Escolha a opção mais parecida. Não existe resposta errada.", [
+        ["nao", "Ainda não reconhece as letras"],
+        ["algumas", "Reconhece algumas letras", "Por exemplo, a letra do próprio nome"],
+        ["letras", "Conhece as letras, mas não junta os sons", "Sabe o B e o A, mas não lê BA"],
+        ["silabas", "Já junta sílabas", "Lê BO + LA = BOLA, devagarinho"],
+        ["palavras", "Já lê palavras simples sozinh" + o()]
+      ]);
+    },
+    info1() {
+      const msgs = {
+        nao: `Com ${idadeTxt()}, está tudo bem ainda não conhecer as letras. E tem uma boa notícia: <b>o caminho da leitura não começa decorando o alfabeto</b>. Começa quando a criança percebe que as palavras têm pedacinhos de som.`,
+        algumas: `${NM()} já começou! O próximo passo é <b>ligar cada letra a um som</b> e perceber que esses sons formam pedacinhos dentro das palavras.`,
+        letras: `Esse é o ponto em que mais crianças travam. <b>Conhecer as letras não é o mesmo que ler.</b> O que falta é juntar os sons em sílabas, e as sílabas em palavras. É exatamente esse passo que dá para treinar em casa.`,
+        silabas: `Ótimo sinal! Quem junta BO + LA já entendeu o segredo da leitura. Agora <b>é ganhar segurança e velocidade</b> com palavras de 3 e 4 pedacinhos.`,
+        palavras: `${NM()} já lê! A próxima conquista é <b>ler palavras grandes e as primeiras frases</b> sem travar, e com prazer.`
+      };
+      app.innerHTML = `<section class="tela ensina"><div class="cartao">
+        <span class="selo">Você sabia?</span>
+        <img class="bene-mini" src="${BENE}" alt="" width="92" height="122">
+        <h2>Ler é juntar pedacinhos de som</h2>
+        <p>${msgs[A.fase] || msgs.letras}</p>
+        <div class="palmas" aria-hidden="true"><span class="chip c1 chip-palma">BO</span><span class="chip c2 chip-palma">LA</span></div>
+        <p class="legenda">Uma palma para cada pedacinho: BO (palma) LA (palma)</p>
+        <p>Os especialistas chamam isso de <b>consciência fonológica</b>: perceber os sons que existem dentro das palavras. Ela pode ser treinada, e bater uma palma para cada sílaba é um dos jeitos mais simples de começar.</p>
+        <div class="caixa"><p>A Base Nacional Comum Curricular (BNCC) coloca a alfabetização como foco do 1º e do 2º ano do ensino fundamental, por volta dos 6 e 7 anos. Brincar com os sons antes disso deixa esse caminho bem mais leve.</p></div>
+        <button class="botao largo" type="button" id="seguir">Entendi, continuar</button>
+      </div></section>`;
+      document.getElementById("seguir").addEventListener("click", prox);
+    },
+    dif() {
+      pergunta("dif", "O que mais atrapalha hoje?", "Escolha o que mais pesa na sua casa.", [
+        ["paciencia", `${NM()} perde o interesse rápido`, "Começa animad" + o() + " e logo quer parar"],
+        ["comecar", "Eu não sei por onde começar", "Nem qual é o jeito certo de ensinar"],
+        ["tempo", "Falta tempo na rotina"],
+        ["confunde", `${cap(ele())} confunde as letras e os sons`],
+        ["escola", "A escola vai devagar e eu quero ajudar em casa"]
+      ]);
+    },
+    tela() {
+      pergunta("tela", `Quanto tempo ${N()} passa no celular, tablet ou TV por dia?`, "Contando vídeos, desenhos e joguinhos.", [
+        ["1", "Menos de 1 hora"], ["2", "De 1 a 2 horas"], ["3", "De 2 a 4 horas"], ["4", "Mais de 4 horas"]
+      ]);
+    },
+    info2() {
+      const media = { "1": 45, "2": 90, "3": 180, "4": 270 }[A.tela] || 90;
+      const pct = Math.round(10 / media * 100);
+      const conta = A.tela === "1"
+        ? `<p>${NM()} já passa pouco tempo na tela, ótimo! Então os 10 minutinhos do plano cabem fácil e fazem esse tempo valer ainda mais.</p>`
+        : `<div class="conta"><span class="num">${pct}%</span><p style="margin:0">É só isso do tempo que ${N()} já passa na tela por dia. <b>10 minutinhos</b> de atividade já mudam o dia.</p></div>`;
+      app.innerHTML = `<section class="tela ensina"><div class="cartao">
+        <span class="selo">Boa notícia</span>
+        <h2>A tela também pode ensinar</h2>
+        <p>Tirar o celular de uma vez quase nunca funciona, e nem precisa. O problema não é a tela: <b>é ficar só assistindo</b>.</p>
+        <p>Quando a criança toca, cobre a letra com o dedo, junta as sílabas e responde, ela está participando. O mesmo aparelho que distrai vira uma ferramenta de aprender.</p>
+        ${conta}
+        <div class="caixa"><p>A dica é fazer junto: você do lado, falando a palavra em voz alta e comemorando cada acerto. Esse tempinho com você é o que mais motiva uma criança.</p></div>
+        <button class="botao largo" type="button" id="seguir">Continuar</button>
+      </div></section>`;
+      document.getElementById("seguir").addEventListener("click", prox);
+    },
+    tempo() {
+      pergunta("tempo", `Quanto tempo você consegue sentar junto com ${N()} por dia?`, "Seja sincera. O plano se ajusta a você.", [
+        ["5", "Uns 5 minutos"], ["10", "Uns 10 minutos"], ["15", "Uns 15 minutos"], ["20", "20 minutos ou mais"]
+      ]);
+    },
+    fe() {
+      pergunta("fe", "E a fé, como ela está na rotina das crianças?", "", [
+        ["junto", "Oramos e lemos a Bíblia juntos"],
+        ["igreja", "Vamos à igreja, mas em casa falamos pouco"],
+        ["comecar", "Quero começar a ensinar sobre Deus em casa"],
+        ["leitura", "Prefiro focar só na leitura"]
+      ]);
+    },
+    obj() {
+      pergunta("obj", "O que você mais quer ver nos próximos meses?", "", [
+        ["ler", `${NM()} lendo as primeiras palavras sozinh${o()}`],
+        ["escola", `${NM()} chegando na escola mais preparad${o()}`],
+        ["tela", "Trocar tempo de vídeo por algo que ensine"],
+        ["fe", "Momentos de fé e aprendizado juntos"]
+      ]);
+    },
+    carrega() {
+      const passos = ["Vendo a fase de leitura", "Escolhendo as primeiras palavras", `Ajustando aos ${A.tempo === "20" ? "20" : A.tempo || "10"} minutos de vocês`, "Separando o versículo da semana"];
+      app.innerHTML = `<section class="tela carrega"><div class="cartao">
+        <img class="bene" src="${BENE}" alt="" width="150" height="200">
+        <h2>Montando o plano de ${N()}…</h2>
+        <ul>${passos.map(p => `<li><span class="v">${CHECK}</span>${p}</li>`).join("")}</ul>
+      </div></section>`;
+      const lis = app.querySelectorAll("li");
+      lis.forEach((li, i) => setTimeout(() => li.classList.add("ok"), 650 * (i + 1)));
+      C.trackCustom("QuizCompleto", { fase: A.fase, idade: A.idade });
+      setTimeout(() => { if (ORDEM[pos] === "carrega") prox(); }, 650 * passos.length + 700);
+    },
+    lead() {
+      const salvo = (() => { try { return JSON.parse(localStorage.getItem("bene_quiz_lead") || "{}"); } catch (e) { return {}; } })();
+      app.innerHTML = `<section class="tela"><div class="pergunta"><h2>O plano de ${N()} está pronto!</h2><p>Deixe seu contato para ver o plano. Ele fica salvo neste aparelho e você pode voltar quando quiser.</p></div>
+        <form class="cartao" id="f-lead" novalidate>
+          <label for="l-nome">Seu nome</label>
+          <input type="text" id="l-nome" autocomplete="name" required value="${esc(salvo.nome || "")}">
+          <label for="l-email">Seu melhor e-mail</label>
+          <input type="email" id="l-email" autocomplete="email" inputmode="email" required value="${esc(salvo.email || "")}">
+          <label for="l-whats">WhatsApp</label>
+          <input type="tel" id="l-whats" autocomplete="tel" inputmode="tel" placeholder="(00) 00000-0000" required value="${esc(salvo.whats || "")}">
+          <p class="erro" id="erro-lead" role="alert"></p>
+          <button class="botao largo verde" type="submit" id="ver-plano">Ver o plano de ${N()}</button>
+          <p class="mini">Usamos seus dados só para falar com você sobre a Bené. Nada de spam.</p>
+        </form></section>`;
+      const w = document.getElementById("l-whats");
+      w.addEventListener("input", () => {
+        const d = w.value.replace(/\D/g, "").slice(0, 11);
+        w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d;
+      });
+      document.getElementById("f-lead").addEventListener("submit", async e => {
+        e.preventDefault();
+        const er = document.getElementById("erro-lead");
+        const nome = document.getElementById("l-nome").value.trim();
+        const email = document.getElementById("l-email").value.trim();
+        const whats = w.value.replace(/\D/g, "");
+        if (nome.length < 2) { er.textContent = "Escreva seu nome para continuar."; document.getElementById("l-nome").focus(); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { er.textContent = "Confira o e-mail: é com ele que você entra no aplicativo."; document.getElementById("l-email").focus(); return; }
+        if (whats.length < 10) { er.textContent = "Digite o WhatsApp com DDD."; w.focus(); return; }
+        er.textContent = "";
+        const b = document.getElementById("ver-plano"); b.disabled = true; b.textContent = "Abrindo o plano…";
+        const lead = { nome, email, whats };
+        try { localStorage.setItem("bene_quiz_lead", JSON.stringify(lead)); localStorage.setItem("bene_quiz", JSON.stringify(A)); } catch (err) {}
+        C.track("Lead", { content_name: "quiz" });
+        await C.salvarLead({ nome, email, whatsapp: whats, origem: "quiz", variante: "quiz", dados: { respostas: A, utm: C.utm, pagina: location.pathname } });
+        prox();
+      });
+    },
+    resultado() { resultado(); }
+  };
+
+  function render() {
+    document.body.classList.toggle("resultado", ORDEM[pos] === "resultado");
+    fixa.classList.remove("ver"); fixa.setAttribute("aria-hidden", "true");
+    progresso();
+    T[ORDEM[pos]]();
+  }
+
+  /* ---------- resultado ---------- */
+  function resultado() {
+    const f = fase(), d = f.deg;
+    const plano = PLANOS[d];
+    const min = A.tempo === "5" ? 5 : A.tempo === "15" ? 15 : A.tempo === "20" ? 20 : 10;
+    const diag = {
+      nao: `${NM()} está na fase de <b>descobrir os sons</b>. Com ${idadeTxt()}, o objetivo não é cobrar leitura: é brincar com os pedacinhos das palavras até ${ele()} perceber que cada letra tem um som.`,
+      algumas: `${NM()} está na fase de <b>descobrir os sons</b>. ${cap(ele())} já conhece algumas letras, e agora vai ligar cada uma a um som, sempre dentro de uma palavra que tem figura.`,
+      letras: `${NM()} está na fase de <b>juntar os sons</b>. As letras ${ele()} já conhece. O que vai destravar a leitura é perceber os pedacinhos (as sílabas) e juntar dois deles para formar uma palavra.`,
+      silabas: `${NM()} está nas <b>primeiras palavras</b>. ${cap(ele())} já junta sílabas, então o plano parte para palavras de 3 pedacinhos, para ganhar segurança e ler sem soletrar.`,
+      palavras: `${NM()} está nas <b>primeiras frases</b>. ${cap(ele())} já lê palavras simples, então o plano traz palavras grandes e frases curtas para ler com fluência.`
+    }[A.fase] || "";
+    const nota3 = A.idade === "3" ? `<p>Com 3 anos, vá no ritmo ${dele()}: se ${ele()} quiser parar, pare e comemore. O que conta agora é gostar.</p>` : "";
+    const destrava = {
+      paciencia: [`Atividades curtas, com começo, meio e fim`, `Cada atividade dura poucos minutos e termina com um "Muito bem!". A criança sente que conseguiu antes de cansar, e quer a próxima.`],
+      comecar: [`Você não precisa saber ensinar`, `O plano diz o que fazer em cada dia, na ordem certa. Você só senta do lado, fala a palavra em voz alta e comemora.`],
+      tempo: [`${min} minutos, no celular, em qualquer lugar`, `Dá para fazer no sofá, na sala de espera ou antes de dormir. Sem material, sem preparar nada.`],
+      confunde: [`Mão, som e figura juntos`, `Cobrir a letra com o dedo, bater palma na sílaba e ver a figura ao mesmo tempo ajuda a fixar qual som é de qual letra.`],
+      escola: [`O mesmo caminho da escola, em casa`, `Letra, sílaba, palavra e frase, nessa ordem. Um reforço que acompanha o que a escola ensina, no ritmo ${dele()}.`]
+    }[A.dif] || ["", ""];
+    const ajusteTempo = {
+      5: `Com 5 minutos já dá: faça Ver, Bater palma e Traçar. Montar e Cantar ficam para o fim de semana.`,
+      10: `Com 10 minutos vocês fazem a atividade do dia inteira, do Ouvir ao Agradecer.`,
+      15: `Com 15 minutos dá para fazer a atividade do dia e repetir a do dia anterior.`,
+      20: `Com 20 minutos ou mais, faça a atividade do dia e um bônus: versículo para colorir ou quebra-cabeça.`
+    }[min];
+    const agradecer = A.fe === "leitura"
+      ? `Termina com um versículo curto. Se preferir, pode pular.`
+      : `Termina com um versículo curto e uma oração de uma frase, juntos.`;
+    const promessa = {
+      ler: `para ${N()} ler as primeiras palavras sozinh${o()}`,
+      escola: `para ${N()} chegar na escola mais preparad${o()}`,
+      tela: `para trocar tempo de vídeo por aprendizado`,
+      fe: `para ter momentos de fé e aprendizado com ${N()}`
+    }[A.obj] || `para ${N()} começar a ler`;
+
+    const w1 = plano[0];
+    const dias = plano.map((p, i) => {
+      const [w, s, img, tag] = p;
+      const txt = s ? `${s.join(" + ")}: ${s.length} palmas, cobrir com o dedo e montar.` : `Ler juntos, bater uma palma por palavra e cobrir com o dedo.`;
+      return `<li class="dia"><img src="/img/p/${img}.webp" alt="" width="56" height="56" loading="lazy"><span><span class="t">Dia ${i + 1}${d === 0 ? ": " + tag : ""}</span><span class="w">${w}</span><span class="s">${txt}</span></span></li>`;
+    }).join("") + `<li class="dia"><img src="/img/p/biblia.webp" alt="" width="56" height="56" loading="lazy"><span><span class="t">Dia 7</span><span class="w">Revisão + versículo</span><span class="s">Repetir a palavra preferida da semana e colorir "Deus é amor."</span></span></li>`;
+
+    const EST = [
+      ["Ouvir", "c2", `Você fala a palavra devagar: ${w1[1] ? w1[1].join("… ") : "BO… LA"}. ${cap(ele())} escuta os pedacinhos.`],
+      ["Ver", "c3", "A figura e a palavra escrita aparecem juntas na tela."],
+      ["Bater palma", "c1", "Uma palma para cada sílaba. O som vira ritmo e fica na memória."],
+      ["Traçar", "c4", "Cobrir a palavra com o dedo na tela, ou com o lápis no papel."],
+      ["Montar", "c2", "Juntar as sílabas na ordem certa, no quebra-cabeça."],
+      ["Cantar", "c3", "Cantar uma música da Bené. As letras estão no aplicativo."],
+      ["Agradecer", "c1", agradecer]
+    ];
+
+    app.innerHTML = `<section class="tela">
+      <div class="res-topo">
+        <span class="selo">Plano pronto</span>
+        <h1>Plano Fono-Fé de ${N()}</h1>
+        <ul class="pilulas"><li>${idadeTxt()}</li><li>Fase: ${f.nome}</li><li>${min} min por dia</li></ul>
+      </div>
+
+      <div class="cartao bloco">
+        <h2>Onde ${N()} está</h2>
+        <div class="degraus" aria-hidden="true">${DEGRAUS.map((_, i) => `<span class="${i <= d ? "on" : ""}"></span>`).join("")}</div>
+        <div class="degraus-nomes" aria-hidden="true">${DEGRAUS.map((n, i) => `<span class="${i === d ? "aqui" : ""}">${n}</span>`).join("")}</div>
+        <p style="margin-top:14px">${diag}</p>${nota3}
+        <div class="comeca"><span class="n">${d === 3 ? "3" : d === 0 ? "A" : d}</span><div><h3>Comece por: ${COMECO[d][0]}</h3><p style="margin:4px 0 0">${COMECO[d][1]}</p></div></div>
+      </div>
+
+      <div class="cartao bloco">
+        <h2>O que vai ajudar ${N()}</h2>
+        <h3 style="margin-bottom:6px">${destrava[0]}</h3>
+        <p>${destrava[1]}</p>
+        <div class="caixa"><p>${ajusteTempo}</p></div>
+      </div>
+
+      <div class="cartao bloco" id="experimente">
+        <h2>Experimente o Dia 1 agora</h2>
+        <p>Mostre para ${N()}: toque nos pedacinhos na ordem certa para montar a palavra.</p>
+        <div class="teste-fig"><img src="/img/p/${w1[2]}.webp" alt="Figura: ${w1[0].toLowerCase()}" width="126" height="126"></div>
+        <div class="vagas" id="vagas"></div>
+        <div class="pecas" id="pecas"></div>
+        <p class="muito-bem" id="muito-bem" role="status"></p>
+      </div>
+
+      <div class="bloco">
+        <h2 style="margin-bottom:6px">Os primeiros 7 dias</h2>
+        <p>Uma atividade por dia, ${min} minutinhos, sempre com os 7 estímulos.</p>
+        <ul class="dias">${dias}</ul>
+      </div>
+
+      <div class="cartao bloco">
+        <h2>Os 7 estímulos do Método Fono-Fé</h2>
+        <p>Em cada atividade, ${N()} aprende a mesma palavra de sete jeitos. Quanto mais sentidos juntos, mais fácil de lembrar.</p>
+        <ul class="estimulos">${EST.map(([t, c, s], i) => `<li><span class="ic ${c}">${i + 1}</span><span><b>${t}</b><span>${s}</span></span></li>`).join("")}</ul>
+      </div>
+
+      <div class="oferta-box bloco" id="oferta">
+        <img class="app-img" src="/oferta/img/hero_app.webp" alt="O aplicativo da Bené aberto no celular" width="240" height="240" loading="lazy">
+        <h2>O plano de ${N()} já está pronto no aplicativo da Bené</h2>
+        <p class="apoio">Todas as palavras, os níveis e os 7 estímulos, prontos ${promessa}.</p>
+        <ul class="itens">
+          <li class="principal"><span class="ok">${CHECK}</span><span>Aplicativo da Bené: 4 níveis e 120 atividades, do primeiro som às primeiras frases</span><small>principal</small></li>
+          <li><span class="ok">${CHECK}</span><span>Marca o que ${N()} já fez e mostra a próxima atividade</span><small>incluso</small></li>
+          <li><span class="ok">${CHECK}</span><span>Funciona no celular, no tablet e no computador</span><small>incluso</small></li>
+          <li class="titulo-bonus">E 5 bônus</li>
+          <li><span class="ok">${CHECK}</span><span>Kit completo em PDF para imprimir, 127 páginas</span><small>bônus</small></li>
+          <li><span class="ok">${CHECK}</span><span>Alfabeto da Bené, de A a Z para cobrir</span><small>bônus</small></li>
+          <li><span class="ok">${CHECK}</span><span>12 versículos para colorir</span><small>bônus</small></li>
+          <li><span class="ok">${CHECK}</span><span>Quebra-cabeça de sílabas</span><small>bônus</small></li>
+          <li><span class="ok">${CHECK}</span><span>Cantando com a Bené: as letras das músicas</span><small>bônus</small></li>
+        </ul>
+        <p class="preco"><span class="rs">R$</span><span class="v">37</span></p>
+        <p class="preco-nota">Pagamento único. Não é assinatura. Acesso na hora e para sempre.</p>
+        <button class="botao largo comprar" type="button">Começar o plano de ${N()}</button>
+        <p class="erro" id="erro-pag" role="alert" style="text-align:center"></p>
+        <div class="seguro">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pagamento seguro pelo Stripe</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>7 dias de garantia</span>
+        </div>
+      </div>
+
+      <div class="cartao bloco garantia">
+        <svg viewBox="0 0 130 130" aria-hidden="true"><circle cx="65" cy="65" r="60" fill="#FFC94A" stroke="#4A3426" stroke-width="4"/><circle cx="65" cy="65" r="46" fill="#fff" stroke="#4A3426" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/><text x="65" y="66" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="40" fill="#4A3426">7</text><text x="65" y="88" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="14" fill="#4A3426">dias</text></svg>
+        <div><h3>Teste por 7 dias</h3><p style="margin:4px 0 0">Faça a primeira semana do plano com ${N()}. Se não for para vocês, peça o reembolso em até 7 dias e devolvemos todo o valor.</p></div>
+      </div>
+
+      <div class="bloco">
+        <h2 style="margin-bottom:12px">Dúvidas</h2>
+        <details><summary>É assinatura?</summary><p>Não. Você paga R$ 37 uma vez só e o acesso é seu para sempre, com todas as atividades e os bônus.</p></details>
+        <details><summary>Como recebo depois de pagar?</summary><p>Logo depois do pagamento você recebe o link do aplicativo. É só abrir, colocar o mesmo e-mail e começar o Dia 1.</p></details>
+        <details><summary>Preciso imprimir alguma coisa?</summary><p>Não. Tudo funciona na tela, com o dedo. O kit em PDF é um bônus para quando você quiser trocar a tela pelo papel e lápis.</p></details>
+        <details><summary>Serve para mais de uma criança?</summary><p>Sim. Pode usar com seus filhos e imprimir para a turma ou o ministério infantil. Só não é permitido revender ou compartilhar o acesso.</p></details>
+        <details><summary>Precisa baixar na loja de aplicativos?</summary><p>Não. Ele abre por um link e pode ser instalado direto na tela inicial do celular.</p></details>
+      </div>
+
+      <div style="text-align:center">
+        <button class="botao largo comprar" type="button">Quero começar hoje</button>
+        <button class="link" type="button" id="refazer">Refazer o teste</button>
+      </div>
+      <p class="rodape">Bené. Este site não faz parte do Facebook ou da Meta. Cada criança aprende no seu tempo.</p>
+    </section>`;
+
+    montarTeste(w1);
+    C.track("ViewContent", { content_name: "plano-quiz", value: C.preco, currency: "BRL" });
+
+    app.querySelectorAll(".comprar").forEach(b => b.addEventListener("click", pagar));
+    document.getElementById("refazer").addEventListener("click", () => {
+      try { localStorage.removeItem("bene_quiz"); } catch (e) {}
+      Object.keys(A).forEach(k => A[k] = ""); hist.length = 0; ir(0, false);
+    });
+
+    // barra fixa: aparece depois do topo e some quando a oferta está na tela
+    const ofertaEl = document.getElementById("oferta");
+    let passou = false, naOferta = false;
+    const upd = () => { const v = passou && !naOferta; fixa.classList.toggle("ver", v); fixa.setAttribute("aria-hidden", v ? "false" : "true"); fixa.querySelector("button").tabIndex = v ? 0 : -1; };
+    const onScroll = () => { if (ORDEM[pos] !== "resultado") return; passou = window.scrollY > 500; upd(); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { naOferta = e.isIntersecting; upd(); }).observe(ofertaEl);
+  }
+
+  function montarTeste(p) {
+    const silabas = p[1] || ["DEUS", "ME", "AMA"];
+    const cores = ["c1", "c2", "c3", "c4"];
+    const vagas = document.getElementById("vagas"), pecas = document.getElementById("pecas"), ok = document.getElementById("muito-bem");
+    vagas.innerHTML = silabas.map((_, i) => `<span class="vaga" data-i="${i}" aria-label="Espaço ${i + 1}"></span>`).join("");
+    let ordem = silabas.map((s, i) => ({ s, i }));
+    do { ordem.sort(() => Math.random() - .5); } while (ordem.length > 1 && ordem.every((x, k) => x.i === k));
+    pecas.innerHTML = ordem.map(x => `<button class="peca ${cores[x.i % 4]}" type="button" data-i="${x.i}">${x.s}</button>`).join("");
+    let prox = 0;
+    pecas.querySelectorAll(".peca").forEach(b => b.addEventListener("click", () => {
+      const i = +b.dataset.i;
+      if (i !== prox) { b.classList.remove("errou"); void b.offsetWidth; b.classList.add("errou"); ok.textContent = "Quase! Qual vem primeiro?"; return; }
+      const v = vagas.querySelector(`[data-i="${i}"]`);
+      v.textContent = silabas[i]; v.classList.add("cheia", cores[i % 4]);
+      b.remove(); prox++;
+      ok.textContent = "";
+      if (prox === silabas.length) {
+        ok.textContent = `Muito bem! ${p[0]}!`;
+        C.trackCustom("QuizDemoFeita");
+      }
+    }));
+  }
+
+  async function pagar(e) {
+    const btns = app.querySelectorAll(".comprar");
+    const er = document.getElementById("erro-pag");
+    let lead = {};
+    try { lead = JSON.parse(localStorage.getItem("bene_quiz_lead") || "{}"); } catch (err) {}
+    C.track("InitiateCheckout", { value: C.preco, currency: "BRL", content_name: "quiz" });
+    btns.forEach(b => { b.disabled = true; b.dataset.t = b.textContent; b.textContent = "Abrindo o pagamento…"; });
+    fixa.querySelector("button").disabled = true;
+    try {
+      await C.irParaPagamento({ nome: lead.nome, email: lead.email, whats: lead.whats, variante: "quiz", utm: C.utm });
+    } catch (err) {
+      btns.forEach(b => { b.disabled = false; b.textContent = b.dataset.t; });
+      fixa.querySelector("button").disabled = false;
+      if (er) er.textContent = "Não conseguimos abrir o pagamento. Tente de novo em alguns segundos.";
+    }
+  }
+  fixa.querySelector("button").addEventListener("click", pagar);
+
+  // quem já fez o teste volta direto para o plano
+  try {
+    const salvo = JSON.parse(localStorage.getItem("bene_quiz") || "null");
+    const temLead = !!localStorage.getItem("bene_quiz_lead");
+    if (salvo && salvo.fase && temLead && !new URLSearchParams(location.search).has("refazer")) {
+      Object.assign(A, salvo); pos = ORDEM.indexOf("resultado");
+    }
+  } catch (e) {}
+  render();
+})();
+</script>
+</body>
+</html>

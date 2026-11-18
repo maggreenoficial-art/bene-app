@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Grafismo Fonético da Bené: 120 atividades para ler com fé</title>
-<meta name="description" content="Kit para imprimir com 120 atividades de grafismo fonético, palavras e frases com a ovelhinha Bené, mais 4 bônus. Acesso imediato por R$ 37.">
-<meta property="og:title" content="Aplicativo Grafismo Fonético da Bené">
-<meta property="og:description" content="Seu filho lendo as primeiras palavras com 10 minutinhos por dia. Aplicativo com 120 atividades, kit em PDF e 4 bônus por R$ 37.">
+<title>Aplicativo da Bené: Método Fono-Fé para seu filho ler com fé</title>
+<meta name="description" content="Aplicativo com o Método Fono-Fé: 120 atividades com a ovelhinha Bené para seu filho ler as primeiras palavras em 10 minutinhos por dia. Kit em PDF e mais 4 bônus. R$ 37, pagamento único.">
+<meta property="og:title" content="Aplicativo da Bené: Método Fono-Fé">
+<meta property="og:description" content="Seu filho lendo as primeiras palavras com 10 minutinhos por dia. Aplicativo com o Método Fono-Fé, 120 atividades e 5 bônus por R$ 37.">
 <meta property="og:image" content="img/og.jpg">
 <meta name="theme-color" content="#7EC8F2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
 <style>
   :root{
     --ceu:#7EC8F2; --ceu-claro:#EAF6FE; --ceu-fundo:#F4FAFF;
@@ -95,6 +96,14 @@
   .silabas{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:22px 0 8px}
   .chip{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:2.1rem;color:#fff;padding:6px 22px;border:var(--contorno);border-radius:var(--r-sm);box-shadow:4px 4px 0 var(--tinta);line-height:1.2}
   .chip.c1{background:var(--coral)} .chip.c2{background:var(--azul)} .chip.c3{background:var(--pasto-escuro)} .chip.c4{background:var(--sol-escuro)}
+  .estimulos{list-style:none;padding:0;margin:30px 0 0;display:grid;gap:14px}
+  .estimulos li{display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:start;background:var(--papel);border:var(--contorno);border-radius:var(--r-md);padding:16px}
+  .estimulos .ic{width:52px;height:52px;border:var(--contorno);border-radius:var(--r-sm);display:grid;place-items:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.5rem;color:#fff}
+  .estimulos h3{margin:2px 0 4px}
+  .estimulos p{margin:0;color:var(--tinta-suave);font-size:1rem;line-height:1.45}
+  .ic.c1{background:var(--coral)} .ic.c2{background:var(--azul)} .ic.c3{background:var(--pasto-escuro)} .ic.c4{background:var(--sol-escuro)}
+  @media (min-width:760px){.estimulos{grid-template-columns:1fr 1fr}.estimulos li:last-child{grid-column:1/-1}}
+  .principal .tela-app{max-width:220px;margin:0 auto}
   .tres{display:grid;gap:18px;margin-top:30px}
   .tres > div{background:var(--papel);border:var(--contorno);border-radius:var(--r-md);padding:22px}
   .tres svg{width:100%;height:46px;margin-bottom:10px}
@@ -216,7 +225,7 @@
     <div class="hero-grade">
       <div>
         <h1 id="titulo">Seu filho lendo as primeiras palavras com 10 minutinhos por dia</h1>
-        <p class="sub">O aplicativo da Bené junta traços, sons e histórias da Bíblia em 120 atividades para fazer na tela, com o dedo, ou imprimir. Aplicativo, kit em PDF e 4 bônus por <b>R$ 37</b>.</p>
+        <p class="sub">O aplicativo da Bené ensina com o <b>Método Fono-Fé</b>: em cada atividade a criança ouve, vê, bate palma, traça, monta, canta e agradece. São 120 atividades com palavras da Bíblia, e o kit para imprimir vem de bônus. Tudo por <b>R$ 37</b>, pagamento único.</p>
         <button class="botao abrir-checkout" type="button">Quero o app da Bené</button>
         <div class="seguro">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pagamento seguro</span>
@@ -252,41 +261,34 @@
 <section aria-labelledby="oque">
   <div class="wrap estreito">
     <div class="titulo-sec">
-      <h2 id="oque">O que é o grafismo fonético</h2>
-      <p>É aprender a ler unindo três coisas: o traço, o som de cada sílaba e a palavra inteira. A criança bate palmas nas sílabas e cobre a palavra, com o dedo na tela ou com o lápis no papel.</p>
+      <h2 id="oque">Método Fono-Fé: 7 estímulos em cada palavra</h2>
+      <p>Para ler, a criança precisa perceber que as palavras são feitas de pedacinhos de som, as sílabas, e ligar cada som às letras. Isso se chama consciência fonológica e pode ser treinado em casa. No Método Fono-Fé, a mesma palavra é aprendida de 7 jeitos, e quanto mais sentidos juntos, mais fácil de lembrar.</p>
     </div>
     <div class="silabas" aria-label="Exemplo: a palavra BOLA separada em sílabas">
       <span class="chip c1">BO</span><span class="chip c2">LA</span>
     </div>
-    <div class="tres">
-      <div>
-        <svg viewBox="0 0 240 46" aria-hidden="true"><path d="M6 23 C 26 3, 46 43, 66 23 S 106 3, 126 23 S 166 43, 186 23 S 226 3, 234 23" fill="none" stroke="#4A3426" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 10"/></svg>
-        <h3>Traçar</h3>
-        <p>Cobrir as letras pontilhadas treina a mão e prepara a escrita.</p>
-      </div>
-      <div>
-        <svg viewBox="0 0 240 46" aria-hidden="true"><rect x="40" y="6" width="70" height="34" rx="10" fill="#F26B6B" stroke="#4A3426" stroke-width="3"/><rect x="130" y="6" width="70" height="34" rx="10" fill="#5BA8E8" stroke="#4A3426" stroke-width="3"/></svg>
-        <h3>Ouvir</h3>
-        <p>Uma palma para cada sílaba: o som vira ritmo e fica na memória.</p>
-      </div>
-      <div>
-        <svg viewBox="0 0 240 46" aria-hidden="true"><text x="120" y="38" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="40" fill="none" stroke="#4A3426" stroke-width="2" stroke-dasharray="3 3">BOLA</text></svg>
-        <h3>Ler e escrever</h3>
-        <p>A criança cobre a palavra inteira e, no papel, escreve sozinha.</p>
-      </div>
-    </div>
+    <ol class="estimulos">
+      <li><span class="ic c2">1</span><div><h3>Ouvir</h3><p>Você fala a palavra devagar, BO… LA, e a criança escuta os pedacinhos de som.</p></div></li>
+      <li><span class="ic c3">2</span><div><h3>Ver</h3><p>A figura e a palavra escrita aparecem juntas. A criança liga o desenho à palavra.</p></div></li>
+      <li><span class="ic c1">3</span><div><h3>Bater palma</h3><p>Uma palma para cada sílaba. O som vira ritmo e fica na memória.</p></div></li>
+      <li><span class="ic c4">4</span><div><h3>Traçar</h3><p>Cobrir a palavra com o dedo na tela, ou com o lápis no papel. Treina a mão para escrever.</p></div></li>
+      <li><span class="ic c2">5</span><div><h3>Montar</h3><p>Juntar as sílabas na ordem certa no quebra-cabeça. É aqui que a leitura acontece.</p></div></li>
+      <li><span class="ic c3">6</span><div><h3>Cantar</h3><p>Cantar uma música da Bené. As letras estão no aplicativo para cantar em família.</p></div></li>
+      <li><span class="ic c1">7</span><div><h3>Agradecer</h3><p>Cada atividade termina com um versículo curto e uma oração de uma frase, juntos.</p></div></li>
+    </ol>
+    <p style="margin:22px 0 0">O caminho é o mesmo da escola: som, sílaba, palavra e frase. A BNCC coloca a alfabetização como foco do 1º e do 2º ano do ensino fundamental; com a Bené, seu filho chega lá brincando.</p>
   </div>
 </section>
 
 <section class="entrega" aria-labelledby="recebe">
   <div class="wrap">
-    <div class="titulo-sec"><h2 id="recebe">Veja o que você recebe</h2><p>O aplicativo para fazer na tela e os mesmos materiais em PDF, para imprimir quantas vezes quiser.</p></div>
+    <div class="titulo-sec"><h2 id="recebe">Veja o que você recebe</h2><p>O produto principal é o aplicativo, para fazer na tela com o dedo. O kit em PDF e os outros materiais vêm de bônus.</p></div>
     <div class="principal">
-      <img src="img/kit_mockup.webp" alt="Kit Grafismo Fonético da Bené" width="560" height="500" loading="lazy">
+      <img class="tela-app" src="img/tela_ativ.webp" alt="Atividade do aplicativo: a palavra PIPA para cobrir com o dedo" width="324" height="624" loading="lazy">
       <div>
-        <p class="qtd">120 atividades no aplicativo e em 127 páginas de PDF</p>
-        <h3 style="font-size:1.8rem">Aplicativo Grafismo Fonético da Bené</h3>
-        <p style="margin-top:8px">Um nível de cada vez, do mais fácil ao mais completo. Em cada atividade a criança vê a figura, toca nas sílabas e cobre a palavra com o dedo. O aplicativo marca o que já foi feito e mostra a próxima.</p>
+        <p class="qtd">Produto principal: 4 níveis e 120 atividades</p>
+        <h3 style="font-size:1.8rem">Aplicativo da Bené com o Método Fono-Fé</h3>
+        <p style="margin-top:8px">Um nível de cada vez, do mais fácil ao mais completo. Em cada atividade a criança vê a figura, bate palma nas sílabas, cobre a palavra com o dedo e monta as sílabas na ordem. O aplicativo marca o que já foi feito e mostra a próxima.</p>
         <ul class="niveis">
           <li><span class="n">1</span><span>30 palavras de 2 sílabas: bola, arca, sino, maçã</span></li>
           <li><span class="n">2</span><span>30 palavras de 3 sílabas: Bíblia, coração, escova</span></li>
@@ -297,8 +299,9 @@
       </div>
     </div>
 
-    <h3 class="bonus-titulo" style="font-size:1.7rem">E ainda leva 4 bônus, no aplicativo e em PDF</h3>
+    <h3 class="bonus-titulo" style="font-size:1.7rem">E ainda leva 5 bônus</h3>
     <div class="bonus">
+      <div class="bonus-item"><img src="img/kit_mockup.webp" alt="" width="96" height="86" loading="lazy" style="object-fit:contain"><div><h3>Kit completo em PDF <span class="selo-gratis">grátis</span></h3><p>As 120 atividades em 127 páginas para imprimir quantas vezes quiser e fazer com lápis.</p></div></div>
       <div class="bonus-item"><img src="img/pagina_alfa.webp" alt="" width="96" height="136" loading="lazy"><div><h3>Alfabeto da Bené <span class="selo-gratis">grátis</span></h3><p>De A a Z: cada letra com desenho, frase e a letra grande para cobrir.</p></div></div>
       <div class="bonus-item"><img src="img/pagina_vers.webp" alt="" width="96" height="136" loading="lazy"><div><h3>Versículos para colorir <span class="selo-gratis">grátis</span></h3><p>12 versículos curtos para pintar com o dedo ou no papel.</p></div></div>
       <div class="bonus-item"><img src="img/pagina_quebra.webp" alt="" width="96" height="136" loading="lazy"><div><h3>Quebra-cabeça de sílabas <span class="selo-gratis">grátis</span></h3><p>Montar a palavra tocando nas sílabas na ordem certa, ou recortando no papel.</p></div></div>
@@ -342,8 +345,8 @@
     <ol class="passos">
       <li><h3>Garanta o acesso</h3><p>Pagamento único de R$ 37, direto no checkout seguro.</p></li>
       <li><h3>Abra o aplicativo</h3><p>Entre com seu nome, e-mail e WhatsApp. Não precisa de senha.</p></li>
-      <li><h3>Na tela ou no papel</h3><p>Faça no celular ou baixe os PDFs para imprimir.</p></li>
-      <li><h3>10 minutos por dia</h3><p>Uma atividade por dia, sentadinhos juntos.</p></li>
+      <li><h3>Faça na tela</h3><p>Uma atividade por dia, com os 7 estímulos. Se quiser, imprima o kit bônus.</p></li>
+      <li><h3>10 minutos por dia</h3><p>Sentadinhos juntos, você fala a palavra e comemora cada acerto.</p></li>
     </ol>
   </div>
 </section>
@@ -365,15 +368,15 @@
     <div class="caixa-oferta">
       <h2 id="leva">Tudo o que você leva hoje</h2>
       <ul>
-        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Aplicativo da Bené: 4 níveis, 120 atividades</span><small>incluso</small></li>
-        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Kit completo em PDF para imprimir, 127 páginas</span><small>incluso</small></li>
-        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Alfabeto da Bené</span><small>grátis</small></li>
-        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Versículos para colorir</span><small>grátis</small></li>
-        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Quebra-cabeça de sílabas</span><small>grátis</small></li>
-        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Cantando com a Bené</span><small>grátis</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Aplicativo da Bené com o Método Fono-Fé: 4 níveis, 120 atividades</span><small>principal</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Kit completo em PDF para imprimir, 127 páginas</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Alfabeto da Bené</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Versículos para colorir</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Quebra-cabeça de sílabas</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Cantando com a Bené</span><small>bônus</small></li>
       </ul>
       <p class="preco"><span class="rs">R$</span><span class="v">37</span></p>
-      <p class="preco-nota">Pagamento único. Acesso imediato e para sempre.</p>
+      <p class="preco-nota">Pagamento único, não é assinatura. Acesso imediato e para sempre.</p>
       <button class="botao botao-largo abrir-checkout" type="button">Quero o app da Bené</button>
       <div class="seguro" style="justify-content:center">
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pagamento processado pelo Stripe</span>
@@ -402,11 +405,14 @@
 <section aria-labelledby="duvidas" style="padding-top:0">
   <div class="wrap estreito">
     <div class="titulo-sec"><h2 id="duvidas">Dúvidas comuns</h2></div>
-    <details><summary>É um livro físico?</summary><p>Não. É um aplicativo que abre no navegador do celular, do tablet ou do computador, com os mesmos materiais em PDF para você imprimir em casa ou numa gráfica.</p></details>
+    <details><summary>É um livro físico?</summary><p>Não. É um aplicativo que abre no navegador do celular, do tablet ou do computador. De bônus, você recebe os mesmos materiais em PDF para imprimir em casa ou numa gráfica.</p></details>
+    <details><summary>É assinatura?</summary><p>Não. Você paga R$ 37 uma vez só e o acesso é seu para sempre, com todas as atividades e os 5 bônus.</p></details>
+    <details><summary>O que é o Método Fono-Fé?</summary><p>É o jeito de ensinar da Bené: cada palavra é aprendida com 7 estímulos (ouvir, ver, bater palma, traçar, montar, cantar e agradecer), seguindo o caminho som, sílaba, palavra e frase.</p></details>
+    <details><summary>Meu filho ainda não conhece as letras. Serve?</summary><p>Serve. Ele começa pelo Alfabeto da Bené e pelo nível 1, com palavras de 2 pedacinhos, sempre com você do lado.</p></details>
     <details><summary>Preciso baixar na loja de aplicativos?</summary><p>Não. Ele abre por um link e pode ser instalado direto na tela inicial do celular, sem passar pela loja.</p></details>
     <details><summary>Como recebo depois de pagar?</summary><p>Logo após a confirmação do pagamento você recebe o link do aplicativo. É só abrir, colocar seu nome, e-mail e WhatsApp, e usar.</p></details>
     <details><summary>Para qual idade é?</summary><p>Foi pensado para crianças de 3 a 7 anos. Os pequenos começam pelo nível 1 com ajuda; os maiores podem avançar mais rápido. Cada criança tem o seu tempo.</p></details>
-    <details><summary>Preciso de impressora?</summary><p>Não. Todas as atividades podem ser feitas na tela. Se quiser imprimir, as páginas funcionam bem em preto e branco.</p></details>
+    <details><summary>Preciso de impressora?</summary><p>Não. Todas as atividades são feitas na tela. O kit em PDF é um bônus para quando quiser trocar a tela pelo papel, e funciona bem em preto e branco.</p></details>
     <details><summary>O conteúdo é de alguma denominação?</summary><p>Não. As palavras e versículos são das histórias bíblicas que todas as igrejas cristãs conhecem, como a arca de Noé e o Bom Pastor.</p></details>
     <details><summary>Posso usar com mais de um filho ou com alunos?</summary><p>Sim, pode imprimir para os seus filhos e para usar com as crianças da sua turma ou do ministério infantil. Só não é permitido revender ou compartilhar o acesso e os arquivos.</p></details>
     <details><summary>O pagamento é seguro?</summary><p>Sim. O pagamento é feito pelo Stripe, uma das maiores empresas de pagamento do mundo. Nós não vemos nem guardamos os dados do seu cartão.</p></details>
@@ -453,35 +459,12 @@
 </dialog>
 
 <script>
-/* ====== CONFIGURE AQUI ====== */
-const CONFIG = {
-  // Opção A (sua API Stripe): endpoint que recebe {nome,email,whats,utm} e responde {url: "https://checkout.stripe.com/..."}
-  checkoutApi: "",
-  // Opção B (link de pagamento do Stripe), usado se checkoutApi estiver vazio
-  checkoutUrl: "https://buy.stripe.com/SEU_LINK_AQUI",
-  // Opcional: endpoint para salvar o lead antes do pagamento (POST JSON)
-  leadEndpoint: "https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-lead",
-  // Opcional: ID do Pixel da Meta
-  pixelId: "",
-  preco: 37
-};
-/* ============================ */
-
+/* Stripe, pixel e preço ficam no arquivo /config.js (vale também para o quiz) */
+const CONFIG = window.BENE_CONFIG;
 (function(){
-  // UTMs: guarda os parâmetros da URL de entrada
-  const q = new URLSearchParams(location.search);
-  const keys = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","fbclid"];
-  let utm = {};
-  try { utm = JSON.parse(localStorage.getItem("bene_utm") || "{}"); } catch(e) {}
-  keys.forEach(k => { if (q.get(k)) utm[k] = q.get(k); });
-  try { localStorage.setItem("bene_utm", JSON.stringify(utm)); } catch(e) {}
-
-  // Pixel
-  if (CONFIG.pixelId) {
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', CONFIG.pixelId); fbq('track', 'PageView');
-  }
-  const track = (ev, data) => { if (window.fbq) fbq('track', ev, data || {}); };
+  try { if (!localStorage.getItem("bene_variante")) localStorage.setItem("bene_variante", "oferta"); } catch(e) {}
+  const utm = CONFIG.utm || {};
+  const track = CONFIG.track;
 
   const dlg = document.getElementById("cadastro");
   const form = document.getElementById("form-cadastro");
@@ -509,22 +492,11 @@ const CONFIG = {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro.textContent = "Confira o e-mail: é com ele que você entra no aplicativo."; form.email.focus(); return; }
     if (whats.length < 10) { erro.textContent = "Digite o WhatsApp com DDD."; form.whats.focus(); return; }
     erro.textContent = ""; btn.disabled = true; btn.textContent = "Abrindo o pagamento…";
-    const lead = { nome, email, whats, whatsapp: whats, origem: "pagina-de-vendas", utm, pagina: location.href, quando: new Date().toISOString() };
+    const lead = { nome, email, whats, whatsapp: whats, origem: "pagina-de-vendas", variante: "oferta", utm, dados: { utm, pagina: location.pathname } };
     track("Lead");
-    if (CONFIG.leadEndpoint) {
-      try { await fetch(CONFIG.leadEndpoint, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(lead), keepalive: true}); } catch(err) {}
-    }
+    await CONFIG.salvarLead(lead);
     try {
-      if (CONFIG.checkoutApi) {
-        const r = await fetch(CONFIG.checkoutApi, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(lead)});
-        const j = await r.json();
-        if (!j.url) throw new Error("sem url");
-        location.href = j.url; return;
-      }
-      const u = new URL(CONFIG.checkoutUrl);
-      u.searchParams.set("prefilled_email", email);
-      Object.entries(utm).forEach(([k, v]) => { if (k.startsWith("utm_")) u.searchParams.set(k, v); });
-      location.href = u.toString();
+      await CONFIG.irParaPagamento(lead);
     } catch(err) {
       btn.disabled = false; btn.textContent = "Continuar para o pagamento";
       erro.textContent = "Não conseguimos abrir o pagamento. Tente de novo em alguns segundos.";
