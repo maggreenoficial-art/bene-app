@@ -6,7 +6,7 @@ window.BENE_CONFIG = {
   // Salva o lead antes do pagamento
   leadEndpoint: "https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-lead",
   // ID do Pixel da Meta (só os números)
-  pixelId: "",
+  pixelId: "1170302909276144",
   preco: 37,
   // Teste A/B do link /comecar/: porcentagem que vai para o quiz (o resto vai para a página de vendas)
   quizPct: 50
