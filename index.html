@@ -127,7 +127,7 @@ input:focus{outline:3px solid var(--blue);outline-offset:1px}
 <script>
 (function(){
 'use strict';
-var D=window.BENE, API='https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-lead';
+var D=window.BENE, API='https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-lead', ACESSO='https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/bene-acesso';
 var app=document.getElementById('app');
 var LS={get:function(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:function(k){try{localStorage.removeItem(k);}catch(e){}}};
 var user=LS.get('bene_user',null), prog=LS.get('bene_prog',{});
@@ -174,31 +174,36 @@ function goAttr(o){return " data-go='"+JSON.stringify(o).replace(/'/g,'&#39;')+"
 /* ---------- entrada ---------- */
 function gate(){
   app.innerHTML='<div class="gate"><div class="brand"><img src="img/logo.webp" alt="Bené, a Ovelhinha"></div>'
-   +'<form class="card" novalidate><h1>Acesse seu material</h1><p class="muted" style="text-align:center">Preencha uma vez e o acesso fica liberado neste aparelho.</p>'
+   +'<form class="card" novalidate><h1>Acesse seu aplicativo</h1><p class="muted" style="text-align:center">Use o mesmo e-mail que você usou no pagamento. O acesso fica liberado neste aparelho.</p>'
    +'<label>Seu nome<input name="nome" autocomplete="name" maxlength="120" required></label>'
-   +'<label>E-mail<input name="email" type="email" inputmode="email" autocomplete="email" maxlength="160" required></label>'
-   +'<label>WhatsApp com DDD<input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(67) 99999-9999" maxlength="16" required></label>'
+   +'<label>E-mail da compra<input name="email" type="email" inputmode="email" autocomplete="email" maxlength="160" required></label>'
    +'<div class="err" role="alert"></div><button class="btn wide">Entrar</button>'
-   +'<p class="fine">Dados do responsável, não da criança. Usamos só para liberar o acesso e avisar das novidades da Bené.</p></form></div>';
-  var f=app.querySelector('form'), err=f.querySelector('.err'), w=f.whatsapp;
-  w.oninput=function(){var d=w.value.replace(/\D/g,'').slice(0,11),o=d;if(d.length>2)o='('+d.slice(0,2)+') '+d.slice(2);if(d.length>7)o='('+d.slice(0,2)+') '+d.slice(2,d.length-4)+'-'+d.slice(-4);w.value=o;};
+   +'<p class="fine">Ainda não tem o aplicativo? <a href="/comecar/">Conheça o aplicativo da Bené</a>.</p></form></div>';
+  var f=app.querySelector('form'), err=f.querySelector('.err');
   f.onsubmit=function(e){
     e.preventDefault();
-    var u={nome:f.nome.value.trim(),email:f.email.value.trim().toLowerCase(),whatsapp:w.value.replace(/\D/g,''),sent:false};
+    var u={nome:f.nome.value.trim(),email:f.email.value.trim().toLowerCase(),whatsapp:'',sent:true,pago:true};
     if(u.nome.length<2){err.textContent='Digite seu nome.';f.nome.focus();return;}
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u.email)){err.textContent='Confira o e-mail.';f.email.focus();return;}
-    if(u.whatsapp.length<10){err.textContent='Digite o WhatsApp com DDD.';w.focus();return;}
-    var b=f.querySelector('.btn'); b.disabled=true; b.textContent='Entrando…';
-    user=u; LS.set('bene_user',u);
-    sendLead().then(function(){route={v:'home'};render();});
+    var b=f.querySelector('.btn'); b.disabled=true; b.textContent='Conferindo…'; err.textContent='';
+    temCompra(u.email).then(function(ok){
+      if(ok){user=u;LS.set('bene_user',u);route={v:'home'};render();return;}
+      b.disabled=false;b.textContent='Entrar';
+      err.innerHTML='Não encontramos uma compra com este e-mail. Confira se é o mesmo e-mail do pagamento.';
+    },function(){b.disabled=false;b.textContent='Entrar';err.textContent='Sem conexão com a internet. Tente de novo.';});
   };
 }
-function sendLead(){
-  if(!user||user.sent)return Promise.resolve();
-  var ctl=window.AbortController?new AbortController():null, tm=setTimeout(function(){if(ctl)ctl.abort();},6000);
-  return fetch(API,{method:'POST',headers:{'content-type':'application/json'},signal:ctl?ctl.signal:undefined,
-    body:JSON.stringify({nome:user.nome,email:user.email,whatsapp:user.whatsapp,origem:location.hostname})})
-   .then(function(r){if(r.ok){user.sent=true;LS.set('bene_user',user);}}).catch(function(){}).then(function(){clearTimeout(tm);});
+function temCompra(email){
+  return fetch(ACESSO,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:email})})
+    .then(function(r){if(!r.ok&&r.status!==400)throw new Error('rede');return r.json();}).then(function(j){return !!(j&&j.ok);});
+}
+/* quem entrou antes da trava: confere uma vez se tem compra */
+function conferirAcesso(){
+  if(!user||user.pago)return;
+  temCompra(user.email).then(function(ok){
+    if(ok){user.pago=true;LS.set('bene_user',user);}
+    else{user=null;LS.del('bene_user');render();}
+  },function(){});
 }
 function sheet(html){var s=document.createElement('div');s.className='sheet';s.innerHTML='<div role="dialog" aria-modal="true">'+html+'</div>';s.onclick=function(e){if(e.target===s)s.remove();};document.body.appendChild(s);return s;}
 function account(){
@@ -370,7 +375,7 @@ function printView(){
 }
 var VIEWS={home:home,levels:levels,level:level,act:act,bonus:bonus,alpha:alpha,letter:letter,verses:verses,paint:paintView,puzzle:puzzle,songs:songs,song:song,print:printView};
 function render(){[].forEach.call(document.querySelectorAll('.sheet'),function(s){s.remove();});if(!user){gate();return;}(VIEWS[route.v]||home)();}
-render(); sendLead();
+render(); conferirAcesso();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
 </script>

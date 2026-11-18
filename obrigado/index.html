@@ -10,7 +10,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://js.stripe.com/v3/"></script>
 <script src="/config.js"></script>
 <style>
   :root{--ceu:#7EC8F2;--ceu-claro:#EAF6FE;--tinta:#4A3426;--tinta-suave:#6B5546;--sol:#FFC94A;--sol-claro:#FFF4D6;--pasto:#8BD17C;--azul:#5BA8E8;--contorno:3px solid var(--tinta)}
@@ -48,18 +47,21 @@
   const el = document.getElementById("conteudo");
   let lead = {};
   try { lead = JSON.parse(localStorage.getItem("bene_checkout") || "{}"); } catch (e) {}
-  const nome = (lead.nome || "").split(" ")[0];
+  let nome = (lead.nome || "").split(" ")[0];
   const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const ACESSO = C.checkoutEndpoint.replace("bene-checkout", "bene-acesso");
 
-  function liberarApp() {
-    // deixa o aplicativo já aberto com os dados de quem comprou
-    if (lead.email) {
-      try { localStorage.setItem("bene_user", JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats || "").replace(/\D/g, ""), sent: true })); } catch (e) {}
-    }
+  function liberarApp(dados) {
+    // deixa o aplicativo já aberto com os dados de quem comprou (confirmados no Stripe)
+    const email = (dados.email || lead.email || "").toLowerCase();
+    if (!email) return;
+    try { localStorage.setItem("bene_user", JSON.stringify({ nome: dados.nome || lead.nome || "", email, whatsapp: String(lead.whats || "").replace(/\D/g, ""), sent: true, pago: true })); } catch (e) {}
   }
 
-  function pago() {
-    liberarApp();
+  function pago(dados) {
+    liberarApp(dados);
+    if (dados.nome) nome = dados.nome.split(" ")[0];
+    if (dados.email) lead.email = dados.email;
     const chave = "bene_purchase_" + id;
     let jaContou = false;
     try { jaContou = !!localStorage.getItem(chave); localStorage.setItem(chave, "1"); } catch (e) {}
@@ -87,22 +89,19 @@
       <a class="botao" href="/checkout/">Tentar de novo</a>`;
   }
 
-  let pk = ""; try { pk = sessionStorage.getItem("bene_pk") || ""; } catch (e) {}
-  let cs = q.get("payment_intent_client_secret") || "";
-  if (!cs) { try { const s = JSON.parse(sessionStorage.getItem("bene_pi") || "null"); if (s && s.id === id) cs = s.clientSecret; } catch (e) {} }
-
   async function conferir() {
-    if (!pk || !cs || !window.Stripe) {
-      const st = q.get("redirect_status");
-      return st === "succeeded" ? pago() : st === "failed" ? falhou() : esperando();
-    }
-    const stripe = Stripe(pk, { locale: "pt-BR" });
+    if (!id) return falhou();
+    let tentativas = 0;
     const t = async () => {
-      const { paymentIntent } = await stripe.retrievePaymentIntent(cs);
-      const s = paymentIntent && paymentIntent.status;
-      if (s === "succeeded") { clearInterval(iv); pago(); try { sessionStorage.removeItem("bene_pi"); } catch (e) {} }
-      else if (s === "requires_payment_method") { clearInterval(iv); falhou(); try { sessionStorage.removeItem("bene_pi"); } catch (e) {} }
-      else esperando();
+      tentativas++;
+      let j = {};
+      try {
+        const r = await fetch(ACESSO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ payment_intent: id }) });
+        j = await r.json();
+      } catch (e) { j = { status: "aguardando" }; }
+      if (j.status === "pago") { clearInterval(iv); try { sessionStorage.removeItem("bene_pi"); } catch (e) {} pago(j); }
+      else if (j.status === "falhou" || j.status === "desconhecido") { clearInterval(iv); falhou(); }
+      else { esperando(); if (tentativas > 150) clearInterval(iv); }
     };
     const iv = setInterval(t, 4000);
     t();
