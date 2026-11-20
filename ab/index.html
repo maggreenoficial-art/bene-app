@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bené</title>
+<script>window.BENE_SEM_PIXEL = true;</script>
+<script src="/config.js"></script>
+<script>
+// Teste A/B da campanha 07: metade vai para o quiz, metade para a página do app (/veja/).
+// Cada visitante cai sempre na mesma versão (guardada no aparelho). A página de destino grava a variante usada na compra.
+(function () {
+  var v = "";
+  try { v = localStorage.getItem("bene_ab_qv") || ""; } catch (e) {}
+  if (v !== "quiz" && v !== "veja") {
+    v = Math.random() < 0.5 ? "quiz" : "veja";
+    try { localStorage.setItem("bene_ab_qv", v); } catch (e) {}
+  }
+  location.replace("/" + v + "/" + location.search + location.hash);
+})();
+</script>
+<style>body{margin:0;background:#F4FAFF}</style>
+</head>
+<body></body>
+</html>
