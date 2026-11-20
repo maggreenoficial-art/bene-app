@@ -10,7 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://js.stripe.com/v3/"></script>
+<link rel="preconnect" href="https://js.stripe.com"><link rel="preconnect" href="https://api.stripe.com"><link rel="preconnect" href="https://acbksachtpypwtbgwyxh.supabase.co">
+<script src="https://js.stripe.com/v3/" async></script>
 <script src="/config.js"></script>
 <script src="https://www.metricasrapida.cloud/t.js" async></script>
 <style>
@@ -43,7 +44,7 @@
   .passos .linha{width:18px;height:3px;background:var(--tinta);border-radius:2px}
 
   main{max-width:980px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:18px}
-  @media (min-width:860px){main{grid-template-columns:1fr 380px;align-items:start;padding-top:32px}.resumo{position:sticky;top:20px;order:2}}
+  @media (min-width:860px){main{grid-template-columns:minmax(0,1fr) 380px;align-items:start;padding-top:32px}.resumo{position:sticky;top:20px;order:2}}
   .cartao{background:#fff;border:var(--contorno);border-radius:24px;box-shadow:5px 5px 0 var(--tinta);padding:20px 18px}
   h1{font-size:1.7rem;margin-bottom:4px}
   .apoio{color:var(--tinta-suave);margin:0 0 16px}
@@ -97,6 +98,43 @@
   .garantia svg{width:60px;height:60px}
   .garantia b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.05rem}
   footer{text-align:center;font-size:.8rem;color:var(--tinta-suave);padding:0 16px 30px}
+
+  /* celular: nada pode passar da largura da tela (inclusive com a fonte do celular aumentada) */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{overflow-x:hidden}
+  main{grid-template-columns:minmax(0,1fr)}
+  .cartao,#pagamento,#form-pag,.produto>div,.seguranca>div,.garantia>div{min-width:0}
+  .quem{flex-wrap:wrap}
+  .quem>div{min-width:0;flex:1 1 180px;overflow-wrap:anywhere}
+  .itens li{grid-template-columns:20px minmax(0,1fr) auto}
+  .cab{flex-wrap:wrap}
+  .passos{flex-wrap:wrap}
+  input{min-width:0}
+  @media (max-width:859px){
+    .faixa{font-size:.75rem;padding:5px 10px}
+    .resumo{padding:12px 14px}
+    .resumo h2{display:none}
+    .produto{grid-template-columns:48px minmax(0,1fr);gap:10px;padding-bottom:8px}
+    .produto img{width:48px;height:48px;border-radius:12px}
+    .produto b{font-size:1.05rem}
+    .produto small{font-size:.8rem;line-height:1.3;display:block}
+    .bonus summary{padding:6px 0 0;font-size:.88rem}
+    .total{padding-top:8px}
+    .total strong{font-size:1.5rem}
+    .total-nota{font-size:.78rem}
+    .apoio{font-size:.95rem;margin-bottom:12px}
+  }
+  @media (max-width:420px){
+    .cab{padding:8px 12px}
+    .cab img{width:62px}
+    .passos{font-size:.8rem;gap:6px}
+    main{padding:14px 12px 40px;gap:14px}
+    .cartao{padding:16px 14px;border-radius:20px;box-shadow:4px 4px 0 var(--tinta)}
+    h1{font-size:1.45rem}
+    .total strong{font-size:1.7rem}
+    .botao{font-size:1.2rem;padding:13px 14px}
+    .selos span{font-size:.75rem}
+  }
 </style>
 </head>
 <body>
@@ -224,7 +262,12 @@
 
   // espera o t.js do Métricas Rápida carregar (até 3 s) para o pagamento levar o vid
   async function esperarRastreio() {
-    for (let i = 0; i < 30 && !window.ltUtm; i++) await new Promise(r => setTimeout(r, 100));
+    for (let i = 0; i < 15 && !window.ltUtm; i++) await new Promise(r => setTimeout(r, 100));
+  }
+  // o Stripe.js carrega sem travar a página; espera ele aqui (até 15 s)
+  async function esperarStripe() {
+    for (let i = 0; i < 150 && !window.Stripe; i++) await new Promise(r => setTimeout(r, 100));
+    if (!window.Stripe) throw new Error("stripe");
   }
 
   async function criarPagamento() {
@@ -248,7 +291,7 @@
     erro.textContent = ""; btn.disabled = true;
     $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando as formas de pagamento…</div></div>';
     let s;
-    try { s = await criarPagamento(); }
+    try { const r = await Promise.all([criarPagamento(), esperarStripe()]); s = r[0]; }
     catch (e) {
       $("pagamento").innerHTML = "";
       erro.textContent = e.message === "config"

@@ -50,3 +50,8 @@ h1{font-size:clamp(1.8rem,7.4vw,2.4rem);text-align:center}
 .garantia{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;font-size:.9rem;color:var(--tinta-suave)}
 .garantia b{color:var(--tinta)}
 .garantia i{width:44px;height:44px;border:2.5px solid var(--tinta);border-radius:50%;background:var(--sol);display:grid;place-items:center;font-style:normal;font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--tinta)}
+
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden}
+.lista li{grid-template-columns:30px minmax(0,1fr)}
+.lista li span,.lead,h1{overflow-wrap:anywhere}
