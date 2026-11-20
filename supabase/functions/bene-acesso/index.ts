@@ -1,7 +1,7 @@
 // Acesso ao app da Bené: confirma no Stripe se um pagamento foi aprovado.
 // POST {payment_intent} -> {status: pago|processando|aguardando|falhou, nome, email}  (usado na página de obrigado)
 // POST {email}          -> {ok: true|false, produtos: [...]}                         (usado na entrada do aplicativo)
-// produtos: app-bene (principal), niveis56, livro, livro_nome (upsells)
+// produtos: app-bene (aplicativo), kit (kit para imprimir), niveis56, livro, livro_nome (upsells)
 import { createClient } from "npm:@supabase/supabase-js@2";
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type", "access-control-allow-methods": "POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...cors, "content-type": "application/json; charset=utf-8" } });
@@ -49,12 +49,12 @@ Deno.serve(async (req: Request) => {
   if (id) {
     if (!/^pi_[A-Za-z0-9]{10,64}$/.test(id)) return json({ status: "desconhecido" }, 404);
     const pi = await buscarPI(id, sk);
-    if (!pi || pi.metadata?.produto !== "app-bene") return json({ status: "desconhecido" }, 404);
+    if (!pi || !["app-bene", "kit"].includes(String(pi.metadata?.produto))) return json({ status: "desconhecido" }, 404);
     const st = situacao(pi);
     if (st === "pago") await marcarPago(pi);
     const m = pi.metadata ?? {};
     const produtos = st === "pago" ? await produtosDe(String(m.email || "").toLowerCase()) : [];
-    return json({ status: st, nome: m.nome || "", email: m.email || "", produtos });
+    return json({ status: st, nome: m.nome || "", email: m.email || "", produtos, produto: m.produto, valor: pi.amount });
   }
 
   // 2) Entrada do aplicativo: existe compra paga para este e-mail?

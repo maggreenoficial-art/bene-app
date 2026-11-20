@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Aplicativo da Bené</title>
+<meta name="theme-color" content="#8BD17C">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ofertas.css">
+<script src="/config.js"></script>
+</head>
+<body>
+<div class="faixa">Pagamento confirmado! Seu kit já está liberado.<small>Não feche esta página: o download aparece logo em seguida.</small></div>
+<main>
+  <span class="etiqueta">Oferta única, só nesta página</span>
+  <h1>Que tal a Bené ensinar também na tela?</h1>
+  <p class="lead">Agora que você tem as folhas, o <b>aplicativo da Bené</b> transforma o tempo de tela em tempo de leitura. Nos dias sem impressora, ele continua aprendendo.</p>
+  <div style="display:flex;justify-content:center"><div style="width:min(240px,62vw);aspect-ratio:1/2;border:12px solid #4A3426;border-radius:40px;background:#4A3426;box-shadow:10px 12px 0 rgba(74,52,38,.22)"><video src="/veja/v/bola.mp4" poster="/veja/v/bola.jpg" muted loop playsinline autoplay style="width:100%;height:100%;object-fit:cover;border-radius:28px;display:block" aria-label="O aplicativo da Bené funcionando"></video></div></div>
+  <div class="cartao">
+    <ul class="lista">
+      <li><span><b>A Bené guia cada atividade</b> na tela, e a tela comemora cada acerto.</span></li>
+      <li><span><b>120 atividades na tela:</b> tocar nas sílabas, cobrir as letras com o dedo, montar o quebra-cabeça.</span></li>
+      <li><span>O mesmo caminho do kit, do BO-LA às primeiras frases, em 4 níveis. Folha e tela andam juntas.</span></li>
+      <li><span><b>Mais 4 PDFs:</b> alfabeto da Bené, versículos para colorir, quebra-cabeça de sílabas e músicas.</span></li>
+      <li><span>Abre no celular que você já tem, sem baixar nada da loja.</span></li>
+    </ul>
+  </div>
+  <div class="cartao">
+    <div class="preco"><p style="margin:0 0 4px;text-decoration:line-through">R$ 37 no site</p><div class="valor"><small>R$</small> 27</div><p>Só para quem comprou o kit. Pagamento único, acesso na hora.</p></div>
+    <button type="button" class="botao" id="sim" style="margin-top:14px"><span>Sim, quero o aplicativo por R$ 27</span></button>
+  <div id="pagar" hidden><div id="pe"></div><button type="button" class="botao" id="pagarBtn">Pagar</button></div>
+  <p class="msg" id="msg" role="alert"></p>
+    <p class="nota">Um toque só: cobramos no mesmo cartão da compra, sem digitar nada. Se você pagou com Pix, aparece um Pix novo.</p>
+  </div>
+  <div class="garantia"><i>7</i><span><b>Também tem 7 dias de garantia.</b> Se não for para vocês, devolvemos o valor.</span></div>
+  <a href="#" class="nao" id="nao">Não, obrigado. Quero só o kit.</a>
+</main>
+<script>window.UPSELL = { oferta: "app27", libera: "app-bene", valor: 27, precoTxt: "R$ 27,00", botao: "Sim, quero o aplicativo por R$ 27", sim: "/oferta-1/", nao: "/kit-oferta-2/" };</script>
+<script src="/upsell.js"></script>
+</body>
+</html>

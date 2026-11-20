@@ -55,18 +55,35 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const ACESSO = C.checkoutEndpoint.replace("bene-checkout", "bene-acesso");
 
-  const NOMES = { "app-bene": "Aplicativo da Bené + 5 bônus", niveis56: "Níveis 5 e 6: 30 historinhas", livro: "Livrinho personalizado", livro_nome: "Livrinho com o nome do seu filho" };
+  const NOMES = { "app-bene": "Aplicativo da Bené + 5 bônus", kit: "Kit da Bené para imprimir (127 páginas)", niveis56: "Níveis 5 e 6: 30 historinhas", livro: "Livrinho personalizado", livro_nome: "Livrinho com o nome do seu filho" };
   function pago(dados) {
     C.compraConfirmada(id, dados);
     if (dados.nome) nome = dados.nome.split(" ")[0];
     if (dados.email) lead.email = dados.email;
-    const prods = (dados.produtos && dados.produtos.length ? dados.produtos : ["app-bene"]).filter(p => NOMES[p]);
+    const prods = (dados.produtos && dados.produtos.length ? dados.produtos : [dados.produto || "app-bene"]).filter(p => NOMES[p]);
     const temLivro = prods.indexOf("livro") >= 0 || prods.indexOf("livro_nome") >= 0;
+    const temKit = prods.indexOf("kit") >= 0;
+    const baixar = '<a class="botao" href="/pdf/kit-completo.pdf" download style="background:var(--pasto)">Baixar o kit (PDF)</a>';
+    if (prods.indexOf("app-bene") < 0) {
+      // só o kit
+      el.innerHTML = `<span class="selo">Pagamento confirmado</span>
+        <h1>${nome ? "Seu kit está pronto, " + esc(nome) + "!" : "Seu kit está pronto!"}</h1>
+        <p style="margin-top:10px">Baixe o PDF e imprima a primeira folha do nível 1. Sente 10 minutinhos com seu filho e comece pelo BO-LA.</p>
+        ${baixar}
+        <ul class="passos">
+          <li><span class="n">1</span><span><b>Salve o PDF</b>Guarde no celular ou no computador. Você pode voltar nesta página para baixar de novo.</span></li>
+          <li><span class="n">2</span><span><b>Leia o guia da página 2</b>Ele explica os 4 passos de cada folha.</span></li>
+          <li><span class="n">3</span><span><b>Uma folha por dia</b>Na ordem, do nível 1 ao 4. No final, o certificado!</span></li>
+        </ul>
+        <p class="mini">O recibo do pagamento foi enviado para o seu e-mail.</p>`;
+      return;
+    }
     el.innerHTML = `<span class="selo">Pagamento confirmado</span>
       <h1>${nome ? "Bem-vinda, " + esc(nome) + "!" : "Bem-vinda à turma da Bené!"}</h1>
       <p style="margin-top:10px">O aplicativo da Bené já está liberado. Comece hoje pelo Dia 1, com 10 minutinhos.</p>
       <ul class="pedido">${prods.map(p => "<li>" + NOMES[p] + "</li>").join("")}</ul>
       <a class="botao" href="/">Abrir o aplicativo</a>
+      ${temKit ? baixar : ""}
       <ul class="passos">
         <li><span class="n">1</span><span><b>Instale na tela inicial</b>No aplicativo, toque em "Instalar". No iPhone: botão Compartilhar e depois "Adicionar à Tela de Início".</span></li>
         <li><span class="n">2</span><span><b>Entre sempre com o mesmo e-mail</b>${lead.email ? esc(lead.email) : "O e-mail que você usou na compra"}.</span></li>
@@ -98,10 +115,10 @@
         j = await r.json();
       } catch (e) { j = { status: "aguardando" }; }
       if (j.status === "pago") {
-        clearInterval(iv); try { sessionStorage.removeItem("bene_pi"); } catch (e) {}
+        clearInterval(iv); try { sessionStorage.removeItem("bene_pi"); sessionStorage.removeItem("bene_pi_kit"); } catch (e) {}
         // quem pagou com Pix (ou com redirecionamento) ainda não viu as ofertas de 1 clique
         let viu = false; try { viu = !!localStorage.getItem("bene_ofertas_" + id); } catch (e) {}
-        if (!viu) { C.compraConfirmada(id, j); location.replace("/oferta-1/?pi=" + encodeURIComponent(id)); return; }
+        if (!viu) { C.compraConfirmada(id, j); location.replace((j.produto === "kit" ? "/kit-oferta-1/" : "/oferta-1/") + "?pi=" + encodeURIComponent(id)); return; }
         pago(j);
       }
       else if (j.status === "falhou" || j.status === "desconhecido") { clearInterval(iv); falhou(); }

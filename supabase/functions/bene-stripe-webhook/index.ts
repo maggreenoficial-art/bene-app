@@ -13,7 +13,7 @@ async function assinaturaValida(payload: string, header: string, segredo: string
   return v1s.some((v) => v.length === hex.length && [...v].reduce((acc, c, i) => acc | (c.charCodeAt(0) ^ hex.charCodeAt(i)), 0) === 0);
 }
 
-const PRODUTOS = ["app-bene", "niveis56", "livro", "livro_nome"];
+const PRODUTOS = ["app-bene", "kit", "niveis56", "livro", "livro_nome"];
 
 async function sha256(v: string): Promise<string> {
   const d = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(v)));

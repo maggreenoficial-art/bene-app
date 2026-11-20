@@ -1,7 +1,7 @@
 // Upsells da Bené (ofertas depois da compra).
 // POST {pi, oferta, modo?}
-//   pi     = PaymentIntent da compra principal (app-bene, já pago)
-//   oferta = niveis56 | livro | livro_nome
+//   pi     = PaymentIntent da compra de entrada (app-bene ou kit, já pago)
+//   oferta = app27 | app17 (depois do kit) | niveis56 | livro | livro_nome
 //   modo   = "auto" (padrão: cobra no cartão salvo, 1 clique) | "novo" (novo pagamento: Pix ou outro cartão)
 // Respostas:
 //   {status:"pago", id, valor}                          cobrado no cartão salvo
@@ -13,7 +13,10 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type", "access-control-allow-methods": "POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...cors, "content-type": "application/json; charset=utf-8" } });
 
-const OFERTAS: Record<string, { valor: number; nome: string; desc: string }> = {
+// "da" = produto que a oferta libera (o aplicativo vendido depois do kit libera o mesmo "app-bene")
+const OFERTAS: Record<string, { valor: number; nome: string; desc: string; da?: string }> = {
+  app27: { valor: 2700, nome: "Aplicativo da Bené", desc: "Aplicativo da Bené: Método Fono-Fé + 5 bônus (oferta para quem comprou o kit)", da: "app-bene" },
+  app17: { valor: 1700, nome: "Aplicativo da Bené", desc: "Aplicativo da Bené: Método Fono-Fé + 5 bônus (oferta especial)", da: "app-bene" },
   niveis56: { valor: 4700, nome: "Bené - Níveis 5 e 6: Historinhas", desc: "Bené: Níveis 5 e 6 com 30 historinhas bíblicas" },
   livro: { valor: 3700, nome: "Bené - Livrinho personalizado", desc: "Bené: livrinho personalizado com o nome da criança" },
   livro_nome: { valor: 1900, nome: "Bené - Livrinho com o nome", desc: "Bené: livrinho com o nome da criança" },
@@ -35,7 +38,7 @@ Deno.serve(async (req: Request) => {
   // compra principal: precisa estar paga
   const ro = await fetch(`https://api.stripe.com/v1/payment_intents/${encodeURIComponent(origId)}?expand[]=payment_method`, { headers: H });
   const orig = await ro.json();
-  if (!ro.ok || orig?.metadata?.produto !== "app-bene") return json({ erro: "compra" }, 404);
+  if (!ro.ok || !["app-bene", "kit"].includes(String(orig?.metadata?.produto))) return json({ erro: "compra" }, 404);
   if (orig.status !== "succeeded") return json({ erro: "nao_pago" }, 409);
   const m = orig.metadata as Record<string, string>;
   const email = String(m.email || orig.receipt_email || "").toLowerCase();
@@ -43,7 +46,8 @@ Deno.serve(async (req: Request) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { data: tem } = await sb.from("bene_compras").select("produto").eq("email", email).eq("status", "pago");
   const meus = (tem ?? []).map((r) => r.produto);
-  if (meus.includes(oferta) || (oferta === "livro_nome" && meus.includes("livro"))) return json({ status: "ja_tem" });
+  const libera = O.da || oferta;
+  if (meus.includes(libera) || (oferta === "livro_nome" && meus.includes("livro"))) return json({ status: "ja_tem" });
 
   const f = new URLSearchParams();
   f.set("amount", String(O.valor));
@@ -52,7 +56,8 @@ Deno.serve(async (req: Request) => {
   f.set("statement_descriptor_suffix", "BENE APP");
   if (email) f.set("receipt_email", email);
   for (const k of COPIAR) if (m[k]) f.set(`metadata[${k}]`, String(m[k]).slice(0, 500));
-  f.set("metadata[produto]", oferta);
+  f.set("metadata[produto]", libera);
+  f.set("metadata[oferta]", oferta);
   f.set("metadata[product]", O.nome);
   f.set("metadata[origem]", origId);
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim().slice(0, 64) || m.ip || "";
@@ -64,7 +69,7 @@ Deno.serve(async (req: Request) => {
   const registrar = async (id: string, status: string) => {
     await sb.from("bene_compras").upsert({
       payment_intent: id, email, nome: m.nome || null, whatsapp: m.whatsapp || null, valor: O.valor, moeda: "brl", variante: m.variante || null,
-      produto: oferta, origem: origId, status, ...(status === "pago" ? { pago_em: new Date().toISOString() } : {}),
+      produto: libera, origem: origId, status, ...(status === "pago" ? { pago_em: new Date().toISOString() } : {}),
       utm: Object.fromEntries(["vid", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].filter((k) => m[k]).map((k) => [k, m[k]])),
     }, { onConflict: "payment_intent" });
   };

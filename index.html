@@ -238,7 +238,7 @@ function gate(){
     temCompra(u.email).then(function(j){
       if(j.ok){u.produtos=j.produtos||[];user=u;LS.set('bene_user',u);route={v:'home'};render();return;}
       b.disabled=false;b.textContent='Entrar';
-      err.innerHTML='Não encontramos uma compra com este e-mail. Confira se é o mesmo e-mail do pagamento.';
+      err.innerHTML=(j.produtos&&j.produtos.indexOf('kit')>=0)?'Este e-mail comprou o kit para imprimir: <a href="/pdf/kit-completo.pdf" download>baixe o PDF aqui</a>. O aplicativo é vendido à parte: <a href="/veja/">conheça o aplicativo</a>.':'Não encontramos uma compra com este e-mail. Confira se é o mesmo e-mail do pagamento.';
     },function(){b.disabled=false;b.textContent='Entrar';err.textContent='Sem conexão com a internet. Tente de novo.';});
   };
 }
@@ -251,7 +251,7 @@ function conferirAcesso(){
   if(!user)return;
   temCompra(user.email).then(function(j){
     if(j.ok){var antes=JSON.stringify(user.produtos||[]);user.pago=true;user.produtos=j.produtos||[];LS.set('bene_user',user);if(antes!==JSON.stringify(user.produtos))render();}
-    else if(!user.pago){user=null;LS.del('bene_user');render();}
+    else if(!user.pago||(j.produtos&&j.produtos.indexOf('app-bene')<0)){user=null;LS.del('bene_user');render();}
   },function(){});
 }
 function sheet(html){var s=document.createElement('div');s.className='sheet';s.innerHTML='<div role="dialog" aria-modal="true">'+html+'</div>';s.onclick=function(e){if(e.target===s)s.remove();};document.body.appendChild(s);return s;}

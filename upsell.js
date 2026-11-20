@@ -20,7 +20,7 @@
       if (j.status !== "pago") { final(); return; }
       dados = j; C.compraConfirmada(pi, j);
       var tem = j.produtos || [];
-      if (tem.indexOf(U.oferta) >= 0 || (U.oferta === "livro_nome" && tem.indexOf("livro") >= 0)) { proximo(U.sim); return; }
+      if (tem.indexOf(U.libera || U.oferta) >= 0 || (U.oferta === "livro_nome" && tem.indexOf("livro") >= 0)) { proximo(U.sim); return; }
       // voltou de um pagamento com redirecionamento
       if (q.get("payment_intent") && q.get("redirect_status") === "succeeded") sucesso(q.get("payment_intent"));
     }).catch(function () {});
@@ -50,7 +50,7 @@
       .catch(function () { ocupado(false); msg.textContent = "Sem conexão com a internet. Tente de novo."; });
   }
   function sucesso(id) {
-    C.contarCompra(id, U.valor, U.oferta); C.addProduto(U.oferta);
+    C.contarCompra(id, U.valor, U.oferta); C.addProduto(U.libera || U.oferta);
     sim.disabled = true; texto("Pronto, liberado!");
     var pg = $("pagar"); if (pg) pg.hidden = true;
     setTimeout(function () { proximo(U.sim); }, 900);

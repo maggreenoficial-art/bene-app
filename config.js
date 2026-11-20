@@ -47,13 +47,14 @@ window.BENE_CONFIG = {
     var lead = {};
     try { lead = JSON.parse(localStorage.getItem("bene_checkout") || "{}"); } catch (e) {}
     var email = String(dados.email || lead.email || "").toLowerCase();
-    if (email) {
+    var temApp = (dados.produtos || []).indexOf("app-bene") >= 0 || dados.produto === "app-bene" || !dados.produto;
+    if (email && temApp) {
       var antes = {}; try { antes = JSON.parse(localStorage.getItem("bene_user") || "{}") || {}; } catch (e) {}
       var prods = ["app-bene"].concat(dados.produtos || [], antes.email === email ? (antes.produtos || []) : []).filter(function (p, i, a) { return a.indexOf(p) === i; });
       var u = { nome: dados.nome || lead.nome || "", email: email, whatsapp: String(lead.whats || "").replace(/\D/g, ""), sent: true, pago: true, produtos: prods };
       try { localStorage.setItem("bene_user", JSON.stringify(u)); } catch (e) {}
     }
-    C.contarCompra(id, C.preco, "app-bene");
+    C.contarCompra(id, dados.valor ? dados.valor / 100 : C.preco, dados.produto || "app-bene");
   };
   C.addProduto = function (p) {
     try { var u = JSON.parse(localStorage.getItem("bene_user") || "null"); if (u) { u.produtos = u.produtos || []; if (u.produtos.indexOf(p) < 0) u.produtos.push(p); localStorage.setItem("bene_user", JSON.stringify(u)); } } catch (e) {}
