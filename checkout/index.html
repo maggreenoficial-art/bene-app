@@ -231,7 +231,13 @@
     return Object.assign({}, C.utm || {}, t);
   }
 
+  // espera o t.js do Métricas Rápida carregar (até 3 s) para o pagamento levar o vid
+  async function esperarRastreio() {
+    for (let i = 0; i < 30 && !window.ltUtm; i++) await new Promise(r => setTimeout(r, 100));
+  }
+
   async function criarPagamento() {
+    await esperarRastreio();
     // reaproveita o mesmo pagamento se a página for recarregada
     try {
       const s = JSON.parse(sessionStorage.getItem("bene_pi") || "null");
