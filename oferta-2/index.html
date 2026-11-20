@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Livrinho personalizado da Bené</title>
+<meta name="theme-color" content="#8BD17C">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ofertas.css">
+<script src="/config.js"></script>
+</head>
+<body>
+<div class="faixa">Pagamento confirmado! Seu aplicativo já está liberado.<small>Não feche esta página: o acesso aparece logo em seguida.</small></div>
+<main>
+  <span class="etiqueta">Oferta única, só nesta página</span>
+  <h1>Um livrinho em que seu filho é o personagem</h1>
+  <p class="lead">Uma história de 12 páginas sobre a Bené e o Bom Pastor, com <b>o nome do seu filho</b> e <b>um bonequinho parecido com ele</b>.</p>
+  <div class="cartao">
+    <div id="capa"></div>
+    <label class="campo">Experimente: digite o nome do seu filho<input id="nomeFilho" maxlength="24" autocomplete="off" placeholder="Ex.: Davi"></label>
+    <div class="opts" id="genero"><button type="button" data-g="m" class="sel">Menino</button><button type="button" data-g="f">Menina</button></div>
+  </div>
+  <div class="cartao">
+    <ul class="lista">
+      <li><span><b>O nome dele em todas as páginas</b> da história.</span></li>
+      <li><span><b>Um bonequinho parecido com ele:</b> você escolhe a cor da pele, do cabelo e da roupa.</span></li>
+      <li><span>Uma dedicatória especial com o Salmo 139: "fizeste de modo especial e admirável".</span></li>
+      <li><span>Para ler no aplicativo e imprimir quantas vezes quiser. Um presente lindo para guardar.</span></li>
+    </ul>
+  </div>
+  <div class="cartao">
+    <div class="preco"><div class="valor"><small>R$</small> 37</div><p>Pagamento único. Você monta o livrinho no aplicativo em 1 minuto.</p></div>
+    <button type="button" class="botao" id="sim" style="margin-top:14px"><span>Sim, quero o livrinho personalizado</span></button>
+  <div id="pagar" hidden><div id="pe"></div><button type="button" class="botao" id="pagarBtn">Pagar</button></div>
+  <p class="msg" id="msg" role="alert"></p>
+    <p class="nota">Um toque só: cobramos no mesmo cartão da compra, sem digitar nada. Se você pagou com Pix, aparece um Pix novo.</p>
+  </div>
+  <div class="garantia"><i>7</i><span><b>Também tem 7 dias de garantia.</b> Se não for para vocês, devolvemos o valor.</span></div>
+  <a href="#" class="nao" id="nao">Não, obrigado.</a>
+</main>
+<script>window.UPSELL = { oferta: "livro", valor: 37, precoTxt: "R$ 37,00", botao: "Sim, quero o livrinho personalizado", sim: "fim", nao: "/oferta-3/" };</script>
+<script src="/livro.js"></script>
+<script>
+(function () {
+  var L = window.BENE_LIVRO, c = { nome: "", g: "m", pele: 0, cab: 1, tipo: "liso", roupa: 0, completo: true };
+  try { var s = JSON.parse(localStorage.getItem("bene_livro") || "null"); if (s) { c.nome = s.nome || ""; c.g = s.g || "m"; } } catch (e) {}
+  var inp = document.getElementById("nomeFilho"); inp.value = c.nome;
+  function cap(n) { return n.split(" ").map(function (w, i) { return i && /^(de|da|do|dos|das|e)$/i.test(w) ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1); }).join(" "); }
+  function nome() { return cap(inp.value.trim().replace(/\s+/g, " ")) || "Seu filho"; }
+  function desenhar() {
+    var cc = Object.assign({}, c, { nome: nome() });
+    document.getElementById("capa").innerHTML = L.paginaHtml(L.paginas(cc)[0], 0);
+    var n = cap(inp.value.trim().split(" ")[0] || "");
+    window.UPSELL.botaoAtual = function () { return n ? "Sim, quero o livrinho de " + n : "Sim, quero o livrinho personalizado"; };
+    var b = document.querySelector("#sim span"); if (b && !document.getElementById("sim").disabled) b.textContent = window.UPSELL.botaoAtual();
+  }
+  [].forEach.call(document.querySelectorAll("#genero button"), function (b) {
+    if (b.dataset.g === c.g) { [].forEach.call(document.querySelectorAll("#genero button"), function (x) { x.classList.toggle("sel", x === b); }); }
+    b.onclick = function () { c.g = b.dataset.g; [].forEach.call(document.querySelectorAll("#genero button"), function (x) { x.classList.toggle("sel", x === b); }); desenhar(); guardar(); };
+  });
+  function guardar() { var n = inp.value.trim().replace(/\s+/g, " "); try { var s = JSON.parse(localStorage.getItem("bene_livro") || "{}") || {}; if (n) s.nome = cap(n); s.g = c.g; localStorage.setItem("bene_livro", JSON.stringify(s)); } catch (e) {} }
+  inp.oninput = function () { desenhar(); guardar(); };
+  window.UPSELL.antes = guardar;
+  desenhar();
+})();
+</script>
+<script src="/upsell.js"></script>
+</body>
+</html>

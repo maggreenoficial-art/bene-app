@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Livrinho da Bené com o nome do seu filho</title>
+<meta name="theme-color" content="#8BD17C">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ofertas.css">
+<script src="/config.js"></script>
+</head>
+<body>
+<div class="faixa">Pagamento confirmado! Seu aplicativo já está liberado.<small>Não feche esta página: o acesso aparece logo em seguida.</small></div>
+<main>
+  <span class="etiqueta">Espere, tem uma versão mais simples</span>
+  <h1>Que tal o livrinho só com o nome dele, por R$ 19?</h1>
+  <p class="lead">É a mesma história da Bené e do Bom Pastor, com <b>o nome do seu filho em todas as páginas</b>. Só não tem o bonequinho personalizado.</p>
+  <div class="cartao"><div id="capa"></div></div>
+  <div class="cartao">
+    <ul class="lista">
+      <li><span><b>O nome dele em todas as 12 páginas</b> da história.</span></li>
+      <li><span>A dedicatória especial com o Salmo 139.</span></li>
+      <li><span>Para ler no aplicativo e imprimir quantas vezes quiser.</span></li>
+    </ul>
+  </div>
+  <div class="cartao">
+    <div class="preco"><div class="valor"><small>R$</small> 19</div><p>Pagamento único. Liberado na hora, no seu aplicativo.</p></div>
+    <button type="button" class="botao" id="sim" style="margin-top:14px"><span>Sim, quero o livrinho por R$ 19</span></button>
+  <div id="pagar" hidden><div id="pe"></div><button type="button" class="botao" id="pagarBtn">Pagar</button></div>
+  <p class="msg" id="msg" role="alert"></p>
+    <p class="nota">Um toque só: cobramos no mesmo cartão da compra, sem digitar nada. Se você pagou com Pix, aparece um Pix novo.</p>
+  </div>
+  <a href="#" class="nao" id="nao">Não, obrigado. Quero ir para o meu acesso.</a>
+</main>
+<script src="/livro.js"></script>
+<script>
+(function () {
+  var L = window.BENE_LIVRO, c = { nome: "Seu filho", g: "m", completo: false };
+  try { var s = JSON.parse(localStorage.getItem("bene_livro") || "null"); if (s && s.nome) { c.nome = s.nome; c.g = s.g || "m"; } } catch (e) {}
+  document.getElementById("capa").innerHTML = L.paginaHtml(L.paginas(c)[0], 0);
+})();
+</script>
+<script>window.UPSELL = { oferta: "livro_nome", valor: 19, precoTxt: "R$ 19,00", botao: "Sim, quero o livrinho por R$ 19", sim: "fim", nao: "fim" };</script>
+<script src="/upsell.js"></script>
+</body>
+</html>

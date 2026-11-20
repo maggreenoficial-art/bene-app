@@ -34,6 +34,30 @@ window.BENE_CONFIG = {
     try { localStorage.setItem("bene_checkout", JSON.stringify(dados)); } catch (e) {}
     location.href = "/checkout/" + location.search;
   };
+  C.acessoEndpoint = C.checkoutEndpoint.replace("bene-checkout", "bene-acesso");
+  C.upsellEndpoint = C.checkoutEndpoint.replace("bene-checkout", "bene-upsell");
+  // conta uma compra no pixel uma vez só (o mesmo id vai pela API de Conversões, a Meta junta os dois)
+  C.contarCompra = function (id, valor, nome) {
+    var k = "bene_purchase_" + id, ja = false;
+    try { ja = !!localStorage.getItem(k); localStorage.setItem(k, "1"); } catch (e) {}
+    if (!ja && window.fbq) fbq("track", "Purchase", { value: valor, currency: "BRL", content_name: nome }, { eventID: id });
+  };
+  // compra principal confirmada no Stripe: deixa o aplicativo aberto neste aparelho e conta a compra
+  C.compraConfirmada = function (id, dados) {
+    var lead = {};
+    try { lead = JSON.parse(localStorage.getItem("bene_checkout") || "{}"); } catch (e) {}
+    var email = String(dados.email || lead.email || "").toLowerCase();
+    if (email) {
+      var antes = {}; try { antes = JSON.parse(localStorage.getItem("bene_user") || "{}") || {}; } catch (e) {}
+      var prods = ["app-bene"].concat(dados.produtos || [], antes.email === email ? (antes.produtos || []) : []).filter(function (p, i, a) { return a.indexOf(p) === i; });
+      var u = { nome: dados.nome || lead.nome || "", email: email, whatsapp: String(lead.whats || "").replace(/\D/g, ""), sent: true, pago: true, produtos: prods };
+      try { localStorage.setItem("bene_user", JSON.stringify(u)); } catch (e) {}
+    }
+    C.contarCompra(id, C.preco, "app-bene");
+  };
+  C.addProduto = function (p) {
+    try { var u = JSON.parse(localStorage.getItem("bene_user") || "null"); if (u) { u.produtos = u.produtos || []; if (u.produtos.indexOf(p) < 0) u.produtos.push(p); localStorage.setItem("bene_user", JSON.stringify(u)); } } catch (e) {}
+  };
   C.salvarLead = async function (lead) {
     if (!C.leadEndpoint) return;
     try { await fetch(C.leadEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lead), keepalive: true }); } catch (e) {}

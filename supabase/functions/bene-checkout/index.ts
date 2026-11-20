@@ -1,5 +1,5 @@
 // Checkout transparente da Bené: cria o PaymentIntent no Stripe (cartão, Pix, Apple Pay, Google Pay)
-// e registra a compra como "criado". As chaves ficam só nos secrets do Supabase:
+// e registra a compra como "criado". Cria também o cliente no Stripe para guardar o cartão (upsells de 1 clique). As chaves ficam só nos secrets do Supabase:
 // STRIPE_SECRET_KEY (sk_live ou rk_live com permissão de escrita em PaymentIntents) e STRIPE_PUBLISHABLE_KEY (pk_live).
 import { createClient } from "npm:@supabase/supabase-js@2";
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type", "access-control-allow-methods": "POST, OPTIONS" };
@@ -20,8 +20,22 @@ Deno.serve(async (req: Request) => {
   const utm = (b.utm && typeof b.utm === "object" && JSON.stringify(b.utm).length < 4000) ? b.utm as Record<string, string> : {};
   if (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10) return json({ erro: "dados" }, 400);
 
+  // cliente no Stripe: guarda o cartão para os upsells de 1 clique (se a chave não puder criar clientes, segue sem)
+  let customer = "";
+  try {
+    const c = new URLSearchParams({ email, name: nome, phone: "+55" + whatsapp });
+    c.set("metadata[origem]", "bene-checkout");
+    const rc = await fetch("https://api.stripe.com/v1/customers", { method: "POST", headers: { Authorization: `Bearer ${sk}`, "Content-Type": "application/x-www-form-urlencoded" }, body: c });
+    const jc = await rc.json();
+    if (rc.ok && jc.id) customer = jc.id; else console.error("customer", jc?.error?.type, jc?.error?.code, jc?.error?.message);
+  } catch (e) { console.error("customer falhou", String(e)); }
+
   const f = new URLSearchParams();
   f.set("amount", String(PRECO_CENTAVOS));
+  if (customer) {
+    f.set("customer", customer);
+    f.set("payment_method_options[card][setup_future_usage]", "off_session");
+  }
   f.set("currency", "brl");
   f.set("automatic_payment_methods[enabled]", "true");
   f.set("description", "Aplicativo da Bené: Método Fono-Fé + 5 bônus");
@@ -58,5 +72,5 @@ Deno.serve(async (req: Request) => {
   }
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   await sb.from("bene_compras").insert({ payment_intent: pi.id, email, nome, whatsapp, valor: PRECO_CENTAVOS, variante: variante || null, utm });
-  return json({ clientSecret: pi.client_secret, publishableKey: pk, id: pi.id, valor: PRECO_CENTAVOS });
+  return json({ clientSecret: pi.client_secret, publishableKey: pk, id: pi.id, valor: PRECO_CENTAVOS, umClique: !!customer });
 });

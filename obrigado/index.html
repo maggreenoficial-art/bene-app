@@ -30,6 +30,9 @@
   .passos li{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start;font-size:.95rem}
   .passos .n{width:36px;height:36px;border:var(--contorno);border-radius:12px;background:var(--azul);color:#fff;display:grid;place-items:center;font-family:'Baloo 2',sans-serif;font-weight:800}
   .passos b{display:block}
+  .pedido{list-style:none;padding:0;margin:14px 0 0;text-align:left;display:grid;gap:6px}
+  .pedido li{background:var(--sol-claro);border:2.5px solid var(--tinta);border-radius:12px;padding:8px 12px;font-weight:800;font-size:.95rem}
+  .pedido li::before{content:"✓ ";color:#3a7d2e}
   .mini{font-size:.85rem;color:var(--tinta-suave);margin-top:16px}
 </style>
 </head>
@@ -52,29 +55,23 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const ACESSO = C.checkoutEndpoint.replace("bene-checkout", "bene-acesso");
 
-  function liberarApp(dados) {
-    // deixa o aplicativo já aberto com os dados de quem comprou (confirmados no Stripe)
-    const email = (dados.email || lead.email || "").toLowerCase();
-    if (!email) return;
-    try { localStorage.setItem("bene_user", JSON.stringify({ nome: dados.nome || lead.nome || "", email, whatsapp: String(lead.whats || "").replace(/\D/g, ""), sent: true, pago: true })); } catch (e) {}
-  }
-
+  const NOMES = { "app-bene": "Aplicativo da Bené + 5 bônus", niveis56: "Níveis 5 e 6: 30 historinhas", livro: "Livrinho personalizado", livro_nome: "Livrinho com o nome do seu filho" };
   function pago(dados) {
-    liberarApp(dados);
+    C.compraConfirmada(id, dados);
     if (dados.nome) nome = dados.nome.split(" ")[0];
     if (dados.email) lead.email = dados.email;
-    const chave = "bene_purchase_" + id;
-    let jaContou = false;
-    try { jaContou = !!localStorage.getItem(chave); localStorage.setItem(chave, "1"); } catch (e) {}
-    if (!jaContou && window.fbq) fbq("track", "Purchase", { value: C.preco, currency: "BRL", content_name: "app-bene" }, { eventID: id || undefined });
+    const prods = (dados.produtos && dados.produtos.length ? dados.produtos : ["app-bene"]).filter(p => NOMES[p]);
+    const temLivro = prods.indexOf("livro") >= 0 || prods.indexOf("livro_nome") >= 0;
     el.innerHTML = `<span class="selo">Pagamento confirmado</span>
       <h1>${nome ? "Bem-vinda, " + esc(nome) + "!" : "Bem-vinda à turma da Bené!"}</h1>
       <p style="margin-top:10px">O aplicativo da Bené já está liberado. Comece hoje pelo Dia 1, com 10 minutinhos.</p>
+      <ul class="pedido">${prods.map(p => "<li>" + NOMES[p] + "</li>").join("")}</ul>
       <a class="botao" href="/">Abrir o aplicativo</a>
       <ul class="passos">
         <li><span class="n">1</span><span><b>Instale na tela inicial</b>No aplicativo, toque em "Instalar". No iPhone: botão Compartilhar e depois "Adicionar à Tela de Início".</span></li>
         <li><span class="n">2</span><span><b>Entre sempre com o mesmo e-mail</b>${lead.email ? esc(lead.email) : "O e-mail que você usou na compra"}.</span></li>
         <li><span class="n">3</span><span><b>Os PDFs estão na aba Imprimir</b>O kit completo e os bônus, para baixar quando quiser.</span></li>
+        ${temLivro ? '<li><span class="n">4</span><span><b>Monte o livrinho</b>Na tela inicial do aplicativo, toque no livrinho e digite o nome do seu filho.</span></li>' : ""}
       </ul>
       <p class="mini">O recibo do pagamento foi enviado para o seu e-mail.</p>`;
   }
@@ -100,7 +97,13 @@
         const r = await fetch(ACESSO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ payment_intent: id }) });
         j = await r.json();
       } catch (e) { j = { status: "aguardando" }; }
-      if (j.status === "pago") { clearInterval(iv); try { sessionStorage.removeItem("bene_pi"); } catch (e) {} pago(j); }
+      if (j.status === "pago") {
+        clearInterval(iv); try { sessionStorage.removeItem("bene_pi"); } catch (e) {}
+        // quem pagou com Pix (ou com redirecionamento) ainda não viu as ofertas de 1 clique
+        let viu = false; try { viu = !!localStorage.getItem("bene_ofertas_" + id); } catch (e) {}
+        if (!viu) { C.compraConfirmada(id, j); location.replace("/oferta-1/?pi=" + encodeURIComponent(id)); return; }
+        pago(j);
+      }
       else if (j.status === "falhou" || j.status === "desconhecido") { clearInterval(iv); falhou(); }
       else { esperando(); if (tentativas > 150) clearInterval(iv); }
     };

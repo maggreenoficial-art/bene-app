@@ -13,6 +13,8 @@ async function assinaturaValida(payload: string, header: string, segredo: string
   return v1s.some((v) => v.length === hex.length && [...v].reduce((acc, c, i) => acc | (c.charCodeAt(0) ^ hex.charCodeAt(i)), 0) === 0);
 }
 
+const PRODUTOS = ["app-bene", "niveis56", "livro", "livro_nome"];
+
 async function sha256(v: string): Promise<string> {
   const d = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(v)));
   return Array.from(d).map((x) => x.toString(16).padStart(2, "0")).join("");
@@ -41,7 +43,7 @@ async function compraParaMeta(pi: any) {
     data: [{
       event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), event_id: pi.id, action_source: "website",
       event_source_url: m.url || "https://www.beneaovelhinha.online/obrigado/", user_data: ud,
-      custom_data: { value: pi.amount / 100, currency: String(pi.currency || "brl").toUpperCase(), content_name: "app-bene", order_id: pi.id },
+      custom_data: { value: pi.amount / 100, currency: String(pi.currency || "brl").toUpperCase(), content_name: String(m.produto || "app-bene"), order_id: pi.id },
     }],
   };
   const teste = Deno.env.get("META_TEST_CODE");
@@ -67,10 +69,12 @@ Deno.serve(async (req: Request) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const metodo = (pi.payment_method_types && pi.payment_method_types.length === 1) ? pi.payment_method_types[0] : null;
   const m = pi.metadata ?? {};
-  const base = { payment_intent: pi.id, email: m.email || pi.receipt_email || "", nome: m.nome || null, whatsapp: m.whatsapp || null, valor: pi.amount, moeda: pi.currency, variante: m.variante || null };
+  // a conta Stripe também recebe vendas de outros produtos: só registra os da Bené
+  if (!PRODUTOS.includes(m.produto)) return new Response("ok");
+  const base = { payment_intent: pi.id, email: String(m.email || pi.receipt_email || "").toLowerCase(), nome: m.nome || null, whatsapp: m.whatsapp || null, valor: pi.amount, moeda: pi.currency, variante: m.variante || null, produto: m.produto || "app-bene", origem: m.origem || null };
   if (ev.type === "payment_intent.succeeded") {
     await sb.from("bene_compras").upsert({ ...base, status: "pago", pago_em: new Date().toISOString(), metodo: metodo }, { onConflict: "payment_intent" });
-    if (m.produto === "app-bene") await compraParaMeta(pi);
+    if (PRODUTOS.includes(m.produto)) await compraParaMeta(pi);
   } else if (ev.type === "payment_intent.processing") {
     await sb.from("bene_compras").upsert({ ...base, status: "processando" }, { onConflict: "payment_intent" });
   } else if (ev.type === "payment_intent.payment_failed") {

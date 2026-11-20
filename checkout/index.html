@@ -305,6 +305,8 @@
   }
 
   function obrigado(id, status) {
+    // pago: segue para as ofertas de 1 clique; Pix ainda processando: a página de obrigado espera a confirmação
+    if (status === "succeeded") { location.href = "/oferta-1/?pi=" + encodeURIComponent(id); return; }
     location.href = "/obrigado/?payment_intent=" + encodeURIComponent(id) + "&redirect_status=" + encodeURIComponent(status);
   }
 

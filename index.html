@@ -116,6 +116,51 @@ input:focus{outline:3px solid var(--blue);outline-offset:1px}
 .sheet>div{width:100%;max-width:560px;background:var(--cream);border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;max-height:88%;overflow:auto}
 .sheet h2{font-size:22px}
 .steps{margin:0;padding-left:22px;line-height:1.6}
+/* historinhas (níveis 5 e 6) */
+.story{padding:18px;display:flex;flex-direction:column;gap:14px}
+.story .ttl{display:flex;align-items:center;gap:12px}
+.story .ttl img{width:76px;height:76px;object-fit:contain;flex:none}
+.story .ttl h2{font-size:24px}
+.story .txt{font-family:var(--display);font-size:25px;line-height:1.5;font-weight:600}
+.story .txt span{border-radius:8px;padding:0 2px;cursor:pointer}
+.story .txt span.on{background:var(--sun)}
+.quiz{display:flex;flex-direction:column;gap:10px;padding:16px}
+.quiz h3{font-size:21px;text-align:center}
+.opt{min-height:54px;border-radius:16px;border:2px solid var(--ink);background:var(--white);font-family:var(--display);font-size:20px;box-shadow:0 3px 0 var(--ink)}
+.opt.ok{background:#bfe6ad}
+.opt.no{background:#f9c9c9;animation:shake .3s}
+/* livrinho */
+.lv-pg{position:relative;background:var(--white);border:2px solid var(--ink);border-radius:20px;overflow:hidden;box-shadow:0 4px 0 var(--ink)}
+.lv-art{display:block;width:100%;height:auto;border-bottom:2px solid var(--ink)}
+.lv-txt{padding:14px 16px 20px;font-size:19px;line-height:1.45}
+.lv-txt h1{font-size:32px}
+.lv-pg.capa .lv-txt,.lv-pg.fim .lv-txt{text-align:center}
+.lv-txt .vers{font-style:italic;margin-top:8px}
+.lv-txt small{font-style:normal;color:var(--ink2)}
+.lv-txt .desenho{margin-top:12px;height:110px;border:3px dashed var(--line);border-radius:16px;display:grid;place-items:center;color:var(--ink2);font-size:14px}
+.lv-n{position:absolute;right:12px;bottom:6px;font-size:12px;color:var(--ink2)}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts button{min-width:52px;height:48px;padding:0 16px;border-radius:14px;border:2px solid var(--ink);background:var(--white);font-weight:800}
+.opts button.sel{box-shadow:0 0 0 3px var(--cream),0 0 0 6px var(--ink)}
+.opts button.cor{width:48px;min-width:48px;padding:0}
+.avprev{display:flex;justify-content:center;background:var(--sky2);border-radius:16px;padding:8px}
+#print{display:none}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff;height:auto}
+  #app,.sheet{display:none!important}
+  #print{display:block}
+  #print .lv-pg,#print .pst{box-shadow:none;break-after:page;page-break-after:always;border-radius:0;border:0}
+  #print .lv-art{border:2px solid #4a3426;border-radius:16px}
+  #print .lv-txt{font-size:20pt;padding:18px 6px}
+  #print .lv-txt h1{font-size:34pt}
+  #print .pst{font-family:var(--display)}
+  #print .pst img{width:150px;height:150px;object-fit:contain}
+  #print .pst h2{font-size:28pt;margin:10px 0 4px}
+  #print .pst p{font-size:22pt;line-height:1.6}
+  #print .pst .ref{font-size:12pt;color:#7a6657}
+  #print .pst .q{margin-top:28px;font-size:16pt}
+}
 @keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -123,7 +168,10 @@ input:focus{outline:3px solid var(--blue);outline-offset:1px}
 </head>
 <body>
 <div id="app"></div>
+<div id="print" aria-hidden="true"></div>
 <script src="data.js"></script>
+<script src="historias.js"></script>
+<script src="livro.js"></script>
 <script>
 (function(){
 'use strict';
@@ -131,6 +179,7 @@ var D=window.BENE, API='https://acbksachtpypwtbgwyxh.supabase.co/functions/v1/be
 var app=document.getElementById('app');
 var LS={get:function(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:function(k){try{localStorage.removeItem(k);}catch(e){}}};
 var user=LS.get('bene_user',null), prog=LS.get('bene_prog',{});
+function tem(p){return !!(user&&user.produtos&&user.produtos.indexOf(p)>=0);}
 function done(k,i){return !!(prog[k]&&prog[k][i]);}
 function mark(k,i){prog[k]=prog[k]||{};prog[k][i]=1;LS.set('bene_prog',prog);}
 function count(k){return prog[k]?Object.keys(prog[k]).length:0;}
@@ -186,8 +235,8 @@ function gate(){
     if(u.nome.length<2){err.textContent='Digite seu nome.';f.nome.focus();return;}
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u.email)){err.textContent='Confira o e-mail.';f.email.focus();return;}
     var b=f.querySelector('.btn'); b.disabled=true; b.textContent='Conferindo…'; err.textContent='';
-    temCompra(u.email).then(function(ok){
-      if(ok){user=u;LS.set('bene_user',u);route={v:'home'};render();return;}
+    temCompra(u.email).then(function(j){
+      if(j.ok){u.produtos=j.produtos||[];user=u;LS.set('bene_user',u);route={v:'home'};render();return;}
       b.disabled=false;b.textContent='Entrar';
       err.innerHTML='Não encontramos uma compra com este e-mail. Confira se é o mesmo e-mail do pagamento.';
     },function(){b.disabled=false;b.textContent='Entrar';err.textContent='Sem conexão com a internet. Tente de novo.';});
@@ -195,14 +244,14 @@ function gate(){
 }
 function temCompra(email){
   return fetch(ACESSO,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:email})})
-    .then(function(r){if(!r.ok&&r.status!==400)throw new Error('rede');return r.json();}).then(function(j){return !!(j&&j.ok);});
+    .then(function(r){if(!r.ok&&r.status!==400)throw new Error('rede');return r.json();}).then(function(j){return j||{};});
 }
 /* quem entrou antes da trava: confere uma vez se tem compra */
 function conferirAcesso(){
-  if(!user||user.pago)return;
-  temCompra(user.email).then(function(ok){
-    if(ok){user.pago=true;LS.set('bene_user',user);}
-    else{user=null;LS.del('bene_user');render();}
+  if(!user)return;
+  temCompra(user.email).then(function(j){
+    if(j.ok){var antes=JSON.stringify(user.produtos||[]);user.pago=true;user.produtos=j.produtos||[];LS.set('bene_user',user);if(antes!==JSON.stringify(user.produtos))render();}
+    else if(!user.pago){user=null;LS.del('bene_user');render();}
   },function(){});
 }
 function sheet(html){var s=document.createElement('div');s.className='sheet';s.innerHTML='<div role="dialog" aria-modal="true">'+html+'</div>';s.onclick=function(e){if(e.target===s)s.remove();};document.body.appendChild(s);return s;}
@@ -237,15 +286,22 @@ function home(){
   else body+='<div class="card win"><h2>Kit completo!</h2><p>Todas as atividades foram feitas. Parabéns!</p></div>';
   body+='<h2 class="sec">Seu material</h2><div class="list">'
    +'<button class="card item" data-tab="levels"><div class="badge" style="background:var(--blue)">'+IC.pen+'</div><div class="grow"><h3>Fazer no aplicativo</h3><p class="muted">120 atividades e 4 bônus para fazer com o dedo</p></div>'+IC.chev+'</button>'
-   +'<button class="card item" data-tab="print"><div class="badge" style="background:var(--coral)">'+IC.print+'</div><div class="grow"><h3>Baixar para imprimir</h3><p class="muted">Kit completo e bônus em PDF</p></div>'+IC.chev+'</button></div>';
+   +'<button class="card item" data-tab="print"><div class="badge" style="background:var(--coral)">'+IC.print+'</div><div class="grow"><h3>Baixar para imprimir</h3><p class="muted">Kit completo e bônus em PDF</p></div>'+IC.chev+'</button>'+extras()+'</div>';
   if(!standalone)body+='<div class="card pad row"><div class="grow"><h3 style="font-size:18px">Instale no celular</h3><p class="muted">Fica na tela inicial, como um aplicativo.</p></div><button class="btn" id="inst">Instalar</button></div>';
   shell('',body);
   [].forEach.call(app.querySelectorAll('.badge svg'),function(s){s.style.width='28px';s.style.height='28px';});
   var b=document.getElementById('inst'); if(b)b.onclick=install;
 }
+function extras(){
+  var h='';
+  if(tem('niveis56'))h+='<button class="card item"'+goAttr({v:'hist'})+'><img class="th" src="img/p/livro.webp" alt=""><div class="grow"><h3>Níveis 5 e 6: Historinhas</h3><p class="muted">30 historinhas da Bíblia para ler sozinho</p></div>'+IC.chev+'</button>';
+  if(tem('livro')||tem('livro_nome')){var c=LS.get('bene_livro',null);h+='<button class="card item"'+goAttr({v:'livro'})+'><img class="th" src="img/bene.webp" alt=""><div class="grow"><h3>'+(c&&c.nome?esc(c.nome)+' e a Bené':'Livrinho personalizado')+'</h3><p class="muted">'+(c&&c.nome?'O livrinho com o nome do seu filho':'Toque para montar o livrinho')+'</p></div>'+IC.chev+'</button>';}
+  return h;
+}
 function levels(){
   var body='<h2 class="sec">Grafismo fonético</h2><p class="muted">Bata palma em cada pedacinho e cubra a palavra com o dedo.</p><div class="list">'+D.levels.map(function(L,i){
     var c=count(L.id);return '<button class="card item"'+goAttr({v:'level',l:i})+'><div class="badge" style="background:'+L.cor+'">'+(i+1)+'</div><div class="grow"><h3>'+L.nome+'</h3><p class="muted">'+L.sub+' · '+c+' de '+L.itens.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(c/L.itens.length*100)+'%"></i></div></div>'+IC.chev+'</button>';}).join('')+'</div>';
+  if(tem('niveis56'))body+='<h2 class="sec">Historinhas da Bíblia</h2><div class="list">'+HIST.map(function(L,i){var c=count(L.id);return '<button class="card item"'+goAttr({v:'histL',l:i})+'><div class="badge" style="background:'+L.cor+'">'+(i+5)+'</div><div class="grow"><h3>'+L.nome+'</h3><p class="muted">'+L.sub+' · '+c+' de '+L.itens.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(c/L.itens.length*100)+'%"></i></div></div>'+IC.chev+'</button>';}).join('')+'</div>';
   shell('',body);
 }
 function level(){
@@ -373,7 +429,73 @@ function printView(){
   shell('','<h2 class="sec">Baixar para imprimir</h2><p class="muted">Arquivos em PDF, no tamanho A4. Imprima quantas vezes quiser.</p><div class="list">'+P.map(function(p){
     return '<div class="card pad"><div class="row"><div class="badge" style="width:48px;height:48px;border-radius:14px;border:2px solid var(--ink);display:grid;place-items:center;color:#fff;background:'+p[3]+'">'+IC.print.replace('<svg','<svg width="24" height="24"')+'</div><div class="grow"><h3 style="font-size:18px">'+p[1]+'</h3><p class="muted">'+p[2]+'</p></div></div><div class="actions" style="margin-top:12px;justify-content:flex-start"><a class="btn" href="pdf/'+p[0]+'" download>'+IC.down+'Baixar PDF</a><a class="btn ghost" href="pdf/'+p[0]+'" target="_blank" rel="noopener">Abrir</a></div></div>';}).join('')+'</div>');
 }
-var VIEWS={home:home,levels:levels,level:level,act:act,bonus:bonus,alpha:alpha,letter:letter,verses:verses,paint:paintView,puzzle:puzzle,songs:songs,song:song,print:printView};
+/* ---------- níveis 5 e 6: historinhas ---------- */
+var HIST=window.BENE_HIST||[];
+function hist(){
+  if(!tem('niveis56')){tab('home');return;}
+  shell('Níveis 5 e 6','<div class="card hero"><img src="img/p/livro.webp" alt=""><div class="grow"><h2>Historinhas da Bíblia</h2><p class="muted">Seu filho lê sozinho e responde uma perguntinha no fim.</p></div></div><div class="list">'+HIST.map(function(L,i){var c=count(L.id);
+    return '<button class="card item"'+goAttr({v:'histL',l:i})+'><div class="badge" style="background:'+L.cor+'">'+(i+5)+'</div><div class="grow"><h3>'+L.nome+'</h3><p class="muted">'+L.sub+' · '+c+' de '+L.itens.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(c/L.itens.length*100)+'%"></i></div></div>'+IC.chev+'</button>';}).join('')
+    +'</div><button class="btn ghost wide" id="pr">'+IC.print.replace('<svg','<svg width="22" height="22"')+'Imprimir as historinhas</button>',{back:true});
+  document.getElementById('pr').onclick=function(){imprimir(HIST.map(function(L){return L.itens.map(function(it){return '<section class="pst"><img src="img/p/'+it.p+'.webp" alt=""><h2>'+esc(it.t)+'</h2><p class="ref">'+L.nome+' · '+esc(it.r)+'</p><p>'+esc(it.x)+'</p><p class="q">'+esc(it.q[0])+' ______________________</p></section>';}).join('');}).join(''));};
+}
+function histL(){
+  var L=HIST[route.l]; if(!L||!tem('niveis56')){tab('home');return;}
+  shell(L.nome,'<p class="muted">'+L.sub+'. Toque em uma historinha.</p><div class="grid">'+L.itens.map(function(it,j){
+    return '<button class="card tile'+(done(L.id,j)?' done':'')+'"'+goAttr({v:'story',l:route.l,i:j})+' aria-label="'+esc(it.t)+'">'+(done(L.id,j)?'<span class="ok">'+IC.ok+'</span>':'')+'<img src="img/p/'+it.p+'.webp" alt="" loading="lazy"><b>'+esc(it.t)+'</b></button>';}).join('')+'</div>',{back:true});
+}
+function story(){
+  var L=HIST[route.l], it=L&&L.itens[route.i]; if(!it||!tem('niveis56')){tab('home');return;}
+  var last=route.i>=L.itens.length-1, ops=shuffle(it.q[1].map(function(o,i){return i;}));
+  var words=it.x.split(' ').map(function(w){return '<span>'+esc(w)+'</span>';}).join(' ');
+  shell(L.nome+' · '+(route.i+1)+' de '+L.itens.length,'<div class="card story"><div class="ttl"><img src="img/p/'+it.p+'.webp" alt=""><div><h2>'+esc(it.t)+'</h2><p class="muted">'+esc(it.r)+'</p></div></div><div class="txt">'+words+'</div><p class="hint">Toque em cada palavra enquanto lê. Se travar, leia junto com ele.</p></div>'
+    +'<div id="after"><button class="btn wide" id="li">Li a historinha!</button></div>',{back:true});
+  [].forEach.call(app.querySelectorAll('.story .txt span'),function(w){w.onclick=function(){w.classList.toggle('on');tone([520]);};});
+  document.getElementById('li').onclick=function(){
+    var a=document.getElementById('after');
+    a.innerHTML='<div class="card quiz"><h3>'+esc(it.q[0])+'</h3>'+ops.map(function(i){return '<button class="opt" data-i="'+i+'">'+esc(it.q[1][i])+'</button>';}).join('')+'</div>';
+    [].forEach.call(a.querySelectorAll('.opt'),function(b){b.onclick=function(){
+      if(+b.dataset.i!==it.q[2]){bad();b.classList.remove('no');void b.offsetWidth;b.classList.add('no');return;}
+      b.classList.add('ok');mark(L.id,route.i);win();
+      setTimeout(function(){a.innerHTML='<div class="card win"><h2>Muito bem!</h2><p>Leu e entendeu a historinha.</p><div class="actions"><button class="btn ghost" id="again2">Ler de novo</button><button class="btn" id="nx">'+(last?'Ver o nível':'Próxima')+'</button></div></div>';
+        document.getElementById('again2').onclick=function(){go({v:'story',l:route.l,i:route.i},true);};
+        document.getElementById('nx').onclick=function(){if(last)back();else go({v:'story',l:route.l,i:route.i+1},true);};},500);
+    };});
+    a.scrollIntoView({behavior:'smooth',block:'center'});
+  };
+}
+/* ---------- livrinho personalizado ---------- */
+var LV=window.BENE_LIVRO;
+function livro(){
+  var completo=tem('livro'); if(!completo&&!tem('livro_nome')){tab('home');return;}
+  var c=LS.get('bene_livro',null);
+  if(!c||!c.nome||route.edit){livroForm(completo,c||{});return;}
+  c.completo=completo;
+  var pgs=LV.paginas(c);
+  shell(c.nome+' e a Bené','<div class="list">'+pgs.map(LV.paginaHtml).join('')+'</div><div class="actions"><button class="btn ghost" id="ed">Editar</button><button class="btn" id="pr">'+IC.print.replace('<svg','<svg width="22" height="22"')+'Imprimir ou salvar PDF</button></div><p class="fine">Para salvar em PDF, escolha "Salvar como PDF" na tela de impressão.</p>',{back:true});
+  document.getElementById('ed').onclick=function(){go({v:'livro',edit:1});};
+  document.getElementById('pr').onclick=function(){imprimir(pgs.map(LV.paginaHtml).join(''));};
+}
+function livroForm(completo,c){
+  c={nome:c.nome||'',g:c.g||'m',pele:c.pele|0,cab:c.cab|0,tipo:c.tipo||'liso',roupa:c.roupa|0};
+  function grupo(rot,k,vals,cores){return '<label>'+rot+'</label><div class="opts" data-k="'+k+'">'+vals.map(function(v,i){var val=cores?i:v[0];return '<button type="button" class="'+(cores?'cor':'')+(String(c[k])===String(val)?' sel':'')+'" data-v="'+val+'"'+(cores?' style="background:'+v+'" aria-label="'+LV.NOMES[k][i]+'"':'')+'>'+(cores?'':v[1])+'</button>';}).join('')+'</div>';}
+  var body='<div class="card pad" style="display:flex;flex-direction:column;gap:12px"><h2 style="font-size:22px">'+(completo?'Monte o livrinho':'Qual é o nome do seu filho?')+'</h2>'
+    +(completo?'<div class="avprev" id="av"></div>':'')
+    +'<label>Nome da criança<input id="nm" maxlength="24" value="'+esc(c.nome)+'" autocomplete="off"></label>'
+    +grupo('É menino ou menina?','g',[['m','Menino'],['f','Menina']])
+    +(completo?grupo('Cor da pele','pele',LV.PELES,true)+grupo('Cor do cabelo','cab',LV.CABELOS,true)+grupo('Cabelo','tipo',[['liso','Liso'],['cacheado','Cacheado']])+grupo('Cor da roupa','roupa',LV.ROUPAS,true):'')
+    +'<div class="err" id="er"></div><button class="btn wide" id="ok">Ver o livrinho</button></div>';
+  shell('Livrinho da Bené',body,{back:true});
+  function prev(){var a=document.getElementById('av');if(a)a.innerHTML=LV.avatarSvg(c,130);}
+  prev();
+  [].forEach.call(app.querySelectorAll('.opts'),function(g){[].forEach.call(g.querySelectorAll('button'),function(b){b.onclick=function(){var k=g.dataset.k,v=b.dataset.v;c[k]=(k==='g'||k==='tipo')?v:+v;[].forEach.call(g.querySelectorAll('button'),function(x){x.classList.toggle('sel',x===b);});prev();};});});
+  document.getElementById('ok').onclick=function(){
+    var n=document.getElementById('nm').value.trim().replace(/\s+/g,' ');
+    if(n.length<2){document.getElementById('er').textContent='Digite o nome da criança.';return;}
+    c.nome=n.split(' ').map(function(w,i){return i&&/^(de|da|do|dos|das|e)$/i.test(w)?w.toLowerCase():w.charAt(0).toUpperCase()+w.slice(1);}).join(' ');LS.set('bene_livro',c);go({v:'livro'},true);
+  };
+}
+function imprimir(html){var d=document.getElementById('print');d.innerHTML=html;setTimeout(function(){window.print();},300);}
+var VIEWS={hist:hist,histL:histL,story:story,livro:livro,home:home,levels:levels,level:level,act:act,bonus:bonus,alpha:alpha,letter:letter,verses:verses,paint:paintView,puzzle:puzzle,songs:songs,song:song,print:printView};
 function render(){[].forEach.call(document.querySelectorAll('.sheet'),function(s){s.remove();});if(!user){gate();return;}(VIEWS[route.v]||home)();}
 render(); conferirAcesso();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});
