@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veja o aplicativo da Bené funcionando: seu filho lendo com fé</title>
+<meta name="description" content="Veja na tela como seu filho aprende a ler com a ovelhinha Bené: toca nas sílabas, cobre as letras, monta palavras e lê as primeiras frases da Bíblia. R$ 37, pagamento único.">
+<meta property="og:title" content="Veja o aplicativo da Bené funcionando">
+<meta property="og:description" content="120 atividades para seu filho ler com fé, em 10 minutinhos por dia. R$ 37, pagamento único.">
+<meta property="og:image" content="/oferta/img/og.jpg">
+<meta name="theme-color" content="#7EC8F2">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
+<script src="https://www.metricasrapida.cloud/t.js" async></script>
+<style>
+  :root{
+    --ceu:#7EC8F2; --ceu-claro:#EAF6FE; --ceu-fundo:#F4FAFF;
+    --tinta:#4A3426; --tinta-suave:#6B5546;
+    --sol:#FFC94A; --sol-claro:#FFF4D6;
+    --pasto:#8BD17C; --pasto-claro:#EAF7E6;
+    --coral:#F26B6B; --coral-claro:#FDE9E7; --azul:#5BA8E8; --lilas:#B8A4EE; --lilas-claro:#F1ECFD;
+    --contorno:3px solid var(--tinta);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;overflow-x:hidden;font-family:'Nunito',system-ui,sans-serif;color:var(--tinta);background:var(--ceu-fundo);font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  img,video{display:block;max-width:100%}
+  h1,h2,h3{font-family:'Baloo 2',system-ui,sans-serif;line-height:1.08;margin:0;letter-spacing:-.01em}
+  h1{font-size:clamp(2.3rem,8.4vw,4rem);font-weight:800}
+  h2{font-size:clamp(1.9rem,6.6vw,3rem);font-weight:800}
+  h3{font-size:1.3rem;font-weight:700}
+  p{margin:0 0 1em}
+  b{font-weight:800}
+  :focus-visible{outline:4px solid var(--azul);outline-offset:3px;border-radius:10px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* topo */
+  .topo{position:sticky;top:0;z-index:20;background:var(--ceu);border-bottom:var(--contorno)}
+  .topo .wrap{display:flex;align-items:center;justify-content:space-between;height:66px}
+  .topo img{width:78px}
+  .topo a{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.05rem;color:var(--tinta);text-decoration:none;background:var(--sol);border:var(--contorno);border-radius:99px;padding:5px 16px;box-shadow:3px 3px 0 var(--tinta)}
+
+  .botao{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.35rem;line-height:1.2;color:var(--tinta);background:var(--pasto);border:var(--contorno);border-radius:20px;box-shadow:6px 6px 0 var(--tinta);padding:16px 30px;text-decoration:none;cursor:pointer;transition:transform .08s,box-shadow .08s}
+  .botao:active{transform:translate(3px,3px);box-shadow:3px 3px 0 var(--tinta)}
+  .garantias{display:flex;flex-wrap:wrap;gap:6px 16px;margin:14px 0 0;padding:0;list-style:none;font-size:.92rem;font-weight:800;color:var(--tinta-suave)}
+  .garantias li{display:flex;align-items:center;gap:6px}
+  .garantias svg{width:18px;height:18px;flex:none}
+
+  /* celular com o app rodando */
+  .cel{position:relative;width:min(300px,74vw);aspect-ratio:1/2;border:14px solid var(--tinta);border-radius:46px;background:var(--tinta);box-shadow:14px 18px 0 rgba(74,52,38,.22);flex:none}
+  .cel video,.cel img{width:100%;height:100%;object-fit:cover;border-radius:32px;background:#fff8ec}
+  .cel.p{width:min(230px,42vw);border-width:11px;border-radius:38px}
+  .cel.p video,.cel.p img{border-radius:26px}
+  .dupla{display:flex;gap:18px;justify-content:center;align-items:flex-start}
+  .dupla .cel:nth-child(2){margin-top:46px}
+
+  /* abertura */
+  .hero{background:var(--ceu);border-bottom:var(--contorno);padding:34px 0 50px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:-40%;background:repeating-conic-gradient(from 0deg at 50% 60%,rgba(255,255,255,.16) 0 9deg,transparent 9deg 18deg);pointer-events:none}
+  .hero .wrap{position:relative;display:grid;gap:30px;justify-items:center;text-align:center}
+  .hero h1{color:#fff;-webkit-text-stroke:2px var(--tinta);paint-order:stroke fill;text-shadow:0 5px 0 var(--tinta)}
+  .hero .sub{font-size:1.15rem;font-weight:700;max-width:34ch;margin:12px auto 0}
+  .hero .garantias{justify-content:center;color:var(--tinta)}
+  .selo{position:absolute;right:-18px;top:46px;width:118px;height:118px;border-radius:50%;background:var(--sol);border:var(--contorno);box-shadow:4px 5px 0 var(--tinta);display:grid;place-items:center;text-align:center;transform:rotate(-10deg);font-family:'Baloo 2',sans-serif;font-weight:800;line-height:.95}
+  .selo small{display:block;font-size:.95rem}
+  .selo span{font-size:2.1rem}
+  @media (min-width:880px){
+    .hero .wrap{grid-template-columns:1.1fr .9fr;text-align:left;justify-items:start;align-items:center}
+    .hero .sub{margin-left:0}
+    .hero .garantias{justify-content:flex-start}
+  }
+
+  /* demonstrações */
+  .demo{padding:64px 0;border-bottom:var(--contorno)}
+  .demo .wrap{display:grid;gap:30px;justify-items:center}
+  .demo .txt{max-width:34rem;text-align:center}
+  .demo h2{margin-bottom:14px}
+  .demo .txt p{font-size:1.12rem}
+  .passo{display:inline-grid;place-items:center;width:54px;height:54px;border-radius:16px;border:var(--contorno);background:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.6rem;box-shadow:3px 3px 0 var(--tinta);margin-bottom:12px}
+  .silabas{display:flex;gap:10px;justify-content:center;margin:6px 0 16px;flex-wrap:wrap}
+  .silabas span{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;border:var(--contorno);border-radius:14px;box-shadow:3px 3px 0 var(--tinta);padding:0 16px;line-height:1.5}
+  .c1{background:var(--coral)} .c2{background:var(--azul)} .c3{background:#5FA84F} .c4{background:#F2AE16}
+  .b-sol{background:var(--sol-claro)} .b-verde{background:var(--pasto-claro)} .b-coral{background:var(--coral-claro)} .b-lilas{background:var(--lilas-claro)} .b-ceu{background:var(--ceu-claro)}
+  @media (min-width:880px){
+    .demo .wrap{grid-template-columns:1fr 1fr;align-items:center}
+    .demo .txt{text-align:left}
+    .demo .silabas{justify-content:flex-start}
+    .demo.inv .txt{order:2}
+  }
+
+  .faixa-cta{background:var(--tinta);color:#fff;padding:34px 0;text-align:center;border-bottom:var(--contorno)}
+  .faixa-cta p{font-family:'Baloo 2',sans-serif;font-size:1.6rem;font-weight:800;line-height:1.15;margin:0 0 16px}
+  .faixa-cta .botao{background:var(--sol)}
+
+  /* método */
+  .metodo{padding:64px 0;background:#fff;border-bottom:var(--contorno)}
+  .metodo h2{text-align:center;margin-bottom:10px}
+  .metodo .apoio{text-align:center;max-width:36rem;margin:0 auto 28px;font-size:1.1rem}
+  .estimulos{list-style:none;padding:0;margin:0 auto;max-width:880px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .estimulos li{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;border:var(--contorno);border-radius:18px;padding:12px 14px;background:var(--ceu-fundo)}
+  .estimulos .n{width:48px;height:48px;border-radius:14px;border:var(--contorno);display:grid;place-items:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.3rem;color:#fff}
+  .estimulos b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.2rem;line-height:1.1}
+  .estimulos span{font-size:.95rem;color:var(--tinta-suave);line-height:1.35}
+
+  /* oferta */
+  .oferta{padding:64px 0;background:var(--sol);border-bottom:var(--contorno)}
+  .caixa{max-width:620px;margin:0 auto;background:#fff;border:4px solid var(--tinta);border-radius:30px;box-shadow:9px 9px 0 var(--tinta);padding:30px 24px;text-align:center}
+  .caixa h2{margin-bottom:6px}
+  .itens{list-style:none;padding:0;margin:20px 0;text-align:left;display:grid;gap:10px}
+  .itens li{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;font-weight:700;line-height:1.35}
+  .itens .ok{width:28px;height:28px;border:2.5px solid var(--tinta);border-radius:9px;background:var(--pasto);display:grid;place-items:center}
+  .itens .ok svg{width:17px;height:17px}
+  .itens small{font-size:.78rem;font-weight:800;border:2px solid var(--tinta);border-radius:99px;padding:1px 9px;background:var(--sol-claro);white-space:nowrap}
+  .itens li.principal small{background:var(--azul);color:#fff}
+  .preco{font-family:'Baloo 2',sans-serif;font-weight:800;line-height:1;margin:10px 0 4px}
+  .preco .rs{font-size:2rem;vertical-align:top;position:relative;top:14px}
+  .preco .v{font-size:6rem}
+  .preco-nota{font-weight:800;color:var(--tinta-suave);margin-bottom:20px}
+  .caixa .botao{width:100%}
+  .pagamentos{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:16px 0 0;font-size:.88rem;font-weight:800;color:var(--tinta-suave)}
+  .garantia{display:grid;grid-template-columns:84px 1fr;gap:16px;align-items:center;max-width:620px;margin:30px auto 0;text-align:left;background:#fff;border:var(--contorno);border-radius:22px;padding:18px}
+  .garantia svg{width:84px;height:84px}
+
+  /* dúvidas */
+  .duvidas{padding:60px 0}
+  .duvidas h2{text-align:center;margin-bottom:22px}
+  details{max-width:720px;margin:0 auto 12px;background:#fff;border:var(--contorno);border-radius:16px;padding:14px 18px}
+  summary{font-weight:800;cursor:pointer}
+  details p{margin:10px 0 2px;color:var(--tinta-suave)}
+  footer{text-align:center;font-size:.85rem;color:var(--tinta-suave);padding:20px 20px 110px}
+
+  .fixa{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:var(--contorno);padding:10px 16px;padding-bottom:max(10px,env(safe-area-inset-bottom));display:flex;justify-content:center;align-items:center;gap:14px;transform:translateY(110%);transition:transform .25s}
+  .fixa.ver{transform:none}
+  .fixa .p{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.45rem;line-height:1}
+  .fixa .p small{display:block;font-family:'Nunito',sans-serif;font-size:.75rem;color:var(--tinta-suave)}
+  .fixa .botao{font-size:1.1rem;padding:11px 20px;box-shadow:3px 3px 0 var(--tinta)}
+  @media (prefers-reduced-motion:reduce){.fixa{transition:none}}
+</style>
+</head>
+<body>
+<header class="topo"><div class="wrap"><img src="/oferta/img/logo.webp" alt="Bené" width="78" height="64"><a href="#oferta">R$ 37</a></div></header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Seu filho lendo as primeiras palavras, aqui na tela</h1>
+      <p class="sub">Veja o aplicativo da Bené funcionando. É isso que seu filho faz em 10 minutinhos por dia, com palavras do dia a dia e da Bíblia.</p>
+      <p style="margin:22px 0 0"><a class="botao cta" href="/checkout/">Quero o aplicativo por R$ 37</a></p>
+      <ul class="garantias">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>Pagamento único</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>Garantia de 7 dias</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Acesso na hora</li>
+      </ul>
+    </div>
+    <div style="position:relative">
+      <div class="cel"><video src="v/bola.mp4" poster="v/bola.jpg" muted loop playsinline autoplay preload="auto" aria-label="O aplicativo da Bené: a criança toca nas sílabas BO e LA e cobre a palavra BOLA"></video></div>
+      <div class="selo" aria-hidden="true"><div><small>só</small><span>R$ 37</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="demo b-sol">
+  <div class="wrap">
+    <div class="txt">
+      <span class="passo">1</span>
+      <h2>Ele toca em cada pedacinho da palavra</h2>
+      <div class="silabas" aria-hidden="true"><span class="c1">BO</span><span class="c2">LA</span></div>
+      <p>Cada sílaba vira um toque e um som. BO, LA: dois pedacinhos, uma palavra inteira. É assim que a criança percebe que as palavras são feitas de sons, o passo que destrava a leitura.</p>
+    </div>
+    <div class="cel"><video data-src="v/banana.mp4" poster="v/banana.jpg" muted loop playsinline preload="none" aria-label="A criança toca nas sílabas BA, NA, NA"></video></div>
+  </div>
+</section>
+
+<section class="demo inv b-verde">
+  <div class="wrap">
+    <div class="txt">
+      <span class="passo">2</span>
+      <h2>Cobre as letras com o dedo, por dentro do traço</h2>
+      <p>O dedinho segue o caminho de cada letra, como no caderno de caligrafia. A mão aprende a forma, o olho aprende a palavra. No fim, a tela comemora: <b>Muito bem!</b></p>
+    </div>
+    <div class="cel"><video data-src="v/biblia.mp4" poster="v/biblia.jpg" muted loop playsinline preload="none" aria-label="A criança cobre a palavra BÍBLIA com o dedo"></video></div>
+  </div>
+</section>
+
+<section class="demo b-coral">
+  <div class="wrap">
+    <div class="txt">
+      <span class="passo">3</span>
+      <h2>Monta o quebra-cabeça de sílabas</h2>
+      <div class="silabas" aria-hidden="true"><span class="c1">O</span><span class="c2">VE</span><span class="c3">LHA</span></div>
+      <p>Os pedacinhos vêm embaralhados. Errou a ordem, é só tentar de novo. Acertou, a palavra aparece inteira. Ler vira brincadeira de montar.</p>
+    </div>
+    <div class="cel"><video data-src="v/ovelha.mp4" poster="v/ovelha.jpg" muted loop playsinline preload="none" aria-label="O quebra-cabeça de sílabas montando a palavra OVELHA"></video></div>
+  </div>
+</section>
+
+<div class="faixa-cta"><div class="wrap"><p>Tudo isso no celular que você já tem.</p><a class="botao cta" href="/checkout/">Começar hoje por R$ 37</a></div></div>
+
+<section class="demo inv b-ceu">
+  <div class="wrap">
+    <div class="txt">
+      <span class="passo">4</span>
+      <h2>Sobe de nível até ler frases sozinho</h2>
+      <p>São 4 níveis e 120 atividades. Começa com palavras de 2 pedacinhos, passa para 3, chega às palavras grandes, como <b>BORBOLETA</b>, e termina nas primeiras frases. O aplicativo marca o que já foi feito e mostra a próxima.</p>
+    </div>
+    <div class="dupla">
+      <div class="cel p"><video data-src="v/borboleta.mp4" poster="v/borboleta.jpg" muted loop playsinline preload="none" aria-label="Nível 3: BORBOLETA"></video></div>
+      <div class="cel p"><video data-src="v/deus.mp4" poster="v/deus.jpg" muted loop playsinline preload="none" aria-label="Nível 4: a frase DEUS ME AMA"></video></div>
+    </div>
+  </div>
+</section>
+
+<section class="demo b-lilas">
+  <div class="wrap">
+    <div class="txt">
+      <span class="passo">5</span>
+      <h2>As palavras vêm da Bíblia</h2>
+      <p>Arca, Bíblia, ovelha, "Deus me ama". Enquanto aprende a ler, seu filho conversa sobre Deus com você. No fim da atividade, vocês agradecem juntos com um versículo curto.</p>
+    </div>
+    <div class="dupla">
+      <div class="cel p"><video data-src="v/arca.mp4" poster="v/arca.jpg" muted loop playsinline preload="none" aria-label="A palavra ARCA"></video></div>
+      <div class="cel p"><video data-src="v/verso.mp4" poster="v/verso.jpg" muted loop playsinline preload="none" aria-label="Versículo para colorir com o dedo"></video></div>
+    </div>
+  </div>
+</section>
+
+<section class="demo inv b-sol">
+  <div class="wrap">
+    <div class="txt">
+      <span class="passo">6</span>
+      <h2>E ainda vem o Alfabeto da Bené</h2>
+      <p>De A a Z, cada letra com uma palavra e uma figura para cobrir com o dedo: A de ARCA, B de BOLA. Perfeito para quem ainda está conhecendo as letras.</p>
+    </div>
+    <div class="cel"><video data-src="v/alfabeto.mp4" poster="v/alfabeto.jpg" muted loop playsinline preload="none" aria-label="Alfabeto: a letra A de ARCA"></video></div>
+  </div>
+</section>
+
+<section class="demo b-verde">
+  <div class="wrap">
+    <div class="txt">
+      <span class="passo">7</span>
+      <h2>Prefere o papel? Imprima tudo</h2>
+      <p>Vem junto o kit completo em PDF, com 127 páginas, e os bônus para imprimir quantas vezes quiser. Para a mesa da cozinha, para a viagem ou para a turma do ministério infantil.</p>
+    </div>
+    <div class="cel"><video data-src="v/imprimir.mp4" poster="v/imprimir.jpg" muted loop playsinline preload="none" aria-label="A aba Imprimir com os PDFs"></video></div>
+  </div>
+</section>
+
+<section class="metodo">
+  <div class="wrap">
+    <h2>Método Fono-Fé: 7 estímulos em cada palavra</h2>
+    <p class="apoio">A mesma palavra é aprendida de sete jeitos. Quanto mais sentidos juntos, mais fácil de lembrar.</p>
+    <ol class="estimulos">
+      <li><span class="n c2">1</span><span><b>Ouvir</b><span>Você fala a palavra devagar, BO… LA.</span></span></li>
+      <li><span class="n c3">2</span><span><b>Ver</b><span>Figura e palavra escrita aparecem juntas.</span></span></li>
+      <li><span class="n c1">3</span><span><b>Bater palma</b><span>Uma palma para cada sílaba.</span></span></li>
+      <li><span class="n c4">4</span><span><b>Traçar</b><span>Cobrir a palavra com o dedo.</span></span></li>
+      <li><span class="n c2">5</span><span><b>Montar</b><span>Juntar as sílabas na ordem certa.</span></span></li>
+      <li><span class="n c3">6</span><span><b>Cantar</b><span>As músicas da Bené, em família.</span></span></li>
+      <li><span class="n c1">7</span><span><b>Agradecer</b><span>Um versículo e uma oração curta.</span></span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="oferta" id="oferta">
+  <div class="wrap">
+    <div class="caixa">
+      <h2>Comece hoje o caminho da leitura</h2>
+      <p style="color:var(--tinta-suave);font-weight:700;margin:0">Tudo o que você viu nesta página, liberado na hora.</p>
+      <ul class="itens">
+        <li class="principal"><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Aplicativo da Bené: 4 níveis e 120 atividades</span><small>principal</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Kit completo em PDF para imprimir, 127 páginas</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Alfabeto da Bené, de A a Z</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>12 versículos para colorir</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Quebra-cabeça de sílabas</span><small>bônus</small></li>
+        <li><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span><span>Cantando com a Bené: as letras das músicas</span><small>bônus</small></li>
+      </ul>
+      <p class="preco"><span class="rs">R$</span><span class="v">37</span></p>
+      <p class="preco-nota">Pagamento único. Não é assinatura. Acesso para sempre.</p>
+      <a class="botao cta" href="/checkout/">Quero o aplicativo da Bené</a>
+      <p class="pagamentos"><span>Pix</span><span>Cartão de crédito</span><span>Apple Pay</span><span>Google Pay</span></p>
+    </div>
+    <div class="garantia">
+      <svg viewBox="0 0 130 130" aria-hidden="true"><circle cx="65" cy="65" r="60" fill="#FFC94A" stroke="#4A3426" stroke-width="5"/><circle cx="65" cy="65" r="46" fill="#fff" stroke="#4A3426" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/><text x="65" y="68" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="42" fill="#4A3426">7</text><text x="65" y="90" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="15" fill="#4A3426">dias</text></svg>
+      <div><h3>Garantia de 7 dias</h3><p style="margin:4px 0 0">Faça a primeira semana com seu filho. Se não for para vocês, peça o reembolso em até 7 dias e devolvemos todo o valor.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="duvidas">
+  <div class="wrap">
+    <h2>Dúvidas</h2>
+    <details><summary>É assinatura?</summary><p>Não. Você paga R$ 37 uma vez só e o acesso é seu para sempre, com todas as atividades e os bônus.</p></details>
+    <details><summary>Para qual idade serve?</summary><p>Para crianças de 3 a 7 anos. Quem ainda não conhece as letras começa pelo Alfabeto e pelo nível 1; quem já junta sílabas vai direto para os níveis 2, 3 e 4.</p></details>
+    <details><summary>Precisa baixar na loja de aplicativos?</summary><p>Não. Ele abre por um link, no celular, no tablet ou no computador, e pode ser instalado direto na tela inicial.</p></details>
+    <details><summary>Como recebo depois de pagar?</summary><p>Logo depois do pagamento a página de boas-vindas abre o aplicativo. Para entrar de novo, é só usar o mesmo e-mail da compra.</p></details>
+    <details><summary>Serve para mais de uma criança?</summary><p>Sim. Pode usar com seus filhos e imprimir para a turma ou o ministério infantil. Só não é permitido revender ou compartilhar o acesso.</p></details>
+  </div>
+</section>
+<footer>Bené. Pagamento processado pelo Stripe. Este site não faz parte do Facebook ou da Meta.</footer>
+
+<div class="fixa" id="fixa" aria-hidden="true"><div class="p">R$ 37<small>pagamento único</small></div><a class="botao cta" href="/checkout/" tabindex="-1">Quero o app</a></div>
+
+<script>
+(function () {
+  const C = window.BENE_CONFIG;
+  try { localStorage.setItem("bene_variante", "veja"); } catch (e) {}
+  C.track("ViewContent", { content_name: "pagina-gifs", value: C.preco, currency: "BRL" });
+  // os vídeos só carregam e tocam quando aparecem na tela
+  const vids = document.querySelectorAll("video");
+  const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => {
+    const v = e.target;
+    if (e.isIntersecting) { if (v.dataset.src && !v.src) v.src = v.dataset.src; v.play().catch(() => {}); }
+    else v.pause();
+  }), { rootMargin: "200px 0px" }) : null;
+  vids.forEach(v => { if (io) io.observe(v); else if (v.dataset.src) { v.src = v.dataset.src; } });
+  // barra fixa: aparece depois da abertura e some na oferta
+  const fixa = document.getElementById("fixa"), oferta = document.getElementById("oferta"); let naOferta = false;
+  const upd = () => { const v = window.scrollY > 600 && !naOferta; fixa.classList.toggle("ver", v); fixa.setAttribute("aria-hidden", v ? "false" : "true"); fixa.querySelector("a").tabIndex = v ? 0 : -1; };
+  window.addEventListener("scroll", upd, { passive: true });
+  if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { naOferta = e.isIntersecting; upd(); }).observe(oferta);
+  document.querySelectorAll(".cta").forEach(a => a.addEventListener("click", () => C.trackCustom("CliqueComprar", { pagina: "veja" })));
+})();
+</script>
+</body>
+</html>
