@@ -40,6 +40,7 @@ const L = {
   checkoutApp: (c: string) => u("/checkout/", c, "recuperacao"),
   checkoutKit: (c: string) => u("/kit/checkout/", c, "recuperacao"),
   kit: (c: string) => u("/kit/", c, "folhas-gratis"),
+  veja: (c: string) => u("/veja/", c, "nutricao"),
   ofertaNiveis: (pi: string, c: string) => u(`/oferta-1/?pi=${encodeURIComponent(pi)}`, c, "pos-compra"),
   ofertaApp: (pi: string, c: string) => u(`/kit-oferta-1/?pi=${encodeURIComponent(pi)}`, c, "pos-compra"),
 };
@@ -356,6 +357,37 @@ const MODELOS: Record<string, (d: Dados) => Modelo> = {
     ],
   }),
 
+  // ===================== LEADS QUE NÃO COMPRARAM =====================
+  lead_0: () => ({
+    assunto: "Um presente da Bené para o seu filho",
+    preheader: "5 folhas de alfabetização para imprimir hoje, de graça.",
+    marketing: true,
+    blocos: [
+      { t: "h", x: "Um presente para começar, {nome}" },
+      { t: "p", x: "{oi} Você deixou seu e-mail na página da Bené. Para seu filho experimentar o método sem compromisso, separamos **5 folhas grátis** do nível 1 para imprimir em casa." },
+      { t: "botao", x: "Baixar as 5 folhas (PDF)", url: L.folhasPdf },
+      { t: "passos", itens: [
+        ["Imprima uma folha por dia", "Em preto e branco mesmo, na impressora de casa."],
+        ["Sente 10 minutinhos com seu filho", "Fale a palavra devagar e bata uma palma em cada pedacinho: BO… LA… BOLA!"],
+        ["Comemore cada folha", "Ele pinta o desenho no fim. Deixe ele mostrar para alguém da casa."],
+      ] },
+      { t: "p", x: "Nos próximos dias, mandamos algumas dicas curtas para ajudar seu filho a ler." },
+    ],
+  }),
+
+  lead_app: () => ({
+    assunto: "E se a leitura virasse brincadeira no celular?",
+    preheader: "O aplicativo da Bené: 120 atividades, com o kit para imprimir de bônus.",
+    marketing: true,
+    blocos: [
+      { t: "h", x: "O caminho das folhas, agora na tela" },
+      { t: "p", x: "{oi} O **aplicativo da Bené** segue a mesma ordem das folhas, só que no celular: seu filho toca em cada sílaba e ouve o som, cobre as letras com o dedo e monta as palavras como um quebra-cabeça." },
+      { t: "lista", itens: ITENS_APP },
+      { t: "preco", por: "R$ 37", nota: "Pagamento único. Garantia de 7 dias." },
+      { t: "botao", x: "Conhecer o aplicativo", url: L.veja("lead-app") },
+    ],
+  }),
+
   // ===================== PÓS-COMPRA: APLICATIVO =====================
   pos_app_1: () => ({
     assunto: "Como foi o primeiro dia com a Bené?",
@@ -467,7 +499,10 @@ export const SEQUENCIAS = {
   recuperacao_app: [["rec_app_1", 60], ["rec_app_2", 180], ["rec_app_3", 720], ["rec_app_4", 1440]],
   recuperacao_kit: [["rec_kit_1", 60], ["rec_kit_2", 180], ["rec_kit_3", 720], ["rec_kit_4", 1440]],
   // evento: lead em /gratis/. Para se comprar o kit ou o aplicativo.
-  folhas_gratis: [["gratis_0", 0], ["gratis_1", 1440], ["gratis_2", 2880], ["gratis_3", 4320], ["gratis_4", 7200]],
+  folhas_gratis: [["gratis_0", 0], ["gratis_1", 1440], ["gratis_2", 2880], ["gratis_3", 4320], ["gratis_4", 7200], ["lead_app", 10080]],
+  // evento: lead do quiz ou da página de vendas que não comprou (quem abandonou o checkout entra 2 dias depois da recuperação).
+  // Usa a mesma chave das folhas grátis: ninguém recebe o mesmo e-mail duas vezes.
+  nutricao: [["lead_0", 120], ["gratis_1", 1440], ["gratis_2", 2880], ["gratis_3", 4320], ["gratis_4", 7200], ["lead_app", 10080]],
   // evento: compra aprovada. O e-mail de oferta só sai se a pessoa ainda não tem o produto.
   pos_compra_app: [["pos_app_1", 1440], ["pos_app_2", 4320], ["pos_app_3", 7200]],
   pos_compra_kit: [["pos_kit_1", 1440], ["pos_kit_2", 2880], ["pos_kit_3", 4320]],

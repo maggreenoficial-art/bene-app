@@ -100,7 +100,7 @@ async function rodar() {
   const desde = (d: number) => new Date(agora() - d * 1440 * MIN).toISOString();
   const [{ data: compras }, { data: leads }, { data: enviados }, { data: fora }] = await Promise.all([
     sb.from("bene_compras").select("email,nome,produto,status,payment_intent,criado_em,pago_em").gte("criado_em", desde(60)),
-    sb.from("bene_leads").select("email,nome,origem,atualizado_em").eq("origem", "gratis").gte("atualizado_em", desde(14)),
+    sb.from("bene_leads").select("email,nome,origem,criado_em,atualizado_em").gte("atualizado_em", desde(30)),
     sb.from("bene_emails").select("email,modelo,chave,enviado_em").gte("enviado_em", desde(60)),
     sb.from("bene_descadastros").select("email"),
   ]);
@@ -157,11 +157,28 @@ async function rodar() {
     sequencia(a.email, a.nome, `rec:${a.produto}`, a.base, a.produto === "kit" ? SEQUENCIAS.recuperacao_kit : SEQUENCIAS.recuperacao_app);
   }
 
-  // 3) folhas grátis: para quando compra o kit ou o aplicativo
+  // 3) leads: folhas grátis e quem deixou o e-mail no quiz ou na página de vendas. Param quando compram o kit ou o app.
+  // Quem abandonou o checkout fica primeiro com a recuperação e só entra aqui 2 dias depois do último lembrete.
+  const abandonoMaisRecente = new Map<string, number>();
+  for (const c of compras || []) {
+    if (c.status === "pago" || c.origem || !["app-bene", "kit"].includes(c.produto) || !c.email) continue;
+    const e = c.email.toLowerCase(), t = Date.parse(c.criado_em);
+    if (t > (abandonoMaisRecente.get(e) || 0)) abandonoMaisRecente.set(e, t);
+  }
   for (const l of leads || []) {
     const e = (l.email || "").toLowerCase();
     if (ignorar(e) || saiu.has(e) || possui(e, "kit") || possui(e, "app-bene")) continue;
-    sequencia(e, l.nome, "gratis", Date.parse(l.atualizado_em), SEQUENCIAS.folhas_gratis);
+    const gratis = l.origem === "gratis";
+    if (!gratis && Date.parse(l.criado_em) < agora() - 30 * 1440 * MIN) continue;
+    let base = Date.parse(gratis ? l.atualizado_em : l.criado_em);
+    const abandono = abandonoMaisRecente.get(e);
+    if (abandono && abandono > agora() - 30 * 1440 * MIN) {
+      const ultimoLembrete = Math.max(enviado.get(`${e}|rec_app_4|rec:app-bene`) || 0, enviado.get(`${e}|rec_kit_4|rec:kit`) || 0);
+      if (ultimoLembrete) base = Math.max(base, ultimoLembrete + 2 * 1440 * MIN - 120 * MIN);
+      else if (abandono < agora() - 5 * 1440 * MIN) base = Math.max(base, abandono + 5 * 1440 * MIN);
+      else if (!(gratis && !enviado.has(`${e}|gratis_0|gratis`))) continue; // recuperação em andamento (a entrega das folhas grátis sai mesmo assim)
+    }
+    sequencia(e, l.nome, "gratis", base, gratis ? SEQUENCIAS.folhas_gratis : SEQUENCIAS.nutricao);
   }
 
   // 4) pós-compra (compras dos últimos 10 dias); a oferta final só sai se a pessoa ainda não tem o produto
@@ -211,7 +228,7 @@ Deno.serve(async (req: Request) => {
   if (!RESEND || !RESPOSTA) return json({ erro: "faltam os segredos RESEND_API_KEY e BENE_EMAIL_RESPOSTA" }, 503);
   if (b.acao === "rodar") return json(await rodar());
   if (b.acao === "teste") {
-    const ids = b.modelo ? [String(b.modelo)] : [...Object.values(PRODUTOS_APROVADO), ...SEQUENCIAS.recuperacao_app.map((x) => x[0]), ...SEQUENCIAS.recuperacao_kit.map((x) => x[0]), ...SEQUENCIAS.folhas_gratis.map((x) => x[0]), ...SEQUENCIAS.pos_compra_app.map((x) => x[0]), ...SEQUENCIAS.pos_compra_kit.map((x) => x[0])];
+    const ids = b.modelo ? [String(b.modelo)] : [...Object.values(PRODUTOS_APROVADO), ...SEQUENCIAS.recuperacao_app.map((x) => x[0]), ...SEQUENCIAS.recuperacao_kit.map((x) => x[0]), ...SEQUENCIAS.folhas_gratis.map((x) => x[0]), "lead_0", ...SEQUENCIAS.pos_compra_app.map((x) => x[0]), ...SEQUENCIAS.pos_compra_kit.map((x) => x[0])];
     const out = [];
     for (const modelo of ids) {
       out.push({ modelo, ...(await enviar({ email: RESPOSTA, nome: "Teste", modelo, chave: "teste", pi: "pi_teste", marketing: true }, true)) });
