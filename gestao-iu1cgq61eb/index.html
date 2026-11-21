@@ -54,10 +54,21 @@
   td { padding: 7px 8px; border-bottom: 1px solid var(--linha); vertical-align: top; max-width: 260px; overflow-wrap: anywhere; }
   .n { text-align: right; white-space: nowrap; }
   .barra-acoes { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
-  .barra-acoes input { flex: 1; min-width: 160px; border: 2px solid var(--tinta); border-radius: 10px; padding: 6px 10px; background: var(--papel); }
+  .barra-acoes input[type="search"] { flex: 1; min-width: 160px; border: 2px solid var(--tinta); border-radius: 10px; padding: 6px 10px; background: var(--papel); }
   .selo { display: inline-block; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 800; border: 1.5px solid var(--tinta); white-space: nowrap; }
   .s-clicou { background: var(--pasto); } .s-abriu { background: #CFE9FB; } .s-entregue { background: #F3EBDD; }
   .s-enviado, .s-enviando { background: #fff; } .s-erro, .s-devolvido { background: #F6C9C2; }
+  .rot { display: block; font-weight: 800; font-size: .85rem; margin: 10px 0 4px; }
+  textarea { width: 100%; border: 2px solid var(--tinta); border-radius: 12px; padding: 8px 10px; background: var(--papel); font: inherit; resize: vertical; }
+  .filtro { font-size: .85rem; font-weight: 700; display: flex; gap: 6px; align-items: center; }
+  .lista-whats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .pessoa { border: 2px solid var(--linha); border-radius: 14px; padding: 12px; display: grid; gap: 4px; background: var(--papel); }
+  .pessoa b { font-size: 1rem; }
+  .pessoa .meta { font-size: .8rem; color: var(--suave); }
+  .pessoa .acoes { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+  .pessoa a.btn { text-decoration: none; color: var(--tinta); }
+  .tag { display: inline-block; font-size: .72rem; font-weight: 800; border-radius: 999px; padding: 1px 8px; border: 1.5px solid var(--tinta); margin-right: 4px; }
+  .tag.ab { background: #F6C9C2; } .tag.ld { background: #CFE9FB; } .tag.ok { background: var(--pasto); }
   #entrar { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--ceu); }
   #entrar form { width: min(100%, 360px); background: #fff; border: 3px solid var(--tinta); border-radius: 22px; padding: 24px; box-shadow: 5px 5px 0 var(--tinta); text-align: center; }
   #entrar img { width: 110px; height: auto; }
@@ -97,6 +108,7 @@
       <button role="tab" data-aba="vendas" aria-selected="false">Vendas e ofertas</button>
       <button role="tab" data-aba="emails" aria-selected="false">E-mails</button>
       <button role="tab" data-aba="pessoas" aria-selected="false">Pessoas</button>
+      <button role="tab" data-aba="whats" aria-selected="false">WhatsApp</button>
     </nav>
 
     <section data-sec="resumo" class="grade" id="kpis"></section>
@@ -142,6 +154,23 @@
       <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">Abandonaram o checkout (30 dias)</h3><button class="btn" type="button" data-csv="abandonos">Baixar CSV</button></div><div class="rolar" id="t-abandonos"></div></div>
       <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">Clientes e o que ainda dá para oferecer</h3><button class="btn" type="button" data-csv="clientes">Baixar CSV</button></div><div class="rolar" id="t-clientes"></div></div>
       <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">Leads (quiz, página de vendas e folhas grátis)</h3><button class="btn" type="button" data-csv="leads">Baixar CSV</button></div><div class="rolar" id="t-leads"></div></div>
+    </section>
+    <section data-sec="whats" hidden style="display:grid;gap:16px">
+      <div class="card">
+        <div class="barra-acoes"><h3 style="flex:1;margin:0">Para chamar no WhatsApp (30 dias)</h3>
+          <label class="filtro"><input type="checkbox" id="so-pendentes" checked> Só quem ainda não foi chamado</label></div>
+        <p class="nota">O botão abre a conversa com a mensagem pronta no seu WhatsApp e marca a pessoa como chamada. Quem compra sai da lista sozinho.</p>
+        <div id="lista-whats" class="lista-whats"></div>
+      </div>
+      <div class="card">
+        <h3>Mensagens prontas</h3>
+        <p class="nota">Use {nome} onde entra o primeiro nome. Na de abandono, {produto} e {link} mudam sozinhos entre o aplicativo e o kit. O texto fica salvo neste aparelho.</p>
+        <label class="rot" for="msg-abandono">Para quem abandonou o checkout</label>
+        <textarea id="msg-abandono" rows="5"></textarea>
+        <label class="rot" for="msg-lead">Para quem deixou o contato e não comprou</label>
+        <textarea id="msg-lead" rows="5"></textarea>
+        <button class="btn" type="button" id="msg-padrao" style="margin-top:8px">Voltar ao texto original</button>
+      </div>
     </section>
   </main>
 </div>
@@ -242,6 +271,7 @@
       tabela("#t-emails", D.emails, [["email", "E-mail"], ["enviados", "Enviados", "int"], ["entregues", "Entregues", "int"], ["abertos", "Abertos", "int"], ["cliques", "Cliques", "int"], ["taxa_abertura", "Abertura", "pct"], ["taxa_clique", "Clique", "pct"], ["problemas", "Devolvidos ou spam", "int"]], "Nenhum e-mail enviado ainda.");
       tabela("#t-eventos", D.eventos, [["quando", "Quando"], ["email", "Pessoa"], ["modelo", "E-mail"], ["evento", "O que aconteceu"], ["link", "Link clicado", "link"]], "Nenhum evento recebido do Resend ainda.");
     }
+    if (aba === "whats") whatsLista();
     if (aba === "pessoas") {
       tabela("#t-abandonos", D.abandonos, COLS.abandonos, "Ninguém abandonou o checkout nos últimos 30 dias.");
       tabela("#t-clientes", D.clientes, COLS.clientes, "Nenhum cliente ainda.");
@@ -307,6 +337,63 @@
     tabela("#t-enviados", linhas, COLS.enviados, q ? "Nenhum e-mail para essa busca." : "Nenhum e-mail enviado ainda.");
   }
   $("#busca-enviados").addEventListener("input", function () { if (D) enviados(); });
+
+  // ---------- WhatsApp ----------
+  var SITE = "https://www.beneaovelhinha.online";
+  var PADRAO = {
+    abandono: "Oi, {nome}! Aqui é da Bené, a Ovelhinha 🐑\nVi que você começou o pedido do {produto} e não conseguiu finalizar. Aconteceu algum problema no pagamento? Posso te ajudar por aqui.\nSe quiser concluir agora: {link}",
+    lead: "Oi, {nome}! Aqui é da Bené, a Ovelhinha 🐑\nVocê deixou seu contato na nossa página. Separei 5 folhas grátis para seu filho começar a ler hoje:\n" + SITE + "/pdf/5-folhas-gratis.pdf\nQuantos anos ele tem? Te digo por qual folha começar."
+  };
+  function lerMsg(k) { try { return localStorage.getItem("bene_painel_msg_" + k) || PADRAO[k]; } catch (e) { return PADRAO[k]; } }
+  function salvarMsg(k, v) { try { localStorage.setItem("bene_painel_msg_" + k, v); } catch (e) {} }
+  ["abandono", "lead"].forEach(function (k) {
+    var t = $("#msg-" + k); t.value = lerMsg(k);
+    t.addEventListener("input", function () { salvarMsg(k, t.value); });
+  });
+  $("#msg-padrao").addEventListener("click", function () {
+    ["abandono", "lead"].forEach(function (k) { $("#msg-" + k).value = PADRAO[k]; salvarMsg(k, PADRAO[k]); });
+  });
+  $("#so-pendentes").addEventListener("change", function () { if (D) whatsLista(); });
+  function fone(w) { var d = String(w || "").replace(/\D/g, ""); if (d.length <= 11) d = "55" + d; return d; }
+  function foneBonito(w) { var d = String(w || "").replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, ""); return d.length >= 10 ? "(" + d.slice(0, 2) + ") " + d.slice(2, -4) + "-" + d.slice(-4) : d; }
+  function primeiroNome(n) { n = String(n || ""); if (n.indexOf("@") >= 0) return ""; n = n.trim().split(/\s+/)[0] || ""; return n ? n.charAt(0).toUpperCase() + n.slice(1).toLowerCase() : ""; }
+  function mensagem(r) {
+    var kit = r.detalhe === "Kit";
+    var t = r.tipo === "abandono" ? $("#msg-abandono").value : $("#msg-lead").value;
+    var nome = primeiroNome(r.nome);
+    return t.replace(/, \{nome\}/g, nome ? ", " + nome : "").replace(/\{nome\}/g, nome)
+      .replace(/\{produto\}/g, kit ? "kit da Bené para imprimir" : "aplicativo da Bené")
+      .replace(/\{link\}/g, SITE + (kit ? "/kit/checkout/" : "/checkout/") + "?utm_source=whatsapp&utm_medium=recuperacao");
+  }
+  function whatsLista() {
+    var box = $("#lista-whats"); box.replaceChildren();
+    var so = $("#so-pendentes").checked;
+    var linhas = (D.whats || []).filter(function (r) { return !so || !r.chamado_em; });
+    if (!linhas.length) { var p = document.createElement("p"); p.className = "vazio"; p.textContent = so ? "Ninguém pendente. Todo mundo já foi chamado." : "Ninguém para chamar nos últimos 30 dias."; box.appendChild(p); return; }
+    linhas.forEach(function (r) {
+      var c = document.createElement("div"); c.className = "pessoa";
+      var topo = document.createElement("div");
+      var tag = document.createElement("span"); tag.className = "tag " + (r.tipo === "abandono" ? "ab" : "ld");
+      tag.textContent = r.tipo === "abandono" ? "Abandonou: " + r.detalhe : "Lead: " + (r.detalhe || "site");
+      topo.appendChild(tag);
+      if (r.chamado_em) { var ok = document.createElement("span"); ok.className = "tag ok"; ok.textContent = "Chamado em " + r.chamado_em; topo.appendChild(ok); }
+      var nome = document.createElement("b"); nome.textContent = r.nome && r.nome.indexOf("@") < 0 ? r.nome : r.email;
+      var m1 = document.createElement("div"); m1.className = "meta"; m1.textContent = foneBonito(r.whatsapp) + " · " + r.email;
+      var m2 = document.createElement("div"); m2.className = "meta"; m2.textContent = "Entrou em " + r.quando + " · " + F.int(r.emails_recebidos) + " e-mails recebidos";
+      var acoes = document.createElement("div"); acoes.className = "acoes";
+      var a = document.createElement("a"); a.className = "btn sol"; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.textContent = r.chamado_em ? "Chamar de novo" : "Chamar no WhatsApp";
+      a.addEventListener("click", function () {
+        a.href = "https://wa.me/" + fone(r.whatsapp) + "?text=" + encodeURIComponent(mensagem(r));
+        fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ senha: senhaGuardada(), acao: "marcar_whats", email: r.email, tipo: r.tipo }) }).catch(function () {});
+        r.chamado_em = new Date().toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).replace(",", "");
+        setTimeout(whatsLista, 400);
+      });
+      a.href = "https://wa.me/" + fone(r.whatsapp) + "?text=" + encodeURIComponent(mensagem(r));
+      acoes.appendChild(a);
+      c.append(topo, nome, m1, m2, acoes); box.appendChild(c);
+    });
+  }
 
   // ---------- CSV ----------
   document.querySelectorAll("[data-csv]").forEach(function (b) {

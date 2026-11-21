@@ -1,4 +1,5 @@
 // Painel da Bené: devolve os números e as listas só para quem tem a senha (segredo PAINEL_SENHA).
+// {acao:"marcar_whats", email, tipo} registra que a pessoa foi chamada no WhatsApp.
 // Depois de 8 senhas erradas em 15 minutos, o mesmo endereço de internet fica bloqueado por 15 minutos.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -39,7 +40,14 @@ Deno.serve(async (req: Request) => {
     await new Promise((ok) => setTimeout(ok, 800));
     return json({ erro: "senha" }, 401);
   }
-  const { data, error } = await sb.rpc("bene_painel_dados");
-  if (error) return json({ erro: "banco" }, 500);
-  return json(data);
+  // marcar no painel que a pessoa já foi chamada no WhatsApp
+  if (b.acao === "marcar_whats") {
+    const email = String(b.email || "").trim().toLowerCase().slice(0, 160);
+    if (!email.includes("@")) return json({ erro: "email" }, 400);
+    await sb.from("bene_whats_contatos").insert({ email, tipo: String(b.tipo || "").slice(0, 30) || null });
+    return json({ ok: true });
+  }
+  const [dados, whats] = await Promise.all([sb.rpc("bene_painel_dados"), sb.rpc("bene_painel_whats")]);
+  if (dados.error) return json({ erro: "banco" }, 500);
+  return json({ ...dados.data, whats: whats.data || [] });
 });
