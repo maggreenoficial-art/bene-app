@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Sair da lista de e-mails da Bené</title>
+<meta name="theme-color" content="#7EC8F2">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ofertas.css">
+<script src="/config.js"></script>
+</head>
+<body style="background:#7EC8F2">
+<main>
+  <img src="/oferta/img/logo.webp" alt="Bené" width="120" height="98" style="align-self:center">
+  <div class="cartao" style="text-align:center">
+    <h1 id="titulo" style="font-size:1.8rem">Tirando você da lista…</h1>
+    <p id="texto" style="margin-top:10px"></p>
+  </div>
+</main>
+<script>
+(function () {
+  var t = new URLSearchParams(location.search).get("t") || "";
+  var titulo = document.getElementById("titulo"), texto = document.getElementById("texto");
+  function erro() {
+    titulo.textContent = "Este link não funcionou";
+    texto.textContent = "Responda qualquer e-mail nosso pedindo para sair que tiramos você da lista.";
+  }
+  if (!t) return erro();
+  fetch(C.leadEndpoint.replace("bene-lead", "bene-email"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sair: t }) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j.ok) return erro();
+      titulo.textContent = "Pronto, você saiu da lista";
+      texto.textContent = "O e-mail " + j.email + " não vai mais receber dicas nem lembretes da Bené. Se você comprar algo, ainda mandamos o e-mail com o seu acesso.";
+    })
+    .catch(erro);
+})();
+</script>
+</body>
+</html>

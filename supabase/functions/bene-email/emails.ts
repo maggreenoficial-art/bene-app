@@ -45,7 +45,8 @@ const L = {
 };
 
 const primeiroNome = (n?: string) => {
-  const p = (n || "").trim().split(/\s+/)[0] || "";
+  if (!n || n.includes("@")) return ""; // tem gente que digita o e-mail no campo do nome
+  const p = n.trim().split(/\s+/)[0] || "";
   return p ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : "";
 };
 
