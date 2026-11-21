@@ -21,9 +21,19 @@
   <h1>Suas 5 folhas grátis estão aqui</h1>
   <p class="lead">Imprima uma folha por dia e sente 10 minutinhos com seu filho. Bata uma palma em cada pedacinho: BO… LA… BOLA!</p>
   <div class="cartao" style="text-align:center">
-    <img src="/kit/v/passos.jpg" alt="Uma das folhas grátis: BOLA" width="480" height="600" style="width:100%;height:auto;border:3px solid #4A3426;border-radius:18px">
-    <a class="botao" id="baixar" href="/pdf/5-folhas-gratis.pdf" download style="margin-top:16px;text-decoration:none">Baixar as 5 folhas (PDF)</a>
+    <form id="form" novalidate style="text-align:left;margin-top:14px">
+      <label class="campo">Seu nome<input id="nome" name="nome" autocomplete="given-name" required maxlength="80"></label>
+      <label class="campo">Seu melhor e-mail<input id="email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="120"></label>
+      <p class="msg" id="erro" role="alert"></p>
+      <button class="botao" id="enviar" type="submit" style="margin-top:6px">Quero as 5 folhas grátis</button>
+      <p class="nota">Também mandamos dicas de alfabetização e novidades da Bené por e-mail. Você pode sair da lista quando quiser.</p>
+    </form>
+    <div id="pronto" hidden>
+      <p style="font-weight:800;margin:16px 0 0">Prontinho! Seu download vai começar.</p>
+      <a class="botao" id="baixar" href="/pdf/5-folhas-gratis.pdf" download style="margin-top:12px;text-decoration:none">Baixar as 5 folhas (PDF)</a>
+    </div>
     <p class="nota">Funciona em preto e branco, na impressora de casa.</p>
+    <img src="/kit/v/passos.jpg" alt="Uma das folhas grátis: BOLA" width="480" height="600" style="margin-top:14px;width:100%;height:auto;border:3px solid #4A3426;border-radius:18px">
   </div>
   <div class="cartao">
     <h2 style="font-size:1.5rem;text-align:center">Gostou? O kit completo tem 127 folhas</h2>
@@ -39,7 +49,22 @@
 (function () {
   var C = window.BENE_CONFIG;
   C.track("ViewContent", { content_name: "5-folhas-gratis" });
-  document.getElementById("baixar").addEventListener("click", function () { C.track("Lead", { content_name: "5-folhas-gratis" }); });
+  var f = document.getElementById("form"), erro = document.getElementById("erro"), bt = document.getElementById("enviar");
+  try { var j = JSON.parse(localStorage.getItem("bene_checkout") || "{}"); if (j.nome) f.nome.value = j.nome; if (j.email) f.email.value = j.email; } catch (e) {}
+  f.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var nome = f.nome.value.trim(), email = f.email.value.trim().toLowerCase();
+    if (nome.length < 2) { erro.textContent = "Digite o seu nome."; f.nome.focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro.textContent = "Confira o seu e-mail."; f.email.focus(); return; }
+    erro.textContent = ""; bt.disabled = true; bt.textContent = "Enviando…";
+    var utm = Object.assign({}, C.utm || {}, window.ltUtm ? window.ltUtm() : {});
+    try { var lead = JSON.parse(localStorage.getItem("bene_checkout") || "{}"); lead.nome = nome; lead.email = email; localStorage.setItem("bene_checkout", JSON.stringify(lead)); } catch (e2) {}
+    C.salvarLead({ nome: nome, email: email, origem: "gratis", variante: "gratis", dados: { utm: utm, pagina: "5-folhas-gratis" } }).then(function () {
+      C.track("Lead", { content_name: "5-folhas-gratis" });
+      f.hidden = true; document.getElementById("pronto").hidden = false;
+      var a = document.getElementById("baixar"); setTimeout(function () { a.click(); }, 400);
+    });
+  });
   var k = document.getElementById("kit"); k.href = "/kit/" + (location.search || "?utm_source=gratis");
 })();
 </script>

@@ -1,5 +1,6 @@
 // Cadastro de leads da Bené: grava nome, e-mail e WhatsApp do responsável,
 // a variante do teste A/B (oferta ou quiz) e, no quiz, as respostas e as UTMs.
+// O WhatsApp é opcional (a página das folhas grátis pede só nome e e-mail); se vier, precisa ter DDD + número.
 import { createClient } from "npm:@supabase/supabase-js@2";
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type", "access-control-allow-methods": "POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...cors, "content-type": "application/json; charset=utf-8" } });
@@ -18,9 +19,10 @@ Deno.serve(async (req: Request) => {
     const s = JSON.stringify(b.dados);
     if (s.length <= 4000) dados = b.dados;
   }
-  if (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10) return json({ erro: "dados" }, 400);
+  if (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || (whatsapp && whatsapp.length < 10)) return json({ erro: "dados" }, 400);
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const row: Record<string, unknown> = { nome, email, whatsapp, origem, atualizado_em: new Date().toISOString() };
+  const row: Record<string, unknown> = { nome, email, origem, atualizado_em: new Date().toISOString() };
+  if (whatsapp) row.whatsapp = whatsapp; // sem WhatsApp não apaga o que já existe
   if (variante) row.variante = variante;
   if (dados) row.dados = dados;
   const { error } = await sb.from("bene_leads").upsert(row, { onConflict: "email" });
