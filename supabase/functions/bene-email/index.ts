@@ -1,5 +1,6 @@
 // Envio dos e-mails da Bené pelo Resend.
 // - {acao:"rodar"}: chamado pelo agendador a cada 2 minutos. Vê quem precisa receber o quê e envia.
+//   {acao:"rodar", forcar:true}: mesmo envio, mas ignora o horário (8h às 21h) dos e-mails que não são de compra.
 // - {acao:"teste", modelo?}: envia um modelo (ou todos) só para o e-mail de resposta (BENE_EMAIL_RESPOSTA).
 // - {sair: token} ou POST ?sair=token: tira o e-mail da lista (página /sair/ e cancelamento de 1 clique).
 // Segredos: RESEND_API_KEY e BENE_EMAIL_RESPOSTA. Sem eles, nada é enviado.
@@ -96,7 +97,7 @@ async function enviar(t: Tarefa, teste = false) {
 // horário comercial em São Paulo (UTC-3) para e-mails que não são de compra
 const horarioOk = () => { const h = (new Date().getUTCHours() + 21) % 24; return h >= 8 && h < 21; };
 
-async function rodar() {
+async function rodar(forcar = false) {
   const desde = (d: number) => new Date(agora() - d * 1440 * MIN).toISOString();
   const [{ data: compras }, { data: leads }, { data: enviados }, { data: fora }] = await Promise.all([
     sb.from("bene_compras").select("email,nome,produto,status,payment_intent,criado_em,pago_em").gte("criado_em", desde(60)),
@@ -116,7 +117,7 @@ async function rodar() {
   const possui = (e: string, p: string) => tem.get(e.toLowerCase())?.has(p) ?? false;
 
   const tarefas: Tarefa[] = [];
-  const marketingOk = horarioOk();
+  const marketingOk = forcar || horarioOk(); // forcar: disparo manual fora do horário
 
   // próximo passo de uma sequência: respeita o atraso de cada e-mail e o intervalo entre eles
   function sequencia(email: string, nome: string, chave: string, base: number, passos: readonly (readonly [string, number])[], pi?: string, pular?: (m: string) => boolean, depoisDe = 0) {
@@ -226,7 +227,7 @@ Deno.serve(async (req: Request) => {
     return json({ ok: true, email: `${u.slice(0, 2)}***@${d}` });
   }
   if (!RESEND || !RESPOSTA) return json({ erro: "faltam os segredos RESEND_API_KEY e BENE_EMAIL_RESPOSTA" }, 503);
-  if (b.acao === "rodar") return json(await rodar());
+  if (b.acao === "rodar") return json(await rodar(b.forcar === true));
   if (b.acao === "teste") {
     const ids = b.modelo ? [String(b.modelo)] : [...Object.values(PRODUTOS_APROVADO), ...SEQUENCIAS.recuperacao_app.map((x) => x[0]), ...SEQUENCIAS.recuperacao_kit.map((x) => x[0]), ...SEQUENCIAS.folhas_gratis.map((x) => x[0]), "lead_0", ...SEQUENCIAS.pos_compra_app.map((x) => x[0]), ...SEQUENCIAS.pos_compra_kit.map((x) => x[0])];
     const out = [];
