@@ -295,6 +295,7 @@ const MODELOS: Record<string, (d: Dados) => Modelo> = {
         ["Comemore cada folha", "Ele pinta o desenho no fim. Deixe ele mostrar para alguém da casa."],
       ] },
       { t: "p", x: "Nos próximos dias, mandamos algumas dicas curtas para ajudar seu filho a ler." },
+      { t: "caixa", titulo: "Uma pergunta rápida", x: "Quantos anos tem seu filho? Responda este e-mail contando a idade dele que a gente diz por qual folha começar." },
     ],
   }),
 
@@ -372,6 +373,7 @@ const MODELOS: Record<string, (d: Dados) => Modelo> = {
         ["Comemore cada folha", "Ele pinta o desenho no fim. Deixe ele mostrar para alguém da casa."],
       ] },
       { t: "p", x: "Nos próximos dias, mandamos algumas dicas curtas para ajudar seu filho a ler." },
+      { t: "caixa", titulo: "Uma pergunta rápida", x: "Quantos anos tem seu filho? Responda este e-mail contando a idade dele que a gente diz por qual folha começar." },
     ],
   }),
 
@@ -592,23 +594,23 @@ export function montarEmail(id: string, dados: Dados = {}) {
   if (m.marketing && !dados.sair) throw new Error(`o e-mail ${id} precisa do link para sair da lista (dados.sair)`);
   const assunto = trocar(m.assunto, dados);
   const preheader = trocar(m.preheader, dados);
+  const identidade = `<b>Bené, a Ovelhinha</b> · <a href="${SITE}" style="color:${C.tinta}">www.beneaovelhinha.online</a><br>Dúvidas? É só responder este e-mail.<br>`;
   const rodape = m.marketing
-    ? `Você recebe este e-mail porque se cadastrou no site da Bené, a Ovelhinha.<br><a href="${esc(dados.sair!)}" style="color:${C.tinta}">Não quero mais receber estes e-mails</a>`
-    : `Você recebe este e-mail porque fez uma compra no site da Bené, a Ovelhinha.`;
+    ? `${identidade}Você recebe este e-mail porque deixou seu contato no site da Bené.<br><a href="${esc(dados.sair!)}" style="color:${C.tinta}">Não quero mais receber estes e-mails</a>`
+    : `${identidade}Você recebe este e-mail porque fez uma compra no site da Bené.`;
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting">
 <meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
 <title>${esc(assunto)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 <style>a{color:${C.tinta}}@media (max-width:620px){.card{padding:24px 18px!important}}</style>
 </head>
 <body style="margin:0;padding:0;background:${C.ceu}">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${C.ceu}">${esc(preheader)}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${C.ceu}">${esc(preheader)}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.ceu}" style="background:${C.ceu}"><tr><td align="center" style="padding:24px 12px 32px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
-<tr><td align="center" style="padding:0 0 14px"><a href="${SITE}" target="_blank"><img src="${SITE}/img/email-logo.png" width="150" alt="Bené, a Ovelhinha" style="display:block;width:150px;height:auto;border:0"></a></td></tr>
+<tr><td align="center" style="padding:0 0 14px"><a href="${SITE}" target="_blank"><img src="${SITE}/img/email-logo-v2.png" width="120" height="98" alt="Bené, a Ovelhinha" style="display:block;width:120px;height:auto;border:0;font-family:${FT};font-size:24px;font-weight:800;line-height:1.2;color:${C.tinta}"></a></td></tr>
 <tr><td class="card" bgcolor="#FFFFFF" style="background:#FFFFFF;border:3px solid ${C.tinta};border-radius:22px;padding:30px 28px;box-shadow:6px 6px 0 ${C.tinta}">
 ${m.blocos.map((b) => blocoHtml(b, dados)).join("\n")}
 <p style="margin:24px 0 0;font-family:${FB};font-size:16px;line-height:1.5;color:${C.tinta}">Com carinho,<br><b>Equipe da Bené</b></p>
@@ -618,6 +620,7 @@ ${m.blocos.map((b) => blocoHtml(b, dados)).join("\n")}
 </body></html>`;
 
   const texto = [...m.blocos.map((b) => blocoTexto(b, dados)), "Com carinho,\nEquipe da Bené",
+    `Bené, a Ovelhinha · ${SITE}`,
     m.marketing ? `Não quer mais receber? ${dados.sair}` : ""].filter(Boolean).join("\n\n");
 
   return { assunto, preheader, html, texto, marketing: m.marketing };
