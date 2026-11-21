@@ -47,6 +47,12 @@ Deno.serve(async (req: Request) => {
     await sb.from("bene_whats_contatos").insert({ email, tipo: String(b.tipo || "").slice(0, 30) || null });
     return json({ ok: true });
   }
+  // mapa ao vivo: só as visitas da última hora (o painel pede de 15 em 15 segundos)
+  if (b.acao === "aovivo") {
+    const r = await sb.rpc("bene_painel_aovivo");
+    if (r.error) return json({ erro: "banco" }, 500);
+    return json(r.data);
+  }
   const [dados, whats, f24, f72, f7d, analises] = await Promise.all([
     sb.rpc("bene_painel_dados"), sb.rpc("bene_painel_whats"),
     sb.rpc("bene_painel_funil", { horas: 24 }), sb.rpc("bene_painel_funil", { horas: 72 }), sb.rpc("bene_painel_funil", { horas: 168 }),

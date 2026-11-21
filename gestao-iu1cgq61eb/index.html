@@ -77,6 +77,21 @@
   #entrar .btn { width: 100%; padding: 10px; font-size: 1.05rem; }
   #msg { color: var(--erro); font-weight: 700; min-height: 1.4em; margin: 8px 0 0; }
   [hidden] { display: none !important; }
+  .vivo-topo { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+  .vivo-n { font-family: 'Baloo 2', sans-serif; font-size: 2rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .ponto-vivo { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #3FB950; margin-right: 6px; vertical-align: 1px; animation: piscar 1.6s ease-in-out infinite; }
+  @keyframes piscar { 50% { opacity: .25; } }
+  .vivo-grade { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); align-items: start; }
+  .feed { display: grid; gap: 8px; max-height: 560px; overflow: auto; }
+  .feed .item { border: 2px solid var(--linha); border-radius: 12px; padding: 8px 10px; background: var(--papel); display: grid; gap: 3px; }
+  .feed .item.novo { border-color: #3FB950; }
+  .feed .l1 { display: flex; justify-content: space-between; gap: 8px; font-weight: 800; font-size: .9rem; }
+  .feed .l2 { font-size: .8rem; color: var(--suave); }
+  .etp { font-size: .72rem; font-weight: 800; border-radius: 999px; padding: 1px 8px; border: 1.5px solid var(--tinta); white-space: nowrap; }
+  .etp.e1 { background: #fff; } .etp.e2 { background: #CFE9FB; } .etp.e3 { background: var(--sol); } .etp.e4 { background: #FFB27A; } .etp.e5 { background: var(--pasto); }
+  .legenda-vivo { display: flex; flex-wrap: wrap; gap: 10px; font-size: .78rem; color: var(--suave); margin-top: 6px; }
+  .legenda-vivo i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--tinta); margin-right: 4px; vertical-align: -1px; }
+  @media (prefers-reduced-motion: reduce) { .ponto-vivo { animation: none; } .pulso { display: none; } }
   .funil-p { display: grid; gap: 6px; }
   .etapa { display: grid; grid-template-columns: minmax(0, 1fr) auto 70px; gap: 2px 10px; align-items: center; font-size: .85rem; padding: 3px 0; }
   .etapa .nome { font-weight: 800; }
@@ -119,6 +134,7 @@
     <p class="frase" id="frase">—</p>
     <nav class="abas" role="tablist" aria-label="Seções">
       <button role="tab" data-aba="resumo" aria-selected="true">Resumo</button>
+      <button role="tab" data-aba="aovivo" aria-selected="false">Ao vivo</button>
       <button role="tab" data-aba="acessos" aria-selected="false">Acessos e cidades</button>
       <button role="tab" data-aba="vendas" aria-selected="false">Vendas e ofertas</button>
       <button role="tab" data-aba="emails" aria-selected="false">E-mails</button>
@@ -129,6 +145,21 @@
     </nav>
 
     <section data-sec="resumo" class="grade" id="kpis"></section>
+
+    <section data-sec="aovivo" hidden style="display:grid;gap:16px">
+      <div class="vivo-topo">
+        <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)"><span class="ponto-vivo" aria-hidden="true"></span>No site agora</h3><div class="vivo-n" id="v-agora">—</div><p class="nota" style="margin:0">ativos nos últimos 5 min</p></div>
+        <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)">Última hora</h3><div class="vivo-n" id="v-hora">—</div><p class="nota" style="margin:0">pessoas diferentes</p></div>
+        <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)">Checkouts (1 h)</h3><div class="vivo-n" id="v-check">—</div><p class="nota" style="margin:0">abriram o pagamento</p></div>
+        <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)">Hoje</h3><div class="vivo-n" id="v-hoje">—</div><p class="nota" style="margin:0" id="v-hoje-p">—</p></div>
+      </div>
+      <div class="vivo-grade">
+        <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">De onde estão chegando (última hora)</h3><small class="nota" style="margin:0" id="v-atual">—</small></div>
+          <div class="grafico" id="g-vivo"></div>
+          <div class="legenda-vivo"><span><i style="background:#3FB950"></i>agora (até 5 min)</span><span><i style="background:#5BA8E8"></i>até 1 hora</span><span><i style="background:#FFC94A"></i>abriu o checkout</span><span><i style="background:#8BD17C;border-width:3px"></i>pagou</span></div></div>
+        <div class="card"><h3>Quem está navegando</h3><p class="nota">Atualiza sozinho a cada 15 segundos. A cidade vem da conexão de internet, então é aproximada.</p><div class="feed" id="feed-vivo"></div></div>
+      </div>
+    </section>
 
     <section data-sec="acessos" hidden style="display:grid;gap:16px">
       <p class="nota">A contagem de visitas e cidades começou em 21/11/2026. A cidade vem da conexão de internet, então é aproximada.</p>
@@ -307,12 +338,111 @@
     }
     if (aba === "whats") whatsLista();
     if (aba === "funil") funil();
+    if (aba === "aovivo") aoVivo();
     if (aba === "analises") analises();
     if (aba === "pessoas") {
       tabela("#t-abandonos", D.abandonos, COLS.abandonos, "Ninguém abandonou o checkout nos últimos 30 dias.");
       tabela("#t-clientes", D.clientes, COLS.clientes, "Nenhum cliente ainda.");
       tabela("#t-leads", D.leads, COLS.leads, "Nenhum lead ainda.");
     }
+  }
+
+  // ---------- ao vivo ----------
+  var VIVO = null, vivoTimer = null, vivoVistos = {};
+  var ETAPAS = { 1: "Só olhando", 2: "Clicou em comprar", 3: "Abriu o checkout", 4: "Gerou o Pix", 5: "Pagou" };
+  var ORIGENS_NOME = function (o) {
+    o = String(o || "direto").toLowerCase();
+    if (/^(fb|facebook)/.test(o) || o.indexOf("facebook") >= 0) return "Facebook";
+    if (/^(ig|instagram)/.test(o) || o.indexOf("instagram") >= 0) return "Instagram";
+    if (o.indexOf("google") >= 0) return "Google";
+    if (o === "direto") return "Direto";
+    return o;
+  };
+  function haQuanto(iso) {
+    var s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
+    if (s < 60) return "agora"; if (s < 3600) return "há " + Math.floor(s / 60) + " min"; return "há " + Math.floor(s / 3600) + " h";
+  }
+  function etapaDe(p) {
+    var e = p.etapa || 1;
+    if ((p.paginas || []).some(function (x) { return x === "/checkout/" || x === "/kit/checkout/"; })) e = Math.max(e, 3);
+    if ((p.paginas || []).some(function (x) { return /^\/(oferta-\d|obrigado|kit-oferta-\d)\//.test(x); })) e = 5;
+    return e;
+  }
+  async function buscarVivo() {
+    try {
+      var r = await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ senha: senhaGuardada(), acao: "aovivo" }) });
+      if (r.ok) { VIVO = await r.json(); desenharVivo(); }
+    } catch (e) {}
+  }
+  function aoVivo() {
+    if (VIVO) desenharVivo(); else buscarVivo();
+    if (!vivoTimer) vivoTimer = setInterval(function () {
+      var aba = (document.querySelector(".abas [aria-selected=true]") || {}).dataset;
+      if (aba && aba.aba === "aovivo" && document.visibilityState === "visible") buscarVivo();
+      else { clearInterval(vivoTimer); vivoTimer = null; }
+    }, 15000);
+  }
+  function desenharVivo() {
+    var v = VIVO || {}, P = (v.pessoas || []).map(function (p) { p.e = etapaDe(p); return p; });
+    $("#v-agora").textContent = F.int(v.agora); $("#v-hora").textContent = F.int(v.hora); $("#v-check").textContent = F.int(v.checkouts_1h);
+    $("#v-hoje").textContent = F.int(v.vendas_hoje) + (v.vendas_hoje === 1 ? " venda" : " vendas");
+    $("#v-hoje-p").textContent = F.brl(v.receita_hoje) + " · " + F.int(v.visitas_hoje) + " visitantes";
+    $("#v-atual").textContent = "atualizado " + new Date(v.gerado_em || Date.now()).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    mapaVivo("#g-vivo", P);
+    var box = $("#feed-vivo"); box.replaceChildren();
+    if (!P.length) { box.innerHTML = '<p class="vazio">Ninguém na última hora.</p>'; return; }
+    P.slice(0, 60).forEach(function (p) {
+      var chave = p.primeiro + "|" + p.cidade, novo = !vivoVistos[chave] && Object.keys(vivoVistos).length > 0;
+      var it = document.createElement("div"); it.className = "item" + (novo ? " novo" : "");
+      var pags = []; (p.paginas || []).forEach(function (x) { var n = NOMES[x] || x; if (pags[pags.length - 1] !== n) pags.push(n); });
+      it.innerHTML = '<div class="l1"><span></span><span class="etp"></span></div><div class="l2 a"></div><div class="l2 b"></div>';
+      it.querySelector(".l1 span").textContent = (p.cidade || "Cidade desconhecida") + (p.estado ? " - " + p.estado : "") + (p.pais && p.pais !== "BR" ? " (" + p.pais + ")" : "");
+      var et = it.querySelector(".etp"); et.textContent = ETAPAS[p.e]; et.className = "etp e" + p.e;
+      it.querySelector(".a").textContent = haQuanto(p.ultimo) + " · " + ORIGENS_NOME(p.origem) + " · " + (p.celular ? "celular" : "computador");
+      it.querySelector(".b").textContent = pags.join(" → ");
+      box.appendChild(it);
+    });
+    P.forEach(function (p) { vivoVistos[p.primeiro + "|" + p.cidade] = 1; });
+  }
+  function mapaVivo(sel, pessoas) {
+    var el = $(sel);
+    if (!MAPA) {
+      aviso(el, "Carregando o mapa…");
+      fetch("brasil.json").then(function (r) { return r.json(); }).then(function (j) { MAPA = j; mapaVivo(sel, pessoas); }).catch(function () { aviso(el, "O mapa não carregou."); });
+      return;
+    }
+    el.replaceChildren();
+    var W = el.clientWidth, H = Math.min(Math.round(W * 0.95), 520);
+    var proj = d3.geoMercator().fitSize([W, H], MAPA), path = d3.geoPath(proj);
+    var svg = d3.select(el).append("svg").attr("width", "100%").attr("viewBox", "0 0 " + W + " " + H).attr("role", "img").attr("aria-label", "Mapa do Brasil com as visitas da última hora");
+    svg.append("g").selectAll("path").data(MAPA.features).join("path").attr("d", path).attr("fill", "#F7F3EA").attr("stroke", "#D8CBB4");
+    var pts = pessoas.filter(function (p) { return p.pais === "BR" && p.lat != null && p.lon != null; });
+    if (!pts.length) {
+      svg.append("text").attr("x", W / 2).attr("y", H / 2).attr("text-anchor", "middle").attr("fill", "#7A6455").style("font", "700 13px Nunito, sans-serif").text("Ninguém no Brasil na última hora.");
+      return;
+    }
+    var recente = function (p) { return Date.now() - Date.parse(p.ultimo) < 5 * 60000; };
+    var cor = function (p) { return p.e >= 5 ? "#8BD17C" : p.e >= 3 ? "#FFC94A" : recente(p) ? "#3FB950" : "#5BA8E8"; };
+    // espalha um pouco quem está na mesma cidade
+    var jit = {}; pts.forEach(function (p) { var k = p.lat + "," + p.lon; jit[k] = (jit[k] || 0) + 1; p.j = jit[k] - 1; });
+    var xy = function (p) { var c = proj([p.lon, p.lat]), a = p.j * 2.4, d = p.j ? 5 + p.j * 1.5 : 0; return [c[0] + Math.cos(a) * d, c[1] + Math.sin(a) * d]; };
+    var t = dica(el);
+    var g = svg.append("g");
+    g.selectAll("circle.pulso").data(pts.filter(recente)).join("circle").attr("class", "pulso")
+      .attr("cx", function (p) { return xy(p)[0]; }).attr("cy", function (p) { return xy(p)[1]; }).attr("r", 6)
+      .attr("fill", "none").attr("stroke", "#3FB950").attr("stroke-width", 2)
+      .each(function () {
+        var c = d3.select(this);
+        c.append("animate").attr("attributeName", "r").attr("values", "6;22").attr("dur", "1.8s").attr("repeatCount", "indefinite");
+        c.append("animate").attr("attributeName", "stroke-opacity").attr("values", "0.9;0").attr("dur", "1.8s").attr("repeatCount", "indefinite");
+      });
+    g.selectAll("circle.p").data(pts.slice().reverse()).join("circle").attr("class", "p")
+      .attr("cx", function (p) { return xy(p)[0]; }).attr("cy", function (p) { return xy(p)[1]; })
+      .attr("r", function (p) { return p.e >= 3 ? 8 : 6; })
+      .attr("fill", cor).attr("fill-opacity", function (p) { return recente(p) || p.e >= 3 ? 1 : .6; })
+      .attr("stroke", "#4A3426").attr("stroke-width", function (p) { return p.e >= 5 ? 3 : 1.2; })
+      .on("pointermove", function (ev, p) { t.mostrar(ev, (p.cidade || "?") + (p.estado ? " - " + p.estado : "") + " · " + ETAPAS[p.e] + " · " + haQuanto(p.ultimo)); })
+      .on("pointerleave", t.esconder);
   }
 
   // ---------- funil ----------
@@ -592,7 +722,7 @@
       .on("pointermove", function (ev, p) { t.mostrar(ev, p.cidade + (p.estado ? " - " + p.estado : "") + ": " + F.int(p.visitas) + " visitas, " + F.int(p.visitantes) + " pessoas"); })
       .on("pointerleave", t.esconder);
   }
-  var NOMES = { "/veja/": "Página de vendas do app", "/quiz/": "Quiz", "/oferta/": "Oferta", "/checkout/": "Checkout do app", "/obrigado/": "Obrigado",
+  var NOMES = { "/veja/": "Página com vídeos", "/quiz/": "Quiz", "/oferta/": "Página de vendas", "/checkout/": "Checkout do app", "/obrigado/": "Obrigado",
     "/oferta-1/": "Oferta níveis 5 e 6", "/oferta-2/": "Oferta livrinho", "/oferta-3/": "Oferta livrinho com nome", "/kit/": "Página do kit",
     "/kit/checkout/": "Checkout do kit", "/kit-oferta-1/": "Oferta app R$ 27", "/kit-oferta-2/": "Oferta app R$ 17", "/gratis/": "Folhas grátis",
     "/comecar/": "Link de entrada (A/B)", "/ab/": "Teste A/B", "/sair/": "Sair da lista" };
