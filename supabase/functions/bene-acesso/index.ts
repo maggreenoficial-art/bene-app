@@ -67,5 +67,7 @@ Deno.serve(async (req: Request) => {
     if (pi && pi.status === "succeeded") await marcarPago(pi);
   }
   const produtos = await produtosDe(email);
+  // registra a entrada no aplicativo (painel: clientes ativos)
+  if (produtos.includes("app-bene")) await sb.from("bene_acessos").insert({ email });
   return json({ ok: produtos.includes("app-bene"), produtos });
 });

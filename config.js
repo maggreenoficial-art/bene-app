@@ -59,8 +59,26 @@ window.BENE_CONFIG = {
   C.addProduto = function (p) {
     try { var u = JSON.parse(localStorage.getItem("bene_user") || "null"); if (u) { u.produtos = u.produtos || []; if (u.produtos.indexOf(p) < 0) u.produtos.push(p); localStorage.setItem("bene_user", JSON.stringify(u)); } } catch (e) {}
   };
+  // id do visitante: o do Métricas Rápida (t.js) quando existe, para juntar visita, lead e compra
+  C.vid = function () {
+    try { var t = window.ltUtm && window.ltUtm(); if (t && t.vid) return String(t.vid); } catch (e) {}
+    try { var v = localStorage.getItem("bene_vid"); if (!v) { v = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem("bene_vid", v); } return v; } catch (e) { return ""; }
+  };
+  // registra a visita (página, origem e cidade) para o painel
+  (function visita() {
+    if (window.BENE_SEM_VISITA) return;
+    var n = 0;
+    (function enviar() {
+      if (!window.ltUtm && n++ < 15) return setTimeout(enviar, 200);
+      var ref = ""; try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
+      if (ref === location.hostname) ref = "";
+      var b = { vid: C.vid(), pagina: location.pathname, ref: ref, utm_source: utm.utm_source || "", utm_campaign: utm.utm_campaign || "", utm_content: utm.utm_content || "", celular: /Mobi|Android|iPhone/i.test(navigator.userAgent) };
+      try { fetch("/api/v", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), keepalive: true }); } catch (e) {}
+    })();
+  })();
   C.salvarLead = async function (lead) {
     if (!C.leadEndpoint) return;
+    lead = Object.assign({}, lead, { dados: Object.assign({}, lead.dados || {}, { vid: C.vid() }) });
     try { await fetch(C.leadEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lead), keepalive: true }); } catch (e) {}
   };
 })();
