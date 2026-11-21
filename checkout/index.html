@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://js.stripe.com"><link rel="preconnect" href="https://api.stripe.com"><link rel="preconnect" href="https://acbksachtpypwtbgwyxh.supabase.co">
 <script src="https://js.stripe.com/v3/" async></script>
 <script src="/config.js"></script>
+<script src="/pix.js"></script>
 <script src="https://www.metricasrapida.cloud/t.js" async></script>
 <style>
   :root{
@@ -184,6 +185,7 @@
       <p class="erro" id="erro" role="alert"></p>
       <div class="aviso" id="aviso-pix" hidden>O seu Pix continua valendo. Pague pelo aplicativo do banco e esta página avança sozinha quando o pagamento for confirmado.</div>
     </form>
+    <div id="pix" hidden></div>
 
     <div class="seguranca">
       <span class="cadeado"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg></span>
@@ -256,6 +258,7 @@
     setTimeout(() => $("d-nome").focus(), 50);
   }
 
+  function sessionPk() { try { return sessionStorage.getItem("bene_pk") || ""; } catch (e) { return ""; } }
   function cookie(n) { const m = document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)")); return m ? decodeURIComponent(m[1]) : ""; }
   function fbc() {
     const c = cookie("_fbc"); if (c) return c;
@@ -281,6 +284,9 @@
 
   async function criarPagamento() {
     await esperarRastreio();
+    // Pix já gerado neste aparelho (a pessoa foi ao app do banco e voltou): usa o mesmo pagamento
+    const px = window.BenePix && BenePix.salvo("app", lead.email);
+    if (px) return { email: lead.email, clientSecret: px.cs, pk: px.pk, id: px.id, pix: px };
     // reaproveita o mesmo pagamento se a página for recarregada
     try {
       const s = JSON.parse(sessionStorage.getItem("bene_pi") || "null");
@@ -311,6 +317,13 @@
     clientSecret = s.clientSecret; piId = s.id;
     try { sessionStorage.setItem("bene_pk", s.pk); } catch (e) {}
     stripe = Stripe(s.pk, { locale: "pt-BR" });
+    // voltou depois de pagar (ou com o Pix ainda aberto): não monta o pagamento de novo
+    try {
+      const r0 = await stripe.retrievePaymentIntent(clientSecret), p0 = r0 && r0.paymentIntent;
+      if (p0 && (p0.status === "succeeded" || p0.status === "processing")) { if (window.BenePix) BenePix.limpar("app"); return obrigado(p0.id, p0.status); }
+      if (s.pix && p0 && p0.status === "requires_action") abrirPix(s.pix);
+      else if (s.pix && window.BenePix) BenePix.limpar("app");
+    } catch (e) {}
     elements = stripe.elements({
       clientSecret,
       fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" }],
@@ -353,6 +366,14 @@
     location.href = "/obrigado/?payment_intent=" + encodeURIComponent(id) + "&redirect_status=" + encodeURIComponent(status);
   }
 
+  function abrirPix(px) {
+    $("form-pag").hidden = true;
+    $("pag-t").textContent = "Falta só pagar o Pix"; document.querySelector(".apoio").hidden = true;
+    BenePix.mostrar({ el: $("pix"), s: px, valor: "R$ 37,00", stripe, k: "app", onPago: obrigado,
+      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = metodo === "pix" ? "Gerar o Pix de R$ 37,00" : "Pagar R$ 37,00"; } });
+    window.scrollTo({ top: $("pag-t").getBoundingClientRect().top + scrollY - 12, behavior: "smooth" });
+  }
+
   let vigiando = false;
   function vigiarPix() {
     if (vigiando) return; vigiando = true;
@@ -369,6 +390,15 @@
     btn.disabled = true; const antes = txt.textContent; txt.textContent = metodo === "pix" ? "Gerando o Pix…" : "Processando…"; erro.textContent = "";
     C.track("AddPaymentInfo", { value: C.preco, currency: "BRL", content_name: metodo || "pagamento" });
     const whats = String(lead.whats).replace(/\D/g, "");
+    if (metodo === "pix" && window.BenePix) {
+      let r = null;
+      try { r = await BenePix.gerar({ stripe, clientSecret, k: "app", email: lead.email, pk: sessionPk(), billing: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }); } catch (e) { r = null; }
+      if (r && r.error && r.error.type === "invalid_request_error") { console.warn("pix proprio", r.error.code); r = null; }
+      if (r && r.error) { btn.disabled = false; txt.textContent = antes; erro.textContent = r.error.message || "Não conseguimos gerar o Pix. Tente de novo."; return; }
+      if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
+      if (r && r.pix) { btn.disabled = false; txt.textContent = antes; return abrirPix(r.pix); }
+      // sem o Pix próprio: segue com a janela do Stripe
+    }
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -390,7 +420,8 @@
 
   if (window.matchMedia("(min-width:860px)").matches) document.querySelector(".bonus").open = true;
   lead = lerLead();
-  C.track("InitiateCheckout", { value: C.preco, currency: "BRL" });
+  // conta o IC uma vez por sessão (antes cada volta do app do banco contava de novo)
+  try { if (!sessionStorage.getItem("bene_pi_ic")) { sessionStorage.setItem("bene_pi_ic", "1"); C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); } } catch (e) { C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); }
   if (valido(lead)) iniciar(); else formDados();
 })();
 </script>
