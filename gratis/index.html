@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>5 folhas grátis da Bené</title>
+<meta name="description" content="Baixe 5 folhas grátis de alfabetização da ovelhinha Bené para imprimir em casa.">
+<meta property="og:title" content="5 folhas grátis da Bené">
+<meta property="og:image" content="https://www.beneaovelhinha.online/kit/v/passos.jpg">
+<meta name="theme-color" content="#7EC8F2">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ofertas.css">
+<script src="/config.js"></script>
+<script src="https://www.metricasrapida.cloud/t.js" async></script>
+</head>
+<body style="background:#7EC8F2">
+<main>
+  <img src="/oferta/img/logo.webp" alt="Bené" width="120" height="98" style="align-self:center">
+  <h1>Suas 5 folhas grátis estão aqui</h1>
+  <p class="lead">Imprima uma folha por dia e sente 10 minutinhos com seu filho. Bata uma palma em cada pedacinho: BO… LA… BOLA!</p>
+  <div class="cartao" style="text-align:center">
+    <img src="/kit/v/passos.jpg" alt="Uma das folhas grátis: BOLA" width="480" height="600" style="width:100%;height:auto;border:3px solid #4A3426;border-radius:18px">
+    <a class="botao" id="baixar" href="/pdf/5-folhas-gratis.pdf" download style="margin-top:16px;text-decoration:none">Baixar as 5 folhas (PDF)</a>
+    <p class="nota">Funciona em preto e branco, na impressora de casa.</p>
+  </div>
+  <div class="cartao">
+    <h2 style="font-size:1.5rem;text-align:center">Gostou? O kit completo tem 127 folhas</h2>
+    <ul class="lista" style="margin-top:12px">
+      <li><span>4 níveis, do BO-LA às primeiras frases</span></li>
+      <li><span>Guia para o papai e a mamãe</span></li>
+      <li><span>Certificado "Eu já sei ler!"</span></li>
+    </ul>
+    <a class="botao" id="kit" href="/kit/" style="margin-top:16px;text-decoration:none;background:#8BD17C">Ver o kit por R$ 5,99</a>
+  </div>
+</main>
+<script>
+(function () {
+  var C = window.BENE_CONFIG;
+  C.track("ViewContent", { content_name: "5-folhas-gratis" });
+  document.getElementById("baixar").addEventListener("click", function () { C.track("Lead", { content_name: "5-folhas-gratis" }); });
+  var k = document.getElementById("kit"); k.href = "/kit/" + (location.search || "?utm_source=gratis");
+})();
+</script>
+</body>
+</html>
