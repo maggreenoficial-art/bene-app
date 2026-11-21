@@ -37,11 +37,14 @@ Deno.serve(async (req: Request) => {
   };
   const marcarPago = async (pi: PI) => {
     const m = pi.metadata ?? {};
-    await sb.from("bene_compras").upsert({
+    const bumpV = m.bump === "niveis56" ? 1990 : 0; // order bump do checkout vira compra separada de niveis56
+    const base = {
       payment_intent: pi.id, email: (m.email || pi.receipt_email || "").toLowerCase(), nome: m.nome || null, whatsapp: m.whatsapp || null,
-      valor: pi.amount, moeda: pi.currency, variante: m.variante || null, status: "pago", pago_em: new Date().toISOString(),
+      valor: pi.amount - bumpV, moeda: pi.currency, variante: m.variante || null, status: "pago", pago_em: new Date().toISOString(),
       produto: m.produto || "app-bene", origem: m.origem || null,
-    }, { onConflict: "payment_intent" });
+    };
+    await sb.from("bene_compras").upsert(base, { onConflict: "payment_intent" });
+    if (bumpV) await sb.from("bene_compras").upsert({ ...base, payment_intent: pi.id + "_bump", valor: bumpV, produto: "niveis56", origem: pi.id }, { onConflict: "payment_intent" });
   };
 
   // 1) Página de obrigado: confere um pagamento específico

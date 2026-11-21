@@ -85,6 +85,16 @@
   .erro{color:#B3261E;font-weight:800;min-height:1.2em;margin:10px 0 0;font-size:.95rem}
   .aviso{background:var(--sol-claro);border:2.5px dashed var(--tinta);border-radius:16px;padding:12px 14px;margin-top:14px;font-weight:700;font-size:.95rem}
   .aviso[hidden]{display:none}
+  /* order bump */
+  .bump{display:grid;grid-template-columns:30px 56px minmax(0,1fr);gap:10px;align-items:start;background:var(--sol-claro);border:3px dashed var(--tinta);border-radius:18px;padding:14px 12px;margin-top:18px;cursor:pointer;font-size:.92rem;line-height:1.4;font-weight:600}
+  .bump input{width:26px;height:26px;margin:2px 0 0;accent-color:#5FA84F;cursor:pointer}
+  .bump img{width:56px;height:56px;object-fit:cover;border:2.5px solid var(--tinta);border-radius:12px;background:#fff}
+  .bump b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.08rem;line-height:1.2;margin-bottom:3px}
+  .bump em{display:inline-block;font-style:normal;font-weight:800;font-size:.78rem;background:var(--coral);color:#fff;border-radius:99px;padding:1px 9px;margin-top:5px}
+  .bump.marcado{background:var(--pasto-claro);border-style:solid}
+  .bump[hidden]{display:none}
+  .linha-bump{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:.9rem;padding:8px 0 2px}
+  .linha-bump[hidden]{display:none}
 
   /* segurança */
   .seguranca{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start;background:var(--pasto-claro);border:2.5px solid var(--tinta);border-radius:18px;padding:14px;margin-top:18px}
@@ -165,7 +175,8 @@
       <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Cantando com a Bené</span><em>bônus</em></li>
     </ul>
     </details>
-    <div class="total"><span>Total</span><strong>R$ 37,00</strong></div>
+    <div class="linha-bump" id="linha-bump" hidden><span>+ Níveis 5 e 6 (historinhas)</span><span>R$ 19,90</span></div>
+    <div class="total"><span>Total</span><strong id="total-v">R$ 37,00</strong></div>
     <p class="total-nota">Pagamento único. Não é assinatura.</p>
   </aside>
 
@@ -178,6 +189,11 @@
     <form id="form-pag" novalidate>
       <p class="sec">Forma de pagamento</p>
       <div id="pagamento"><div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando as formas de pagamento…</div></div></div>
+      <label class="bump" id="bump" hidden>
+        <input type="checkbox" id="bump-ck">
+        <img src="/img/p/barco.webp" alt="" width="56" height="56">
+        <span><b>Sim! Quero também os Níveis 5 e 6 por + R$ 19,90</b>30 historinhas da Bíblia para ele ler sozinho, de Noé à ressurreição de Jesus. Liberado junto com o aplicativo.<br><em>Só nesta tela. Depois custa R$ 47</em></span>
+      </label>
       <button class="botao" type="submit" id="pagar" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
         <span id="pagar-txt">Pagar R$ 37,00</span>
@@ -213,7 +229,15 @@
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const btn = $("pagar"), txt = $("pagar-txt"), erro = $("erro"), avisoPix = $("aviso-pix");
-  let stripe, elements, clientSecret, piId, metodo = "", lead = null;
+  let stripe, elements, clientSecret, piId, metodo = "", lead = null, bump = false;
+  const total = () => bump ? 56.9 : C.preco;
+  const brl = v => "R$ " + v.toFixed(2).replace(".", ",");
+  const textoBotao = () => metodo === "pix" ? "Gerar o Pix de " + brl(total()) : "Pagar " + brl(total());
+  function mostrarBump() {
+    $("bump-ck").checked = bump; $("bump").classList.toggle("marcado", bump);
+    $("linha-bump").hidden = !bump; $("total-v").textContent = brl(total());
+    txt.textContent = textoBotao();
+  }
 
   function lerLead() {
     for (const k of ["bene_checkout", "bene_quiz_lead"]) {
@@ -321,6 +345,7 @@
     try {
       const r0 = await stripe.retrievePaymentIntent(clientSecret), p0 = r0 && r0.paymentIntent;
       if (p0 && (p0.status === "succeeded" || p0.status === "processing")) { if (window.BenePix) BenePix.limpar("app"); return obrigado(p0.id, p0.status); }
+      if (p0 && typeof p0.amount === "number") { bump = p0.amount >= 5690; mostrarBump(); }
       if (s.pix && p0 && p0.status === "requires_action") abrirPix(s.pix);
       else if (s.pix && window.BenePix) BenePix.limpar("app");
     } catch (e) {}
@@ -352,10 +377,10 @@
     });
     $("pagamento").innerHTML = "";
     pe.mount("#pagamento");
-    pe.on("ready", () => { btn.disabled = false; });
+    pe.on("ready", () => { btn.disabled = false; $("bump").hidden = false; });
     pe.on("change", ev => {
       metodo = ev.value && ev.value.type || "";
-      txt.textContent = metodo === "pix" ? "Gerar o Pix de R$ 37,00" : "Pagar R$ 37,00";
+      txt.textContent = textoBotao();
       erro.textContent = "";
     });
   }
@@ -369,10 +394,26 @@
   function abrirPix(px) {
     $("form-pag").hidden = true;
     $("pag-t").textContent = "Falta só pagar o Pix"; document.querySelector(".apoio").hidden = true;
-    BenePix.mostrar({ el: $("pix"), s: px, valor: "R$ 37,00", stripe, k: "app", onPago: obrigado,
-      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = metodo === "pix" ? "Gerar o Pix de R$ 37,00" : "Pagar R$ 37,00"; } });
+    BenePix.mostrar({ el: $("pix"), s: px, valor: brl(total()), stripe, k: "app", onPago: obrigado,
+      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = textoBotao(); } });
     window.scrollTo({ top: $("pag-t").getBoundingClientRect().top + scrollY - 12, behavior: "smooth" });
   }
+
+  $("bump-ck").addEventListener("change", async () => {
+    const ck = $("bump-ck"), quer = ck.checked;
+    ck.disabled = true; btn.disabled = true; erro.textContent = "";
+    try {
+      const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "bump", id: piId, email: lead.email, bump: quer }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) throw new Error("bump");
+      await elements.fetchUpdates();
+      bump = quer; mostrarBump();
+      if (quer) C.trackCustom("BumpMarcado", { valor: 19.9 }); else C.trackCustom("BumpDesmarcado", {});
+    } catch (e) {
+      ck.checked = !quer; erro.textContent = "Não conseguimos atualizar o pedido agora. Tente de novo.";
+    }
+    ck.disabled = false; btn.disabled = false;
+  });
 
   let vigiando = false;
   function vigiarPix() {
@@ -388,7 +429,7 @@
     e.preventDefault();
     if (!stripe || !elements) return;
     btn.disabled = true; const antes = txt.textContent; txt.textContent = metodo === "pix" ? "Gerando o Pix…" : "Processando…"; erro.textContent = "";
-    C.track("AddPaymentInfo", { value: C.preco, currency: "BRL", content_name: metodo || "pagamento" });
+    C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo || "pagamento" });
     const whats = String(lead.whats).replace(/\D/g, "");
     if (metodo === "pix" && window.BenePix) {
       let r = null;

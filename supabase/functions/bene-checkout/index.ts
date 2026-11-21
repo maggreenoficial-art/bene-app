@@ -10,6 +10,31 @@ const PRODUTOS: Record<string, { valor: number; nome: string; desc: string }> = 
   kit: { valor: 599, nome: "Bené - Kit para imprimir", desc: "Bené: kit Grafismo Fonético para imprimir (127 páginas)" },
 };
 
+// order bump do checkout: Níveis 5 e 6 por + R$ 19,90 (só no aplicativo)
+const BUMP = { valor: 1990, produto: "niveis56" };
+const H = (sk: string) => ({ Authorization: `Bearer ${sk}`, "Content-Type": "application/x-www-form-urlencoded" });
+
+// liga/desliga o bump num pagamento que ainda não foi pago: POST {acao:"bump", id, email, bump:true|false}
+async function trocarBump(b: Record<string, unknown>, sk: string) {
+  const id = String(b.id ?? ""), email = String(b.email ?? "").trim().toLowerCase(), quer = b.bump === true;
+  if (!/^pi_[A-Za-z0-9]{10,64}$/.test(id)) return json({ erro: "dados" }, 400);
+  const r0 = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { headers: H(sk) });
+  const pi = await r0.json();
+  if (!r0.ok || pi?.metadata?.produto !== "app-bene" || String(pi?.metadata?.email || "").toLowerCase() !== email) return json({ erro: "compra" }, 404);
+  if (!["requires_payment_method", "requires_confirmation", "requires_action"].includes(pi.status)) return json({ erro: "estado", status: pi.status }, 409);
+  const valor = PRODUTOS["app-bene"].valor + (quer ? BUMP.valor : 0);
+  const f = new URLSearchParams();
+  f.set("amount", String(valor));
+  f.set("metadata[bump]", quer ? BUMP.produto : "");
+  f.set("description", PRODUTOS["app-bene"].desc + (quer ? " + Níveis 5 e 6" : ""));
+  const r = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { method: "POST", headers: H(sk), body: f });
+  const j = await r.json();
+  if (!r.ok) { console.error("bump", j?.error?.type, j?.error?.code, j?.error?.message); return json({ erro: "stripe" }, 502); }
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  await sb.from("bene_compras").update({ valor }).eq("payment_intent", id).eq("status", "criado");
+  return json({ ok: true, valor, bump: quer });
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ erro: "metodo" }, 405);
@@ -17,12 +42,15 @@ Deno.serve(async (req: Request) => {
   if (!sk || !pk) return json({ erro: "config" }, 503);
   let b: Record<string, unknown> = {};
   try { b = await req.json(); } catch { return json({ erro: "json" }, 400); }
+  if (b.acao === "bump") return await trocarBump(b, sk);
   const nome = String(b.nome ?? "").trim().slice(0, 120);
   const email = String(b.email ?? "").trim().toLowerCase().slice(0, 160);
   const whatsapp = String(b.whatsapp ?? "").replace(/\D/g, "").slice(0, 15);
   const variante = String(b.variante ?? "").slice(0, 40);
   const produto = PRODUTOS[String(b.produto ?? "")] ? String(b.produto) : "app-bene";
   const P = PRODUTOS[produto];
+  const bump = b.bump === true && produto === "app-bene";
+  const valorTotal = P.valor + (bump ? BUMP.valor : 0);
   const utm = (b.utm && typeof b.utm === "object" && JSON.stringify(b.utm).length < 4000) ? b.utm as Record<string, string> : {};
   if (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10) return json({ erro: "dados" }, 400);
 
@@ -37,7 +65,8 @@ Deno.serve(async (req: Request) => {
   } catch (e) { console.error("customer falhou", String(e)); }
 
   const f = new URLSearchParams();
-  f.set("amount", String(P.valor));
+  f.set("amount", String(valorTotal));
+  if (bump) f.set("metadata[bump]", BUMP.produto);
   if (customer) {
     f.set("customer", customer);
     f.set("payment_method_options[card][setup_future_usage]", "off_session");
@@ -77,6 +106,6 @@ Deno.serve(async (req: Request) => {
     return json({ erro: "stripe" }, 502);
   }
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  await sb.from("bene_compras").insert({ payment_intent: pi.id, email, nome, whatsapp, valor: P.valor, variante: variante || null, utm, produto });
-  return json({ clientSecret: pi.client_secret, publishableKey: pk, id: pi.id, valor: P.valor, produto, umClique: !!customer });
+  await sb.from("bene_compras").insert({ payment_intent: pi.id, email, nome, whatsapp, valor: valorTotal, variante: variante || null, utm, produto });
+  return json({ clientSecret: pi.client_secret, publishableKey: pk, id: pi.id, valor: valorTotal, produto, umClique: !!customer });
 });

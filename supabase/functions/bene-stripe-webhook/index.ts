@@ -71,9 +71,15 @@ Deno.serve(async (req: Request) => {
   const m = pi.metadata ?? {};
   // a conta Stripe também recebe vendas de outros produtos: só registra os da Bené
   if (!PRODUTOS.includes(m.produto)) return new Response("ok");
-  const base = { payment_intent: pi.id, email: String(m.email || pi.receipt_email || "").toLowerCase(), nome: m.nome || null, whatsapp: m.whatsapp || null, valor: pi.amount, moeda: pi.currency, variante: m.variante || null, produto: m.produto || "app-bene", origem: m.origem || null };
+  // order bump (Níveis 5 e 6 marcados no checkout): vira uma compra separada de niveis56, ligada à principal
+  const bumpV = m.bump === "niveis56" ? 1990 : 0;
+  const base = { payment_intent: pi.id, email: String(m.email || pi.receipt_email || "").toLowerCase(), nome: m.nome || null, whatsapp: m.whatsapp || null, valor: pi.amount - bumpV, moeda: pi.currency, variante: m.variante || null, produto: m.produto || "app-bene", origem: m.origem || null };
   if (ev.type === "payment_intent.succeeded") {
     await sb.from("bene_compras").upsert({ ...base, status: "pago", pago_em: new Date().toISOString(), metodo: metodo }, { onConflict: "payment_intent" });
+    if (bumpV) {
+      const utm = Object.fromEntries(["vid", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].filter((k) => m[k]).map((k) => [k, m[k]]));
+      await sb.from("bene_compras").upsert({ ...base, payment_intent: pi.id + "_bump", valor: bumpV, produto: "niveis56", origem: pi.id, status: "pago", pago_em: new Date().toISOString(), metodo: metodo, utm }, { onConflict: "payment_intent" });
+    }
     if (PRODUTOS.includes(m.produto)) await compraParaMeta(pi);
   } else if (ev.type === "payment_intent.processing") {
     await sb.from("bene_compras").upsert({ ...base, status: "processando" }, { onConflict: "payment_intent" });
