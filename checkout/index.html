@@ -153,8 +153,8 @@
 <header>
   <div class="cab">
     <img src="/oferta/img/logo.webp" alt="Bené" width="76" height="62">
-    <div class="passos" aria-label="Passo 2 de 2">
-      <span class="feito"><i>✓</i>Seus dados</span><span class="linha" aria-hidden="true"></span><span class="agora"><i>2</i>Pagamento</span>
+    <div class="passos" aria-label="Última etapa">
+      <span class="agora"><i>✓</i>Última etapa</span>
     </div>
   </div>
 </header>
@@ -247,39 +247,47 @@
   }
   const valido = l => l && String(l.nome || "").trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(l.email || "") && String(l.whats || "").replace(/\D/g, "").length >= 10;
 
+  let precisaDados = false;
   function mostrarQuem() {
+    precisaDados = false;
     $("bloco-quem").innerHTML = `<div class="quem"><div>Acesso para<b>${esc(lead.nome)}</b>${esc(lead.email)}</div><button type="button" id="alterar">Alterar</button></div>`;
-    $("alterar").addEventListener("click", formDados);
+    $("alterar").addEventListener("click", () => camposDados(lead));
   }
 
-  function formDados() {
-    btn.disabled = true;
-    $("pagamento").innerHTML = "";
-    const l = lead || {};
-    $("bloco-quem").innerHTML = `<form id="form-dados" novalidate style="margin-bottom:18px">
+  // nome, e-mail e WhatsApp na mesma tela do pagamento (vão junto quando a pessoa toca em pagar)
+  function camposDados(l) {
+    precisaDados = true; l = l || {};
+    $("bloco-quem").innerHTML = `<div id="dados" style="margin-bottom:18px">
       <p class="sec" style="margin-bottom:0">Para quem liberamos o acesso?</p>
       <label for="d-nome">Seu nome</label><input id="d-nome" autocomplete="name" value="${esc(l.nome || "")}">
       <label for="d-email">Seu melhor e-mail</label><input id="d-email" type="email" inputmode="email" autocomplete="email" value="${esc(l.email || "")}">
       <label for="d-whats">WhatsApp</label><input id="d-whats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}">
-      <p class="erro" id="erro-dados" role="alert"></p>
-      <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar</button></form>`;
+      <p class="erro" id="erro-dados" role="alert"></p></div>`;
     const w = $("d-whats");
     const mask = () => { const d = w.value.replace(/\D/g, "").slice(0, 11); w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; };
     w.addEventListener("input", mask); mask();
-    $("form-dados").addEventListener("submit", async e => {
-      e.preventDefault();
-      const n = { nome: $("d-nome").value.trim(), email: $("d-email").value.trim().toLowerCase(), whats: w.value.replace(/\D/g, ""), variante: (lead && lead.variante) || C.variante() || "direto" };
-      const er = $("erro-dados");
-      if (n.nome.length < 2) { er.textContent = "Escreva seu nome."; return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(n.email)) { er.textContent = "Confira o e-mail: é com ele que você entra no aplicativo."; return; }
-      if (n.whats.length < 10) { er.textContent = "Digite o WhatsApp com DDD."; return; }
-      lead = n;
-      try { localStorage.setItem("bene_checkout", JSON.stringify(lead)); } catch (err) {}
-      C.track("Lead", { content_name: "checkout" });
-      C.salvarLead({ nome: n.nome, email: n.email, whatsapp: n.whats, origem: "checkout", variante: n.variante, dados: { utm: C.utm } });
-      iniciar();
-    });
-    setTimeout(() => $("d-nome").focus(), 50);
+    $("dados").addEventListener("input", () => { $("erro-dados").textContent = ""; });
+  }
+  function lerCampos() {
+    const n = { nome: $("d-nome").value.trim(), email: $("d-email").value.trim().toLowerCase(), whats: $("d-whats").value.replace(/\D/g, ""), variante: (lead && lead.variante) || C.variante() || "direto" };
+    const er = $("erro-dados"); er.textContent = "";
+    const falha = (t, id) => { er.textContent = t; $(id).focus(); $(id).scrollIntoView({ block: "center", behavior: "smooth" }); return null; };
+    if (n.nome.length < 2) return falha("Escreva seu nome.", "d-nome");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(n.email)) return falha("Confira o e-mail: é com ele que você entra no aplicativo.", "d-email");
+    if (n.whats.length < 10) return falha("Digite o WhatsApp com DDD.", "d-whats");
+    return n;
+  }
+  async function enviarDados(n) {
+    const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ acao: "dados", id: piId, nome: n.nome, email: n.email, whatsapp: n.whats, variante: n.variante }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) throw new Error(j.erro || "dados");
+    lead = n;
+    try { localStorage.setItem("bene_checkout", JSON.stringify(lead)); } catch (e) {}
+    try { const s = JSON.parse(sessionStorage.getItem("bene_pi") || "null"); if (s) { s.email = lead.email; sessionStorage.setItem("bene_pi", JSON.stringify(s)); } } catch (e) {}
+    C.track("Lead", { content_name: "checkout" });
+    C.salvarLead({ nome: n.nome, email: n.email, whatsapp: n.whats, origem: "checkout", variante: n.variante, dados: { utm: C.utm } });
+    mostrarQuem();
   }
 
   function sessionPk() { try { return sessionStorage.getItem("bene_pk") || ""; } catch (e) { return ""; } }
@@ -309,24 +317,28 @@
   async function criarPagamento() {
     await esperarRastreio();
     // Pix já gerado neste aparelho (a pessoa foi ao app do banco e voltou): usa o mesmo pagamento
-    const px = window.BenePix && BenePix.salvo("app", lead.email);
-    if (px) return { email: lead.email, clientSecret: px.cs, pk: px.pk, id: px.id, pix: px };
+    const email = (valido(lead) && lead.email) || "";
+    const px = email && window.BenePix && BenePix.salvo("app", email);
+    if (px) return { email, clientSecret: px.cs, pk: px.pk, id: px.id, pix: px };
     // reaproveita o mesmo pagamento se a página for recarregada
     try {
       const s = JSON.parse(sessionStorage.getItem("bene_pi") || "null");
-      if (s && s.email === lead.email && s.clientSecret) return s;
+      if (s && s.clientSecret && (s.email === email || (!email && !s.email))) return s;
     } catch (e) {}
     const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
+      body: JSON.stringify(email
+        ? { nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }
+        : { rascunho: true, variante: C.variante() || "direto", utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.clientSecret) throw new Error(j.erro || "falha");
-    const s = { email: lead.email, clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
+    const s = { email, clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
     try { sessionStorage.setItem("bene_pi", JSON.stringify(s)); } catch (e) {}
     return s;
   }
 
   async function iniciar() {
-    mostrarQuem();
+    if (valido(lead)) mostrarQuem();
+    else { camposDados(lead); $("pag-t").textContent = "Finalize seu pedido"; document.querySelector(".apoio").textContent = "Preencha seus dados e escolha como pagar. O acesso ao aplicativo é liberado assim que o pagamento é confirmado."; }
     erro.textContent = ""; btn.disabled = true;
     $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando as formas de pagamento…</div></div>';
     let s;
@@ -395,7 +407,7 @@
     $("form-pag").hidden = true;
     $("pag-t").textContent = "Falta só pagar o Pix"; document.querySelector(".apoio").hidden = true;
     BenePix.mostrar({ el: $("pix"), s: px, valor: brl(total()), stripe, k: "app", onPago: obrigado,
-      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = textoBotao(); } });
+      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = precisaDados ? "Finalize seu pedido" : "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = textoBotao(); } });
     window.scrollTo({ top: $("pag-t").getBoundingClientRect().top + scrollY - 12, behavior: "smooth" });
   }
 
@@ -403,12 +415,12 @@
     const ck = $("bump-ck"), quer = ck.checked;
     ck.disabled = true; btn.disabled = true; erro.textContent = "";
     try {
-      const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "bump", id: piId, email: lead.email, bump: quer }) });
+      const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "bump", id: piId, email: (lead && lead.email) || "", bump: quer }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.ok) throw new Error("bump");
       await elements.fetchUpdates();
       bump = quer; mostrarBump();
-      if (quer) C.trackCustom("BumpMarcado", { valor: 19.9 }); else C.trackCustom("BumpDesmarcado", {});
+      if (quer) { C.trackCustom("BumpMarcado", { valor: 19.9 }); C.evento("bump_marcado", null, true); } else C.trackCustom("BumpDesmarcado", {});
     } catch (e) {
       ck.checked = !quer; erro.textContent = "Não conseguimos atualizar o pedido agora. Tente de novo.";
     }
@@ -428,6 +440,13 @@
   $("form-pag").addEventListener("submit", async e => {
     e.preventDefault();
     if (!stripe || !elements) return;
+    if (precisaDados) {
+      const n = lerCampos(); if (!n) return;
+      btn.disabled = true; txt.textContent = "Salvando seus dados…"; erro.textContent = "";
+      try { await enviarDados(n); }
+      catch (er) { btn.disabled = false; txt.textContent = textoBotao(); erro.textContent = er.message === "estado" ? "Este pagamento já foi concluído. Atualize a página." : "Não conseguimos salvar seus dados. Confira e tente de novo."; return; }
+      txt.textContent = textoBotao();
+    }
     btn.disabled = true; const antes = txt.textContent; txt.textContent = metodo === "pix" ? "Gerando o Pix…" : "Processando…"; erro.textContent = "";
     C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo || "pagamento" });
     const whats = String(lead.whats).replace(/\D/g, "");
@@ -437,7 +456,7 @@
       if (r && r.error && r.error.type === "invalid_request_error") { console.warn("pix proprio", r.error.code); r = null; }
       if (r && r.error) { btn.disabled = false; txt.textContent = antes; erro.textContent = r.error.message || "Não conseguimos gerar o Pix. Tente de novo."; return; }
       if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
-      if (r && r.pix) { btn.disabled = false; txt.textContent = antes; return abrirPix(r.pix); }
+      if (r && r.pix) { btn.disabled = false; txt.textContent = antes; C.evento("pix_gerado", null, true); return abrirPix(r.pix); }
       // sem o Pix próprio: segue com a janela do Stripe
     }
     const { error, paymentIntent } = await stripe.confirmPayment({
@@ -461,9 +480,10 @@
 
   if (window.matchMedia("(min-width:860px)").matches) document.querySelector(".bonus").open = true;
   lead = lerLead();
+  C.evento("checkout_aberto");
   // conta o IC uma vez por sessão (antes cada volta do app do banco contava de novo)
   try { if (!sessionStorage.getItem("bene_pi_ic")) { sessionStorage.setItem("bene_pi_ic", "1"); C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); } } catch (e) { C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); }
-  if (valido(lead)) iniciar(); else formDados();
+  iniciar();
 })();
 </script>
 </body>

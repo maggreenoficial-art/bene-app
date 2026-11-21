@@ -76,7 +76,32 @@ window.BENE_CONFIG = {
       try { fetch("/api/v", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), keepalive: true }); } catch (e) {}
     })();
   })();
+  // eventos do funil (painel: aba Funil). Cada evento conta uma vez por página aberta.
+  var ja = {};
+  C.evento = function (ev, dados, repetir) {
+    if (!repetir && ja[ev]) return; ja[ev] = 1;
+    var b = { evento: ev, vid: C.vid(), pagina: location.pathname, variante: C.variante(), dados: dados || null };
+    try { fetch("/api/v", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), keepalive: true }); } catch (e) {}
+  };
+  // clique em comprar e início do quiz, em qualquer página
+  document.addEventListener("click", function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('.abrir-checkout, .comprar, a[href^="/checkout/"], .cta-comprar') : null;
+    if (el) C.evento("clique_comprar", { texto: (el.textContent || "").trim().slice(0, 40) });
+    if (e.target && e.target.closest && e.target.closest("#comecar")) C.evento("quiz_inicio");
+  }, true);
+  // até onde a pessoa rola as páginas de venda
+  if (/^\/(oferta|veja)\/$/.test(location.pathname)) {
+    var marcas = [25, 50, 75, 100];
+    var rolou = function () {
+      var h = document.documentElement.scrollHeight - innerHeight; if (h <= 0) return;
+      var p = (scrollY / h) * 100;
+      while (marcas.length && p >= marcas[0] - 2) C.evento("rolou_" + marcas.shift());
+      if (!marcas.length) removeEventListener("scroll", rolou);
+    };
+    addEventListener("scroll", rolou, { passive: true });
+  }
   C.salvarLead = async function (lead) {
+    C.evento("lead", { origem: lead.origem || "" });
     if (!C.leadEndpoint) return;
     lead = Object.assign({}, lead, { dados: Object.assign({}, lead.dados || {}, { vid: C.vid() }) });
     try { await fetch(C.leadEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lead), keepalive: true }); } catch (e) {}

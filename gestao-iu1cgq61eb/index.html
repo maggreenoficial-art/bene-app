@@ -77,6 +77,21 @@
   #entrar .btn { width: 100%; padding: 10px; font-size: 1.05rem; }
   #msg { color: var(--erro); font-weight: 700; min-height: 1.4em; margin: 8px 0 0; }
   [hidden] { display: none !important; }
+  .funil-p { display: grid; gap: 6px; }
+  .etapa { display: grid; grid-template-columns: minmax(0, 1fr) auto 70px; gap: 2px 10px; align-items: center; font-size: .85rem; padding: 3px 0; }
+  .etapa .nome { font-weight: 800; }
+  .etapa .trilho { display: block; grid-column: 1 / -1; order: 5; height: 8px; background: var(--ceu-claro); border-radius: 6px; overflow: hidden; }
+  .etapa .trilho i { display: block; height: 100%; background: var(--azul); border-radius: 6px; }
+  .etapa.alvo-ok .trilho i { background: var(--pasto); } .etapa.alvo-mal .trilho i { background: #F2A08F; }
+  .etapa .n { font-weight: 800; }
+  .etapa .meta { font-size: .72rem; color: var(--suave); text-align: right; }
+  .periodos { display: flex; gap: 6px; }
+  .periodos button[aria-pressed="true"] { background: var(--tinta); color: #fff; }
+  .analise { border-left: 4px solid var(--sol); padding: 4px 0 4px 12px; }
+  .analise h4 { font-family: 'Baloo 2', sans-serif; font-size: 1.05rem; margin: 0 0 2px; }
+  .analise .quando { font-size: .78rem; color: var(--suave); font-weight: 800; }
+  .analise p, .analise li { max-width: 80ch; margin: 4px 0; }
+  .analise ul { margin: 4px 0; padding-left: 20px; }
   @media (max-width: 520px) { .kpi .n { font-size: 1.6rem; } main { padding: 12px; } .topo img { width: 40px; } .topo .btn { padding: 5px 9px; font-size: .85rem; } }
 </style>
 </head>
@@ -109,6 +124,8 @@
       <button role="tab" data-aba="emails" aria-selected="false">E-mails</button>
       <button role="tab" data-aba="pessoas" aria-selected="false">Pessoas</button>
       <button role="tab" data-aba="whats" aria-selected="false">WhatsApp</button>
+      <button role="tab" data-aba="funil" aria-selected="false">Funil</button>
+      <button role="tab" data-aba="analises" aria-selected="false">Análises do Claude</button>
     </nav>
 
     <section data-sec="resumo" class="grade" id="kpis"></section>
@@ -155,6 +172,23 @@
       <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">Clientes e o que ainda dá para oferecer</h3><button class="btn" type="button" data-csv="clientes">Baixar CSV</button></div><div class="rolar" id="t-clientes"></div></div>
       <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">Leads (quiz, página de vendas e folhas grátis)</h3><button class="btn" type="button" data-csv="leads">Baixar CSV</button></div><div class="rolar" id="t-leads"></div></div>
     </section>
+    <section data-sec="funil" hidden style="display:grid;gap:16px">
+      <div class="card">
+        <div class="barra-acoes"><h3 style="flex:1;margin:0">Funil por página de entrada</h3>
+          <div class="periodos" role="group" aria-label="Período"><button class="btn" type="button" data-h="24" aria-pressed="false">24 h</button><button class="btn" type="button" data-h="72" aria-pressed="false">3 dias</button><button class="btn" type="button" data-h="168" aria-pressed="true">7 dias</button></div></div>
+        <p class="nota">Pessoas diferentes em cada etapa, contadas sobre as visitas da página. Metas: abrir o checkout em pelo menos 50% das visitas e iniciar o pagamento em pelo menos 30%. Rolagem, cliques e checkout começaram a ser medidos em 21/11; antes disso essas etapas aparecem zeradas.</p>
+        <div id="funil" class="duas"></div>
+      </div>
+    </section>
+
+    <section data-sec="analises" hidden style="display:grid;gap:16px">
+      <div class="card">
+        <h3>Análises do Claude</h3>
+        <p class="nota">A cada 5 horas o Claude olha o funil, os anúncios e as vendas, aponta o gargalo e sugere a próxima correção. As mais novas ficam em cima.</p>
+        <div id="analises" style="display:grid;gap:18px"></div>
+      </div>
+    </section>
+
     <section data-sec="whats" hidden style="display:grid;gap:16px">
       <div class="card">
         <div class="barra-acoes"><h3 style="flex:1;margin:0">Para chamar no WhatsApp (30 dias)</h3>
@@ -272,11 +306,74 @@
       tabela("#t-eventos", D.eventos, [["quando", "Quando"], ["email", "Pessoa"], ["modelo", "E-mail"], ["evento", "O que aconteceu"], ["link", "Link clicado", "link"]], "Nenhum evento recebido do Resend ainda.");
     }
     if (aba === "whats") whatsLista();
+    if (aba === "funil") funil();
+    if (aba === "analises") analises();
     if (aba === "pessoas") {
       tabela("#t-abandonos", D.abandonos, COLS.abandonos, "Ninguém abandonou o checkout nos últimos 30 dias.");
       tabela("#t-clientes", D.clientes, COLS.clientes, "Nenhum cliente ainda.");
       tabela("#t-leads", D.leads, COLS.leads, "Nenhum lead ainda.");
     }
+  }
+
+  // ---------- funil ----------
+  var HORAS = "168";
+  document.querySelectorAll(".periodos button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      HORAS = b.dataset.h;
+      document.querySelectorAll(".periodos button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      funil();
+    });
+  });
+  var NOMES_FUNIL = { oferta: "Página de vendas (/oferta/)", quiz: "Quiz (/quiz/)", veja: "Página com vídeos (/veja/)", direto: "Direto no checkout", kit: "Kit (/kit/)" };
+  function funil() {
+    var box = $("#funil"); box.replaceChildren();
+    var linhas = ((D.funil || {})[HORAS] || []).filter(function (l) { return l.visitas || l.iniciadas || l.checkout_aberto; });
+    if (!linhas.length) { box.innerHTML = '<p class="vazio">Ainda sem dados neste período.</p>'; return; }
+    linhas.sort(function (a, b) { return b.visitas - a.visitas; });
+    linhas.forEach(function (l) {
+      var card = document.createElement("div"); card.className = "funil-p";
+      var base = l.visitas || 0;
+      var et = l.pagina === "quiz"
+        ? [["Visitas", l.visitas], ["Começou o quiz", l.quiz_inicio], ["Deixou os dados", l.lead], ["Clicou em comprar", l.clique_comprar], ["Abriu o checkout", l.checkout_aberto, 50], ["Iniciou o pagamento", l.iniciadas, 30], ["Gerou o Pix", l.pix_gerado], ["Pagou", l.pagas]]
+        : [["Visitas", l.visitas], ["Rolou metade da página", l.rolou_50], ["Clicou em comprar", l.clique_comprar], ["Abriu o checkout", l.checkout_aberto, 50], ["Iniciou o pagamento", l.iniciadas, 30], ["Gerou o Pix", l.pix_gerado], ["Pagou", l.pagas]];
+      var h = document.createElement("h3"); h.textContent = (NOMES_FUNIL[l.pagina] || l.pagina) + " · " + F.brl(l.receita) + (l.bumps ? " · " + F.int(l.bumps) + " order bump" : ""); card.appendChild(h);
+      et.forEach(function (e) {
+        var pct = base ? (e[1] || 0) / base * 100 : null;
+        var row = document.createElement("div");
+        row.className = "etapa" + (e[2] && pct != null ? (pct >= e[2] ? " alvo-ok" : " alvo-mal") : "");
+        row.innerHTML = '<span class="nome"></span><span class="trilho"><i></i></span><span class="n"></span><span class="meta"></span>';
+        row.querySelector(".nome").textContent = e[0];
+        row.querySelector("i").style.width = Math.min(100, pct || 0) + "%";
+        row.querySelector(".n").textContent = F.int(e[1]) + (pct != null && e[0] !== "Visitas" ? " · " + F.pct(pct) : "");
+        row.querySelector(".meta").textContent = e[2] ? "meta " + e[2] + "%" : "";
+        card.appendChild(row);
+      });
+      box.appendChild(card);
+    });
+  }
+  // ---------- análises do Claude ----------
+  function inline(el, t) {
+    String(t).split(/(\*\*[^*]+\*\*)/).forEach(function (p) {
+      if (/^\*\*[^*]+\*\*$/.test(p)) { var b = document.createElement("b"); b.textContent = p.slice(2, -2); el.appendChild(b); }
+      else el.appendChild(document.createTextNode(p));
+    });
+  }
+  function analises() {
+    var box = $("#analises"); box.replaceChildren();
+    var L = D.analises || [];
+    if (!L.length) { box.innerHTML = '<p class="vazio">A primeira análise aparece aqui depois da próxima rodada.</p>'; return; }
+    L.forEach(function (a) {
+      var d = document.createElement("article"); d.className = "analise";
+      var q = document.createElement("div"); q.className = "quando"; q.textContent = a.quando; d.appendChild(q);
+      if (a.titulo) { var h = document.createElement("h4"); h.textContent = a.titulo; d.appendChild(h); }
+      var ul = null;
+      String(a.texto || "").split(/\n+/).forEach(function (ln) {
+        ln = ln.trim(); if (!ln) return;
+        if (/^[-•]\s+/.test(ln)) { if (!ul) { ul = document.createElement("ul"); d.appendChild(ul); } var li = document.createElement("li"); inline(li, ln.replace(/^[-•]\s+/, "")); ul.appendChild(li); }
+        else { ul = null; var p = document.createElement(/^#+\s/.test(ln) ? "h4" : "p"); inline(p, ln.replace(/^#+\s/, "")); d.appendChild(p); }
+      });
+      box.appendChild(d);
+    });
   }
 
   var COLS = {

@@ -47,7 +47,11 @@ Deno.serve(async (req: Request) => {
     await sb.from("bene_whats_contatos").insert({ email, tipo: String(b.tipo || "").slice(0, 30) || null });
     return json({ ok: true });
   }
-  const [dados, whats] = await Promise.all([sb.rpc("bene_painel_dados"), sb.rpc("bene_painel_whats")]);
+  const [dados, whats, f24, f72, f7d, analises] = await Promise.all([
+    sb.rpc("bene_painel_dados"), sb.rpc("bene_painel_whats"),
+    sb.rpc("bene_painel_funil", { horas: 24 }), sb.rpc("bene_painel_funil", { horas: 72 }), sb.rpc("bene_painel_funil", { horas: 168 }),
+    sb.rpc("bene_painel_analises"),
+  ]);
   if (dados.error) return json({ erro: "banco" }, 500);
-  return json({ ...dados.data, whats: whats.data || [] });
+  return json({ ...dados.data, whats: whats.data || [], funil: { "24": f24.data || [], "72": f72.data || [], "168": f7d.data || [] }, analises: analises.data || [] });
 });

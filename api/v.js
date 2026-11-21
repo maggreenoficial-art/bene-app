@@ -1,6 +1,9 @@
 // Registra uma visita no Supabase com a cidade que a Vercel descobre pelo IP (o IP não é guardado).
 // Chamado pelo config.js em todas as páginas do site.
 const SB = "https://acbksachtpypwtbgwyxh.supabase.co/rest/v1/bene_visitas";
+// eventos do funil (rolagem, clique em comprar, lead, checkout…) vão para outra tabela
+const SB_EV = "https://acbksachtpypwtbgwyxh.supabase.co/rest/v1/bene_eventos";
+const EVENTOS = ["rolou_25", "rolou_50", "rolou_75", "rolou_100", "clique_comprar", "lead", "checkout_aberto", "pagamento_iniciado", "pix_gerado", "pix_copiado", "bump_marcado", "pago", "quiz_inicio", "quiz_resultado"];
 // chave pública "anon" (a mesma que pode ir no navegador); a tabela só aceita inserir, nunca ler
 const CHAVE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjYmtzYWNodHB5cHd0Ymd3eXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0Njc5NDQsImV4cCI6MjA4NzA0Mzk0NH0.U4qPmPr5ozsKOxQ8FfIE5rKOt2wms0s7KLuyE4Px1qk";
 
@@ -18,6 +21,16 @@ module.exports = async (req, res) => {
   let b = req.body;
   if (typeof b === "string") { try { b = JSON.parse(b); } catch { b = {}; } }
   b = b || {};
+  if (b.evento) {
+    if (!EVENTOS.includes(b.evento)) { res.statusCode = 400; return res.end(); }
+    let dados = null;
+    if (b.dados && typeof b.dados === "object") { const t = JSON.stringify(b.dados); if (t.length <= 1000) dados = b.dados; }
+    const ev = { evento: b.evento, vid: corta(b.vid, 80), pagina: corta(b.pagina, 120), variante: corta(b.variante, 40), dados };
+    try {
+      await fetch(SB_EV, { method: "POST", headers: { apikey: CHAVE, authorization: `Bearer ${CHAVE}`, "content-type": "application/json", prefer: "return=minimal" }, body: JSON.stringify(ev) });
+    } catch { /* evento perdido não atrapalha a página */ }
+    res.statusCode = 204; return res.end();
+  }
   const linha = {
     vid: corta(b.vid, 80),
     pagina: corta(b.pagina, 120) || "/",

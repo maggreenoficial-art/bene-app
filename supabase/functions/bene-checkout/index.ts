@@ -20,7 +20,8 @@ async function trocarBump(b: Record<string, unknown>, sk: string) {
   if (!/^pi_[A-Za-z0-9]{10,64}$/.test(id)) return json({ erro: "dados" }, 400);
   const r0 = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { headers: H(sk) });
   const pi = await r0.json();
-  if (!r0.ok || pi?.metadata?.produto !== "app-bene" || String(pi?.metadata?.email || "").toLowerCase() !== email) return json({ erro: "compra" }, 404);
+  const dono = String(pi?.metadata?.email || "").toLowerCase(); // vazio enquanto o pagamento ainda é rascunho
+  if (!r0.ok || pi?.metadata?.produto !== "app-bene" || (dono && dono !== email)) return json({ erro: "compra" }, 404);
   if (!["requires_payment_method", "requires_confirmation", "requires_action"].includes(pi.status)) return json({ erro: "estado", status: pi.status }, 409);
   const valor = PRODUTOS["app-bene"].valor + (quer ? BUMP.valor : 0);
   const f = new URLSearchParams();
@@ -35,6 +36,50 @@ async function trocarBump(b: Record<string, unknown>, sk: string) {
   return json({ ok: true, valor, bump: quer });
 }
 
+// checkout em uma tela: o pagamento nasce sem dados ("rascunho") e os dados chegam quando a pessoa toca em pagar
+// POST {acao:"dados", id, nome, email, whatsapp, variante}
+async function salvarDados(b: Record<string, unknown>, sk: string) {
+  const id = String(b.id ?? "");
+  const nome = String(b.nome ?? "").trim().slice(0, 120);
+  const email = String(b.email ?? "").trim().toLowerCase().slice(0, 160);
+  const whatsapp = String(b.whatsapp ?? "").replace(/\D/g, "").slice(0, 15);
+  const variante = String(b.variante ?? "").slice(0, 40);
+  if (!/^pi_[A-Za-z0-9]{10,64}$/.test(id) || nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10) return json({ erro: "dados" }, 400);
+  const r0 = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { headers: H(sk) });
+  const pi = await r0.json();
+  if (!r0.ok || !PRODUTOS[String(pi?.metadata?.produto)]) return json({ erro: "compra" }, 404);
+  if (!["requires_payment_method", "requires_confirmation", "requires_action"].includes(pi.status)) return json({ erro: "estado", status: pi.status }, 409);
+  // cliente no Stripe para guardar o cartão (upsells de 1 clique)
+  let customer = String(pi.customer || "");
+  if (!customer) {
+    try {
+      const c = new URLSearchParams({ email, name: nome, phone: "+55" + whatsapp });
+      c.set("metadata[origem]", "bene-checkout");
+      const rc = await fetch("https://api.stripe.com/v1/customers", { method: "POST", headers: H(sk), body: c });
+      const jc = await rc.json();
+      if (rc.ok && jc.id) customer = jc.id; else console.error("customer", jc?.error?.type, jc?.error?.code, jc?.error?.message);
+    } catch (e) { console.error("customer falhou", String(e)); }
+  }
+  const f = new URLSearchParams();
+  f.set("receipt_email", email);
+  f.set("metadata[nome]", nome);
+  f.set("metadata[email]", email);
+  f.set("metadata[whatsapp]", whatsapp);
+  if (variante) f.set("metadata[variante]", variante);
+  if (customer && !pi.customer) {
+    f.set("customer", customer);
+    f.set("payment_method_options[card][setup_future_usage]", "off_session");
+  }
+  const r = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { method: "POST", headers: H(sk), body: f });
+  const j = await r.json();
+  if (!r.ok) { console.error("dados", j?.error?.type, j?.error?.code, j?.error?.message); return json({ erro: "stripe" }, 502); }
+  const m = (j.metadata ?? {}) as Record<string, string>;
+  const utm = Object.fromEntries(["vid", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].filter((k) => m[k]).map((k) => [k, m[k]]));
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  await sb.from("bene_compras").upsert({ payment_intent: id, email, nome, whatsapp, valor: j.amount, variante: variante || m.variante || null, utm, produto: m.produto, status: "criado" }, { onConflict: "payment_intent" });
+  return json({ ok: true, umClique: !!customer });
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ erro: "metodo" }, 405);
@@ -43,6 +88,8 @@ Deno.serve(async (req: Request) => {
   let b: Record<string, unknown> = {};
   try { b = await req.json(); } catch { return json({ erro: "json" }, 400); }
   if (b.acao === "bump") return await trocarBump(b, sk);
+  if (b.acao === "dados") return await salvarDados(b, sk);
+  const rascunho = b.rascunho === true;
   const nome = String(b.nome ?? "").trim().slice(0, 120);
   const email = String(b.email ?? "").trim().toLowerCase().slice(0, 160);
   const whatsapp = String(b.whatsapp ?? "").replace(/\D/g, "").slice(0, 15);
@@ -52,11 +99,11 @@ Deno.serve(async (req: Request) => {
   const bump = b.bump === true && produto === "app-bene";
   const valorTotal = P.valor + (bump ? BUMP.valor : 0);
   const utm = (b.utm && typeof b.utm === "object" && JSON.stringify(b.utm).length < 4000) ? b.utm as Record<string, string> : {};
-  if (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10) return json({ erro: "dados" }, 400);
+  if (!rascunho && (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10)) return json({ erro: "dados" }, 400);
 
   // cliente no Stripe: guarda o cartão para os upsells de 1 clique (se a chave não puder criar clientes, segue sem)
   let customer = "";
-  try {
+  if (!rascunho) try {
     const c = new URLSearchParams({ email, name: nome, phone: "+55" + whatsapp });
     c.set("metadata[origem]", "bene-checkout");
     const rc = await fetch("https://api.stripe.com/v1/customers", { method: "POST", headers: { Authorization: `Bearer ${sk}`, "Content-Type": "application/x-www-form-urlencoded" }, body: c });
@@ -75,11 +122,13 @@ Deno.serve(async (req: Request) => {
   f.set("automatic_payment_methods[enabled]", "true");
   f.set("description", P.desc);
   f.set("statement_descriptor_suffix", "BENE APP");
-  f.set("receipt_email", email);
   f.set("metadata[produto]", produto);
-  f.set("metadata[nome]", nome);
-  f.set("metadata[email]", email);
-  f.set("metadata[whatsapp]", whatsapp);
+  if (!rascunho) {
+    f.set("receipt_email", email);
+    f.set("metadata[nome]", nome);
+    f.set("metadata[email]", email);
+    f.set("metadata[whatsapp]", whatsapp);
+  }
   if (variante) f.set("metadata[variante]", variante);
   // dados para a API de Conversões da Meta (o webhook manda a compra pelo servidor)
   const fbp = String(b.fbp || utm.fbp || "").slice(0, 200), fbc = String(b.fbc || utm.fbc || "").slice(0, 300), url = String(b.url ?? "").slice(0, 400);
@@ -106,6 +155,6 @@ Deno.serve(async (req: Request) => {
     return json({ erro: "stripe" }, 502);
   }
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  await sb.from("bene_compras").insert({ payment_intent: pi.id, email, nome, whatsapp, valor: valorTotal, variante: variante || null, utm, produto });
+  if (!rascunho) await sb.from("bene_compras").insert({ payment_intent: pi.id, email, nome, whatsapp, valor: valorTotal, variante: variante || null, utm, produto });
   return json({ clientSecret: pi.client_secret, publishableKey: pk, id: pi.id, valor: valorTotal, produto, umClique: !!customer });
 });

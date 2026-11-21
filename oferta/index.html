@@ -54,6 +54,26 @@
   .seguro span{display:inline-flex;align-items:center;gap:6px}
   .seguro svg{width:18px;height:18px;flex:none}
 
+  /* primeira tela: o app funcionando ao lado do que ele faz */
+  .demo{display:grid;grid-template-columns:minmax(0,40%) minmax(0,1fr);gap:16px;align-items:center;margin:18px 0 20px}
+  .video-app{aspect-ratio:1/2;border:6px solid var(--tinta);border-radius:26px;overflow:hidden;background:#fff;box-shadow:var(--sombra)}
+  .video-app video{width:100%;height:100%;object-fit:cover;display:block}
+  .demo-lista{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-weight:700;font-size:1rem;line-height:1.3}
+  .demo-lista li{position:relative;padding-left:26px}
+  .demo-lista li::before{content:"";position:absolute;left:0;top:2px;width:18px;height:18px;border:2.5px solid var(--tinta);border-radius:50%;background:var(--pasto)}
+  .demo-lista .demo-preco{padding-left:0;font-size:.9rem;color:var(--tinta-suave)}
+  .demo-lista .demo-preco::before{display:none}
+  .demo-preco span{display:block;font-family:'Baloo 2',sans-serif;font-size:2.1rem;line-height:1;color:var(--tinta)}
+  @media (max-width:759px){.hero header .logo{width:84px}.hero{padding-top:14px}.hero-grade{padding-top:8px}.hero h1{font-size:1.85rem}.hero-arte{display:none}}
+  @media (min-width:760px){.demo{grid-template-columns:200px minmax(0,1fr)}}
+  /* 7 estímulos em uma olhada */
+  .sete{list-style:none;padding:0;margin:24px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .sete li{display:flex;align-items:center;gap:10px;background:var(--papel);border:var(--contorno);border-radius:var(--r-sm);padding:10px 12px;font-weight:800}
+  .sete .ic{width:34px;height:34px;border:2.5px solid var(--tinta);border-radius:10px;display:grid;place-items:center;font-family:'Baloo 2',sans-serif;font-weight:800;color:#fff;flex:none}
+  .sete li:last-child{grid-column:1/-1;justify-content:center}
+  @media (min-width:760px){.sete{grid-template-columns:repeat(4,minmax(0,1fr))}.sete li:last-child{grid-column:auto;justify-content:flex-start}}
+  details.mais{margin-top:16px}
+  details.mais summary{cursor:pointer;font-weight:800;text-decoration:underline}
   /* hero */
   .hero{position:relative;background:linear-gradient(180deg,var(--ceu) 0%,#BFE5FB 62%,var(--ceu-fundo) 100%);padding:28px 0 0;overflow:hidden}
   .hero header{display:flex;align-items:center;justify-content:space-between}
@@ -218,16 +238,25 @@
 </head>
 <body>
 
-<div class="faixa">Lançamento: aplicativo da Bené + kit para imprimir por <strong>R$ 37</strong>, com acesso imediato</div>
+<div class="faixa">Pagamento único de <strong>R$ 37</strong> · Garantia de 7 dias · Acesso na hora</div>
 
 <section class="hero" aria-labelledby="titulo">
   <div class="wrap">
     <header><img class="logo" src="img/logo.webp" alt="Bené" width="140" height="114"></header>
     <div class="hero-grade">
       <div>
-        <h1 id="titulo">Seu filho lendo as primeiras palavras com 10 minutinhos por dia</h1>
-        <p class="sub">O aplicativo da Bené ensina com o <b>Método Fono-Fé</b>: em cada atividade a criança ouve, vê, bate palma, traça, monta, canta e agradece. São 120 atividades com palavras da Bíblia, e o kit para imprimir vem de bônus. Tudo por <b>R$ 37</b>, pagamento único.</p>
-        <button class="botao abrir-checkout" type="button">Quero o app da Bené</button>
+        <h1 id="titulo">Seu filho conhece as letras, mas trava na hora de juntar?</h1>
+        <div class="demo">
+          <div class="video-app"><video id="demo-video" muted playsinline autoplay preload="metadata" poster="/veja/v/bola.jpg" aria-label="Criança usando o aplicativo da Bené: toca nas sílabas BO e LA e cobre a palavra BOLA"><source src="/veja/v/bola.mp4" type="video/mp4"></video></div>
+          <ul class="demo-lista">
+            <li>A Bené ensina a <b>juntar os sons</b>: BO + LA = BOLA</li>
+            <li><b>10 minutinhos</b> por dia, no celular</li>
+            <li>120 atividades com <b>palavras da Bíblia</b></li>
+            <li>Kit para imprimir de bônus</li>
+            <li class="demo-preco"><span>R$ 37</span>pagamento único</li>
+          </ul>
+        </div>
+        <a class="botao abrir-checkout" href="/checkout/">Quero o app da Bené</a>
         <div class="seguro">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pagamento seguro</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Acesso liberado na hora</span>
@@ -262,12 +291,17 @@
 <section aria-labelledby="oque">
   <div class="wrap estreito">
     <div class="titulo-sec">
-      <h2 id="oque">Método Fono-Fé: 7 estímulos em cada palavra</h2>
-      <p>Para ler, a criança precisa perceber que as palavras são feitas de pedacinhos de som, as sílabas, e ligar cada som às letras. Isso se chama consciência fonológica e pode ser treinado em casa. No Método Fono-Fé, a mesma palavra é aprendida de 7 jeitos, e quanto mais sentidos juntos, mais fácil de lembrar.</p>
+      <h2 id="oque">Método Fono-Fé: 7 jeitos de aprender cada palavra</h2>
+      <p>Para ler, a criança precisa perceber que as palavras são feitas de pedacinhos de som. Na Bené, cada palavra é aprendida de 7 jeitos, e quanto mais sentidos juntos, mais fácil de lembrar.</p>
     </div>
     <div class="silabas" aria-label="Exemplo: a palavra BOLA separada em sílabas">
       <span class="chip c1">BO</span><span class="chip c2">LA</span>
     </div>
+    <ul class="sete" aria-label="Os 7 estímulos">
+      <li><span class="ic c2">1</span>Ouvir</li><li><span class="ic c3">2</span>Ver</li><li><span class="ic c1">3</span>Bater palma</li><li><span class="ic c4">4</span>Traçar</li>
+      <li><span class="ic c2">5</span>Montar</li><li><span class="ic c3">6</span>Cantar</li><li><span class="ic c1">7</span>Agradecer</li>
+    </ul>
+    <details class="mais"><summary>Ver como funciona cada um</summary>
     <ol class="estimulos">
       <li><span class="ic c2">1</span><div><h3>Ouvir</h3><p>Você fala a palavra devagar, BO… LA, e a criança escuta os pedacinhos de som.</p></div></li>
       <li><span class="ic c3">2</span><div><h3>Ver</h3><p>A figura e a palavra escrita aparecem juntas. A criança liga o desenho à palavra.</p></div></li>
@@ -277,6 +311,7 @@
       <li><span class="ic c3">6</span><div><h3>Cantar</h3><p>Cantar uma música da Bené. As letras estão no aplicativo para cantar em família.</p></div></li>
       <li><span class="ic c1">7</span><div><h3>Agradecer</h3><p>Cada atividade termina com um versículo curto e uma oração de uma frase, juntos.</p></div></li>
     </ol>
+    </details>
     <p style="margin:22px 0 0">O caminho é o mesmo da escola: som, sílaba, palavra e frase. A BNCC coloca a alfabetização como foco do 1º e do 2º ano do ensino fundamental; com a Bené, seu filho chega lá brincando.</p>
   </div>
 </section>
@@ -378,7 +413,7 @@
       </ul>
       <p class="preco"><span class="rs">R$</span><span class="v">37</span></p>
       <p class="preco-nota">Pagamento único, não é assinatura. Acesso imediato e para sempre.</p>
-      <button class="botao botao-largo abrir-checkout" type="button">Quero o app da Bené</button>
+      <a class="botao botao-largo abrir-checkout" href="/checkout/">Quero o app da Bené</a>
       <div class="seguro" style="justify-content:center">
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix, cartão, Apple Pay e Google Pay</span>
       </div>
@@ -425,7 +460,7 @@
   <div class="wrap estreito">
     <h2 id="comece">Comece hoje, com 10 minutinhos</h2>
     <p style="margin:14px auto 24px;max-width:30em">Faça a primeira atividade ainda hoje e veja a carinha do seu filho quando ele cobrir a primeira palavra com a Bené.</p>
-    <button class="botao abrir-checkout" type="button">Quero o app da Bené</button>
+    <a class="botao abrir-checkout" href="/checkout/">Quero o app da Bené</a>
     <img src="img/bene_joao.webp" alt="" width="360" height="290" loading="lazy">
   </div>
 </section>
@@ -440,25 +475,10 @@
 
 <div class="fixa" id="fixa" aria-hidden="true">
   <div class="p">R$ 37<small>acesso imediato</small></div>
-  <button class="botao abrir-checkout" type="button" tabindex="-1">Quero o acesso</button>
+  <a class="botao abrir-checkout" href="/checkout/" tabindex="-1">Quero o acesso</a>
 </div>
 
-<dialog id="cadastro" aria-labelledby="cad-titulo">
-  <form class="modal" id="form-cadastro" novalidate>
-    <button class="fechar" type="button" id="fechar" aria-label="Fechar">×</button>
-    <p class="passo">Passo 1 de 2</p>
-    <h2 id="cad-titulo">Para quem liberamos o acesso?</h2>
-    <label for="nome">Seu nome</label>
-    <input id="nome" name="nome" autocomplete="name" required>
-    <label for="email">Seu melhor e-mail</label>
-    <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required>
-    <label for="whats">WhatsApp</label>
-    <input id="whats" name="whats" type="tel" autocomplete="tel" inputmode="tel" placeholder="(00) 00000-0000" required>
-    <p class="erro" id="erro" role="alert"></p>
-    <button class="botao botao-largo" type="submit" id="continuar">Continuar para o pagamento</button>
-    <p class="mini">No passo 2 você paga com Pix, cartão, Apple Pay ou Google Pay, em ambiente seguro.</p>
-  </form>
-</dialog>
+
 
 <script>
 /* Stripe, pixel e preço ficam no arquivo /config.js (vale também para o quiz) */
@@ -468,41 +488,20 @@ const CONFIG = window.BENE_CONFIG;
   const utm = CONFIG.utm || {};
   const track = CONFIG.track;
 
-  const dlg = document.getElementById("cadastro");
-  const form = document.getElementById("form-cadastro");
-  const erro = document.getElementById("erro");
-  const btn = document.getElementById("continuar");
+  // o botão vai direto para o checkout (nome, e-mail e WhatsApp ficam na mesma tela do pagamento)
+  document.querySelectorAll("a.abrir-checkout").forEach(a => { a.href = "/checkout/" + location.search; });
+  document.addEventListener("click", e => {
+    if (e.target.closest && e.target.closest("a.abrir-checkout")) { try { localStorage.setItem("bene_variante", "oferta"); } catch (er) {} }
+  }, true);
 
-  document.querySelectorAll(".abrir-checkout").forEach(b => b.addEventListener("click", () => {
-    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
-    setTimeout(() => document.getElementById("nome").focus(), 50);
-  }));
-  document.getElementById("fechar").addEventListener("click", () => dlg.close());
-
-  // máscara simples do WhatsApp
-  const w = document.getElementById("whats");
-  w.addEventListener("input", () => {
-    const d = w.value.replace(/\D/g, "").slice(0, 11);
-    w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d;
-  });
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const nome = form.nome.value.trim(), email = form.email.value.trim(), whats = form.whats.value.replace(/\D/g, "");
-    if (nome.length < 2) { erro.textContent = "Escreva seu nome para continuar."; form.nome.focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { erro.textContent = "Confira o e-mail: é com ele que você entra no aplicativo."; form.email.focus(); return; }
-    if (whats.length < 10) { erro.textContent = "Digite o WhatsApp com DDD."; form.whats.focus(); return; }
-    erro.textContent = ""; btn.disabled = true; btn.textContent = "Abrindo o pagamento…";
-    const lead = { nome, email, whats, whatsapp: whats, origem: "pagina-de-vendas", variante: "oferta", utm, dados: { utm, pagina: location.pathname } };
-    track("Lead");
-    await CONFIG.salvarLead(lead);
-    try {
-      await CONFIG.irParaPagamento(lead);
-    } catch(err) {
-      btn.disabled = false; btn.textContent = "Continuar para o pagamento";
-      erro.textContent = "Não conseguimos abrir o pagamento. Tente de novo em alguns segundos.";
-    }
-  });
+  // vídeo do app em loop, trocando de palavra
+  const vid = document.getElementById("demo-video");
+  if (vid) {
+    const clipes = ["bola", "arca", "biblia"]; let i = 0;
+    vid.addEventListener("ended", () => { i = (i + 1) % clipes.length; vid.poster = "/veja/v/" + clipes[i] + ".jpg"; vid.src = "/veja/v/" + clipes[i] + ".mp4"; vid.play().catch(() => {}); });
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { vid.removeAttribute("autoplay"); vid.pause(); }
+    else vid.play().catch(() => {});
+  }
 
   // barra fixa no celular depois do topo
   const fixa = document.getElementById("fixa");
@@ -510,7 +509,7 @@ const CONFIG = window.BENE_CONFIG;
   const oferta = document.getElementById("oferta");
   if ("IntersectionObserver" in window) {
     let passouHero = false, naOferta = false;
-    const upd = () => { const v = passouHero && !naOferta; fixa.classList.toggle("ver", v); fixa.setAttribute("aria-hidden", v ? "false" : "true"); fixa.querySelector("button").tabIndex = v ? 0 : -1; };
+    const upd = () => { const v = passouHero && !naOferta; fixa.classList.toggle("ver", v); fixa.setAttribute("aria-hidden", v ? "false" : "true"); fixa.querySelector("a").tabIndex = v ? 0 : -1; };
     new IntersectionObserver(([e]) => { passouHero = !e.isIntersecting; upd(); }).observe(hero);
     new IntersectionObserver(([e]) => { naOferta = e.isIntersecting; upd(); }).observe(oferta);
   }
