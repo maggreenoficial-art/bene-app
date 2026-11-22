@@ -99,12 +99,15 @@ const horarioOk = () => { const h = (new Date().getUTCHours() + 21) % 24; return
 
 async function rodar(forcar = false) {
   const desde = (d: number) => new Date(agora() - d * 1440 * MIN).toISOString();
-  const [{ data: compras }, { data: leads }, { data: enviados }, { data: fora }] = await Promise.all([
+  const [{ data: compras }, { data: leads }, { data: enviados }, { data: fora }, { data: vistas }] = await Promise.all([
     sb.from("bene_compras").select("email,nome,produto,status,payment_intent,criado_em,pago_em").gte("criado_em", desde(60)),
     sb.from("bene_leads").select("email,nome,origem,criado_em,atualizado_em").gte("atualizado_em", desde(30)),
     sb.from("bene_emails").select("email,modelo,chave,enviado_em").gte("enviado_em", desde(60)),
     sb.from("bene_descadastros").select("email"),
+    sb.from("bene_eventos").select("dados").eq("evento", "oferta_vista").gte("criado_em", desde(3)),
   ]);
+  // compras cujas ofertas pós-compra foram abertas (o id do pagamento vem na página da oferta)
+  const viuOferta = new Set((vistas || []).map((x: { dados: { pi?: string } | null }) => String(x.dados?.pi || "")).filter(Boolean));
   const saiu = new Set((fora || []).map((x: { email: string }) => x.email.toLowerCase()));
   const enviado = new Map<string, number>();
   for (const e of enviados || []) enviado.set(`${e.email.toLowerCase()}|${e.modelo}|${e.chave}`, Date.parse(e.enviado_em));
@@ -191,6 +194,15 @@ async function rodar(forcar = false) {
     const aprovado = enviado.get(`${e}|${PRODUTOS_APROVADO[c.produto]}|${c.payment_intent}`);
     if (!aprovado) continue;
     const depois = aprovado + 12 * 60 * MIN - 1440 * MIN; // o 1º passo tem atraso de 1 dia; isto garante o mínimo de 12 h
+    // quem pagou e não viu as ofertas (fechou a página do Pix): um aviso 2 h depois, só uma vez, se ainda não tem os níveis 5 e 6
+    // vale para compras depois de 22/11 16h45 (Brasília), quando a página da oferta passou a registrar a visita
+    if (c.produto === "app-bene" && Date.parse(c.pago_em) > Date.parse("2026-11-22T19:45:00Z") && !viuOferta.has(c.payment_intent) && !possui(e, "niveis56")) {
+      const k0 = `${e}|pos_app_0|${c.payment_intent}`;
+      if (!enviado.has(k0) && Date.parse(c.pago_em) + 120 * MIN <= agora() && Date.parse(c.pago_em) > agora() - 2 * 1440 * MIN && marketingOk) {
+        tarefas.push({ email: c.email, nome: c.nome, modelo: "pos_app_0", chave: c.payment_intent, pi: c.payment_intent, marketing: true });
+        continue;
+      }
+    }
     if (c.produto === "app-bene")
       sequencia(e, c.nome, c.payment_intent, Date.parse(c.pago_em), SEQUENCIAS.pos_compra_app, c.payment_intent, (m) => m === "pos_app_3" && possui(e, "niveis56"), depois);
     if (c.produto === "kit" && !possui(e, "app-bene"))
@@ -229,7 +241,7 @@ Deno.serve(async (req: Request) => {
   if (!RESEND || !RESPOSTA) return json({ erro: "faltam os segredos RESEND_API_KEY e BENE_EMAIL_RESPOSTA" }, 503);
   if (b.acao === "rodar") return json(await rodar(b.forcar === true));
   if (b.acao === "teste") {
-    const ids = b.modelo ? [String(b.modelo)] : [...Object.values(PRODUTOS_APROVADO), ...SEQUENCIAS.recuperacao_app.map((x) => x[0]), ...SEQUENCIAS.recuperacao_kit.map((x) => x[0]), ...SEQUENCIAS.folhas_gratis.map((x) => x[0]), "lead_0", ...SEQUENCIAS.pos_compra_app.map((x) => x[0]), ...SEQUENCIAS.pos_compra_kit.map((x) => x[0])];
+    const ids = b.modelo ? [String(b.modelo)] : [...Object.values(PRODUTOS_APROVADO), ...SEQUENCIAS.recuperacao_app.map((x) => x[0]), ...SEQUENCIAS.recuperacao_kit.map((x) => x[0]), ...SEQUENCIAS.folhas_gratis.map((x) => x[0]), "lead_0", "pos_app_0", ...SEQUENCIAS.pos_compra_app.map((x) => x[0]), ...SEQUENCIAS.pos_compra_kit.map((x) => x[0])];
     const out = [];
     for (const modelo of ids) {
       out.push({ modelo, ...(await enviar({ email: RESPOSTA, nome: "Teste", modelo, chave: "teste", pi: "pi_teste", marketing: true }, true)) });

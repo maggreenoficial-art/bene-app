@@ -74,7 +74,7 @@ window.BENE_CONFIG = {
   };
   // id do visitante: o do Métricas Rápida (t.js) quando existe, para juntar visita, lead e compra
   C.vid = function () {
-    try { var t = window.ltUtm && window.ltUtm(); if (t && t.vid) return String(t.vid); } catch (e) {}
+    try { var t = window.ltUtm && window.ltUtm(); if (t && t.vid) { try { localStorage.setItem("bene_vid", String(t.vid)); } catch (e2) {} return String(t.vid); } } catch (e) {}
     try { var v = localStorage.getItem("bene_vid"); if (!v) { v = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem("bene_vid", v); } return v; } catch (e) { return ""; }
   };
   // registra a visita (página, origem e cidade) para o painel

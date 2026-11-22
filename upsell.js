@@ -8,6 +8,7 @@
   function proximo(url) { if (url === "fim") final(); else location.replace(url + "?pi=" + encodeURIComponent(pi)); }
   if (!/^pi_/.test(pi)) { location.replace("/"); return; }
   C.trackCustom("OfertaVista", { oferta: U.oferta, valor: U.valor });
+  if (C.evento) C.evento("oferta_vista", { pi: pi, oferta: U.oferta });
   try { localStorage.setItem("bene_ofertas_" + pi, "1"); } catch (e) {}
 
   function texto(t) { sim.querySelector("span").textContent = t; }
