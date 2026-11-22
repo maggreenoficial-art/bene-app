@@ -13,6 +13,19 @@ window.BENE_CONFIG = {
 };
 
 /* Daqui para baixo não precisa mexer */
+/* Celular com "fonte grande" (ex.: navegador do Instagram no Android com fonte em 130%):
+   nas páginas marcadas com <html data-fonte>, segura o aumento em no máximo 10% para o layout não quebrar. */
+(function () {
+  var h = document.documentElement;
+  if (!h.hasAttribute("data-fonte")) return;
+  try {
+    var d = document.createElement("div");
+    d.style.cssText = "position:absolute;left:-9999px;top:0;font-size:100px;line-height:1;visibility:hidden;white-space:nowrap";
+    d.textContent = "M"; h.appendChild(d);
+    var z = d.getBoundingClientRect().height / 100; h.removeChild(d);
+    if (z > 1.05 && z < 3) { h.style.fontSize = (100 * Math.min(z, 1.1) / z).toFixed(1) + "%"; h.setAttribute("data-fonte", z.toFixed(2)); }
+  } catch (e) {}
+})();
 (function () {
   var C = window.BENE_CONFIG;
   var q = new URLSearchParams(location.search);
