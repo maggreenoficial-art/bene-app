@@ -82,6 +82,15 @@ nav button span{display:grid;place-items:center;width:56px;height:32px;border-ra
 .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .chip{min-width:62px;padding:6px 14px;border-radius:14px;border:2px solid var(--ink);box-shadow:0 3px 0 var(--ink);font-family:var(--display);font-size:30px;line-height:1.1;color:#fff}
 .chip.pop{animation:pop .3s}
+.hold{width:150px;height:150px;border-radius:50%;border:3px solid var(--ink);box-shadow:0 6px 0 var(--ink);background:var(--coral);color:#fff;font-family:var(--display);font-size:80px;font-weight:800;line-height:1;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .08s}
+.hold.on{transform:translateY(4px) scale(.97);box-shadow:0 2px 0 var(--ink)}
+.holdbar{width:220px;height:16px;border-radius:8px;border:2px solid var(--ink);background:var(--white);overflow:hidden}
+.holdbar i{display:block;height:100%;width:0;background:var(--sun)}
+.stretch{font-family:var(--display);font-weight:800;font-size:34px;color:var(--coral);min-height:44px;letter-spacing:2px}
+.emo{font-size:84px;line-height:1}
+.big{font-family:var(--display);font-weight:800;font-size:56px;line-height:1.1}
+.chips.junta{gap:0}
+.chips.junta .chip{transition:margin .4s}
 .chip.empty{background:var(--white);color:transparent;border-style:dashed;box-shadow:none}
 .chip.no{animation:shake .3s}
 .hint{font-size:15px;color:var(--ink2);text-align:center}
@@ -299,7 +308,7 @@ function extras(){
   return h;
 }
 function levels(){
-  var body='<h2 class="sec">Grafismo fonético</h2><p class="muted">Bata palma em cada pedacinho e cubra a palavra com o dedo.</p><div class="list">'+D.levels.map(function(L,i){
+  var body=sonsCards()+'<h2 class="sec">Grafismo fonético</h2><p class="muted">Bata palma em cada pedacinho e cubra a palavra com o dedo.</p><div class="list">'+D.levels.map(function(L,i){
     var c=count(L.id);return '<button class="card item"'+goAttr({v:'level',l:i})+'><div class="badge" style="background:'+L.cor+'">'+(i+1)+'</div><div class="grow"><h3>'+L.nome+'</h3><p class="muted">'+L.sub+' · '+c+' de '+L.itens.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(c/L.itens.length*100)+'%"></i></div></div>'+IC.chev+'</button>';}).join('')+'</div>';
   if(tem('niveis56'))body+='<h2 class="sec">Historinhas da Bíblia</h2><div class="list">'+HIST.map(function(L,i){var c=count(L.id);return '<button class="card item"'+goAttr({v:'histL',l:i})+'><div class="badge" style="background:'+L.cor+'">'+(i+5)+'</div><div class="grow"><h3>'+L.nome+'</h3><p class="muted">'+L.sub+' · '+c+' de '+L.itens.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(c/L.itens.length*100)+'%"></i></div></div>'+IC.chev+'</button>';}).join('')+'</div>';
   shell('',body);
@@ -495,7 +504,98 @@ function livroForm(completo,c){
   };
 }
 function imprimir(html){var d=document.getElementById('print');d.innerHTML=html;setTimeout(function(){window.print();},300);}
-var VIEWS={hist:hist,histL:histL,story:story,livro:livro,home:home,levels:levels,level:level,act:act,bonus:bonus,alpha:alpha,letter:letter,verses:verses,paint:paintView,puzzle:puzzle,songs:songs,song:song,print:printView};
+
+/* ---------- Primeiros sons: encontros das vogais e sons que esticam ---------- */
+var SONS={
+  enc:[{a:'A',b:'I',w:'AI',e:'😖',t:'Ai! Quando a gente se machuca.'},{a:'O',b:'I',w:'OI',e:'👋',t:'Oi! Para dar oi para alguém.'},{a:'E',b:'U',w:'EU',e:'🙋',t:'Eu! Eu quero!'},{a:'U',b:'I',w:'UI',e:'😯',t:'Ui! Que susto!'},{a:'A',b:'U',w:'AU',e:'🐶',t:'Au au! O cachorro late.'}],
+  est:[{c:'F',k:'FF',v:'O',sil:'FO',w:'FOGO',s:['FO','GO'],p:'fogo'},{c:'V',k:'VV',v:'E',sil:'VE',w:'VELA',s:['VE','LA'],p:'vela'},{c:'S',k:'SS',v:'I',sil:'SI',w:'SINO',s:['SI','NO'],p:'sino'},{c:'M',k:'MM',v:'A',sil:'MA',w:'MALA',s:['MA','LA'],p:'mala'},{c:'Z',k:'ZZ',v:'I',sil:'ZI',w:'ZÍPER',s:['ZÍ','PER'],p:'ziper'}]
+};
+/* falas da Bené num arquivo só (audio/sons.mp3): chave -> [início, fim] em segundos */
+var SPR={"A":[0,0.5],"E":[0.79,1.31],"I":[1.57,2.03],"O":[2.35,2.83],"U":[3.14,3.6],"AI":[3.9,4.47],"OI":[4.69,5.22],"EU":[5.46,5.99],"UI":[6.2,6.74],"AU":[6.96,7.56],"FF":[7.81,8.73],"VV":[8.99,9.91],"SS":[10.23,11.14],"ZZ":[11.33,12.13],"MM":[12.37,13.32],"FO":[13.64,14.17],"VE":[14.4,14.95],"SI":[15.15,15.74],"MA":[15.91,16.42],"ZI":[16.59,17.12],"FOGO":[17.34,18.09],"VELA":[18.22,18.89],"SINO":[19.0,19.7],"MALA":[19.8,20.48],"ZÍPER":[20.59,21.25],"segura":[21.52,24.59],"junta":[24.85,26.75],"muito":[26.96,28.35]};
+var sprBuf=null, sprLoad=null, voz=null;
+function sprite(){if(sprLoad)return sprLoad;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();}catch(e){return Promise.reject();}
+  sprLoad=fetch('audio/sons.mp3').then(function(r){if(!r.ok)throw 0;return r.arrayBuffer();}).then(function(b){return new Promise(function(ok,no){ac.decodeAudioData(b,ok,no);});}).then(function(buf){sprBuf=buf;return buf;});sprLoad.catch(function(){sprLoad=null;});return sprLoad;}
+function cala(){if(voz){try{voz.stop();}catch(e){}voz=null;}}
+function fala(k,fb,laco){var seg=SPR[k];if(!seg){if(fb)tone(fb);return;}
+  sprite().then(function(buf){cala();if(ac.state==='suspended')ac.resume();var s=ac.createBufferSource();s.buffer=buf;s.connect(ac.destination);
+    if(laco){s.loop=true;s.loopStart=seg[0]+0.2;s.loopEnd=seg[1]-0.15;s.start(0,seg[0]);}else s.start(0,seg[0],seg[1]-seg[0]);voz=s;}).catch(function(){if(fb)tone(fb);});}
+var VOG={A:'A',E:'E',I:'I',O:'O',U:'U'};
+function sonsCards(){
+  var cv=count('sv'),ce=count('se');
+  return '<h2 class="sec">Primeiros sons</h2><p class="muted">Para começar: juntar as vogais e esticar os sons.</p><div class="list">'
+   +'<button class="card item"'+goAttr({v:'sonsV'})+'><div class="badge" style="background:var(--sun)">0</div><div class="grow"><h3>Encontros das vogais</h3><p class="muted">AI, OI, EU, UI, AU · '+cv+' de '+SONS.enc.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(cv/SONS.enc.length*100)+'%"></i></div></div>'+IC.chev+'</button>'
+   +'<button class="card item"'+goAttr({v:'sonsE'})+'><div class="badge" style="background:var(--coral)">0</div><div class="grow"><h3>Sons que esticam</h3><p class="muted">FFF… O = FO · '+ce+' de '+SONS.est.length+'</p><div class="bar" style="margin-top:6px"><i style="width:'+(ce/SONS.est.length*100)+'%"></i></div></div>'+IC.chev+'</button></div>';
+}
+function sonsV(){
+  sprite();
+  shell('Encontros das vogais','<p class="muted">Toque nas duas vogais e escute como elas se juntam.</p><div class="grid">'+SONS.enc.map(function(it,j){
+    return '<button class="card tile'+(done('sv',j)?' done':'')+'"'+goAttr({v:'enc',i:j})+' aria-label="'+it.w+'">'+(done('sv',j)?'<span class="ok">'+IC.ok+'</span>':'')+'<span class="emo" style="font-size:52px">'+it.e+'</span><b>'+it.w+'</b></button>';}).join('')+'</div>',{back:true});
+}
+function enc(){
+  var it=SONS.enc[route.i], last=route.i>=SONS.enc.length-1, n=0;
+  shell('Encontros · '+(route.i+1)+' de '+SONS.enc.length,'<div class="card stage"><span class="emo" id="emo" style="visibility:hidden">'+it.e+'</span>'
+   +'<div class="chips" id="vv"><button class="chip" style="background:'+SYL[0]+'">'+it.a+'</button><button class="chip" style="background:'+SYL[1]+'" disabled>'+it.b+'</button></div>'
+   +'<p class="big" id="pal" style="visibility:hidden">'+it.w+'!</p><p class="hint" id="eh">Toque no '+it.a+'.</p></div><div id="after"></div>',{back:true});
+  var cs=app.querySelectorAll('#vv .chip');
+  [].forEach.call(cs,function(c,i){c.onclick=function(){
+    if(i!==n)return; c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop'); fala(i?it.b:it.a,[440+i*90]); n++;
+    if(n===1){cs[1].disabled=false;document.getElementById('eh').textContent='Agora toque no '+it.b+'.';return;}
+    setTimeout(function(){
+      document.getElementById('vv').classList.add('junta');fala(it.w,[523,659]);
+      document.getElementById('emo').style.visibility='visible';document.getElementById('pal').style.visibility='visible';
+      document.getElementById('eh').textContent=it.t;mark('sv',route.i);
+      setTimeout(function(){win();fala('muito');},900);
+      document.getElementById('after').innerHTML='<div class="card win"><h2>Muito bem!</h2><div class="actions"><button class="btn ghost" id="ag">Ouvir de novo</button><button class="btn" id="nx">'+(last?'Ver todos':'Próximo')+'</button></div></div>';
+      document.getElementById('ag').onclick=function(){fala(it.w,[523,659]);};
+      document.getElementById('nx').onclick=function(){if(last)back();else go({v:'enc',i:route.i+1},true);};
+    },700);
+  };});
+}
+function sonsE(){
+  sprite();
+  shell('Sons que esticam','<p class="muted">Segure o dedinho na letra, faça o som e junte com a vogal.</p><div class="grid">'+SONS.est.map(function(it,j){
+    return '<button class="card tile'+(done('se',j)?' done':'')+'"'+goAttr({v:'estica',i:j})+' aria-label="'+it.c+'">'+(done('se',j)?'<span class="ok">'+IC.ok+'</span>':'')+'<img src="img/p/'+it.p+'.webp" alt="" loading="lazy"><b>'+it.c+' · '+esc(it.w)+'</b></button>';}).join('')+'</div>',{back:true});
+}
+function estica(){
+  var it=SONS.est[route.i], last=route.i>=SONS.est.length-1, need=1400, t0=0, raf=0, ok=false;
+  shell('Sons que esticam · '+(route.i+1)+' de '+SONS.est.length,'<div class="card stage" id="st">'
+   +'<button class="hold" id="hb" aria-label="Segure no '+it.c+'">'+it.c+'</button><p class="stretch" id="sx"></p><div class="holdbar"><i id="hf"></i></div>'
+   +'<p class="hint" id="eh">Segure o dedinho no '+it.c+' e faça o som: '+it.c+it.c+it.c+'…</p></div><div id="after"></div>',{back:true});
+  var hb=document.getElementById('hb'), hf=document.getElementById('hf'), sx=document.getElementById('sx');
+  fala('segura');
+  function tick(){var d=Date.now()-t0, q=Math.min(1,d/need);hf.style.width=(q*100)+'%';sx.textContent=new Array(2+Math.floor(q*8)).join(it.c);
+    if(q>=1){ok=true;solta();passo2();return;} raf=requestAnimationFrame(tick);}
+  function segura(e){if(ok)return;e.preventDefault();hb.classList.add('on');t0=Date.now();fala(it.k,[330],true);raf=requestAnimationFrame(tick);}
+  function solta(){hb.classList.remove('on');cancelAnimationFrame(raf);if(!ok){cala();hf.style.width='0';sx.textContent='';}}
+  hb.addEventListener('pointerdown',segura);hb.addEventListener('pointerup',solta);hb.addEventListener('pointerleave',solta);hb.addEventListener('pointercancel',solta);
+  hb.addEventListener('contextmenu',function(e){e.preventDefault();});
+  function passo2(){
+    cala();good();
+    document.getElementById('st').innerHTML='<div class="chips" id="jj"><span class="chip" style="background:var(--coral)">'+it.c+'</span><button class="chip" id="vb" style="background:'+SYL[1]+'">'+it.v+'</button></div><p class="big" id="sl" style="visibility:hidden">'+it.sil+'!</p><p class="hint" id="eh">Agora junta com o '+it.v+': toque no '+it.v+'.</p>';
+    fala('junta');
+    document.getElementById('vb').onclick=function(){
+      var jj=document.getElementById('jj');jj.classList.add('junta');fala(it.sil,[523,659]);
+      document.getElementById('sl').style.visibility='visible';document.getElementById('eh').textContent=it.c+it.c+it.c+'… '+it.v+' = '+it.sil+'!';
+      setTimeout(passo3,1300);
+    };
+  }
+  function passo3(){
+    document.getElementById('st').innerHTML='<img src="img/p/'+it.p+'.webp" alt="'+esc(it.w)+'">'+chipsHtml(it.s)+'<p class="hint" id="eh">Toque em cada pedacinho e bata palma.</p>';
+    var cs=app.querySelectorAll('#st .chip'), n=0;
+    [].forEach.call(cs,function(c,i){c.onclick=function(){c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');
+      if(i===0)fala(it.sil,[440]);else tone([440+i*90]);
+      if(i===n)n++;
+      if(n>=cs.length&&!document.getElementById('nx')){
+        setTimeout(function(){fala(it.w,[523,659,784]);document.getElementById('eh').innerHTML='<b class="big" style="font-size:44px">'+esc(it.w)+'!</b>';},450);
+        mark('se',route.i);setTimeout(win,1300);
+        document.getElementById('after').innerHTML='<div class="card win"><h2>Muito bem!</h2><div class="actions"><button class="btn ghost" id="ag">Fazer de novo</button><button class="btn" id="nx">'+(last?'Ver todos':'Próximo som')+'</button></div></div>';
+        document.getElementById('ag').onclick=function(){go({v:'estica',i:route.i},true);};
+        document.getElementById('nx').onclick=function(){if(last)back();else go({v:'estica',i:route.i+1},true);};
+      }
+    };});
+  }
+}
+var VIEWS={sonsV:sonsV,enc:enc,sonsE:sonsE,estica:estica,hist:hist,histL:histL,story:story,livro:livro,home:home,levels:levels,level:level,act:act,bonus:bonus,alpha:alpha,letter:letter,verses:verses,paint:paintView,puzzle:puzzle,songs:songs,song:song,print:printView};
 function render(){[].forEach.call(document.querySelectorAll('.sheet'),function(s){s.remove();});if(!user){gate();return;}(VIEWS[route.v]||home)();}
 render(); conferirAcesso();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});
