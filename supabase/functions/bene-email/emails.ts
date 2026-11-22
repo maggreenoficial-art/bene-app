@@ -397,7 +397,7 @@ const MODELOS: Record<string, (d: Dados) => Modelo> = {
     preheader: "Os níveis 5 e 6 da Bené: 30 historinhas da Bíblia para depois do nível 4.",
     marketing: true,
     blocos: [
-      { t: "h", x: "{nome}, uma coisa ficou para trás" },
+      { t: "h", x: "Uma coisa ficou para trás, {nome}" },
       { t: "p", x: "Logo depois do pagamento, o site mostra uma oferta só para quem acabou de comprar. Como a página fechou antes, ela não apareceu para você." },
       { t: "p", x: "São os **níveis 5 e 6**: 30 historinhas da Bíblia para quando seu filho terminar o nível 4 e começar a ler frases. Cada uma tem perguntas no final, para você ver se ele entendeu." },
       { t: "preco", por: "R$ 47", nota: "Pagamento único. Liberado na hora, no mesmo aplicativo." },
