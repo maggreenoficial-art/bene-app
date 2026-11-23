@@ -48,6 +48,10 @@ window.BenePix = (function () {
       ".pix .qr{display:block;width:220px;height:220px;margin:12px auto 0;border:2.5px solid var(--tinta);border-radius:14px;background:#fff;padding:8px}" +
       ".pix .validade{font-size:.85rem;color:var(--tinta-suave);font-weight:700;margin:10px 0 0;text-align:center}" +
       ".pix .trocar{appearance:none;background:none;border:0;font:inherit;font-weight:800;text-decoration:underline;color:var(--tinta);cursor:pointer;padding:10px 4px;margin-top:6px;display:block}" +
+      ".pix .confia{font-size:.88rem;color:var(--tinta-suave);font-weight:700;margin:12px 0 0;line-height:1.45}" +
+      ".pix .japaguei{appearance:none;width:100%;background:#fff;border:2.5px solid var(--tinta);border-radius:16px;font:inherit;font-weight:800;color:var(--tinta);padding:12px 14px;margin-top:12px;cursor:pointer}" +
+      ".pix .japaguei[disabled]{opacity:.6}" +
+      ".pix .ainda{background:var(--sol-claro);border:2.5px dashed var(--tinta);border-radius:16px;padding:10px 14px;margin-top:10px;font-weight:700;font-size:.92rem}" +
       ".pix .expirou{background:var(--sol-claro);border:2.5px dashed var(--tinta);border-radius:16px;padding:12px 14px;margin-top:14px;font-weight:700}" +
       "@media (min-width:860px){.pix details{display:block}}";
     document.head.appendChild(st);
@@ -74,6 +78,8 @@ window.BenePix = (function () {
         '<button class="botao copiar" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Copiar código Pix</span></button>' +
         '<textarea readonly aria-label="Código Pix copia e cola">' + esc(s.code) + "</textarea>" +
         '<div class="esperando" role="status"><i aria-hidden="true"></i><span>Assim que o pagamento cair, esta página avança sozinha e libera o seu acesso.</span></div>' +
+        '<button class="japaguei" type="button">Já paguei</button>' +
+        '<p class="confia">No app do banco, o nome de quem recebe pode aparecer diferente de "Bené": é a empresa que processa os nossos pagamentos com segurança.</p>' +
         (s.img ? "<details" + (desk ? " open" : "") + "><summary>Pagar lendo o QR Code (com outro aparelho)</summary><img class=\"qr\" alt=\"QR Code do Pix\" src=\"" + esc(s.img) + "\"></details>" : "") +
         '<p class="validade">Este Pix vale até ' + esc(hora) + "</p>" +
         '<button class="trocar" type="button">Prefiro pagar com cartão</button>' +
@@ -89,6 +95,18 @@ window.BenePix = (function () {
     });
     ta.addEventListener("focus", function () { ta.select(); });
     el.querySelector(".trocar").addEventListener("click", function () { parar(); el.hidden = true; o.onCartao && o.onCartao(); });
+    // "Já paguei": confere na hora; se ainda não caiu, explica que o banco pode demorar um pouquinho
+    var jp = el.querySelector(".japaguei");
+    jp.addEventListener("click", async function () {
+      jp.disabled = true; jp.textContent = "Conferindo o pagamento…";
+      try { window.BENE_CONFIG && BENE_CONFIG.trackCustom("PixJaPaguei", {}); } catch (e) {}
+      await conferir();
+      if (!el.isConnected || !el.querySelector(".japaguei")) return;
+      jp.disabled = false; jp.textContent = "Já paguei";
+      var av = el.querySelector(".ainda");
+      if (!av) { av = document.createElement("div"); av.className = "ainda"; av.setAttribute("role", "status"); jp.insertAdjacentElement("afterend", av); }
+      av.textContent = "Ainda não recebemos a confirmação do banco. Às vezes leva 1 ou 2 minutos: deixe esta página aberta que ela avança sozinha.";
+    });
 
     var conferindo = false;
     async function conferir() {
@@ -100,6 +118,8 @@ window.BenePix = (function () {
           parar(); limpar(o.k);
           el.querySelector(".esperando").outerHTML = '<div class="expirou">Este Pix expirou. Toque abaixo para gerar um novo.</div>';
           el.querySelector(".copiar").remove(); ta.remove();
+          var j0 = el.querySelector(".japaguei"); if (j0) j0.remove();
+          var a0 = el.querySelector(".ainda"); if (a0) a0.remove();
           el.querySelector(".trocar").textContent = "Gerar um novo pagamento";
         }
       } catch (e) {}

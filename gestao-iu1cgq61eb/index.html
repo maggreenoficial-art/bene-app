@@ -224,7 +224,7 @@
       <div class="card">
         <div class="barra-acoes"><h3 style="flex:1;margin:0">Para chamar no WhatsApp (30 dias)</h3>
           <label class="filtro"><input type="checkbox" id="so-pendentes" checked> Só quem ainda não foi chamado</label></div>
-        <p class="nota">O botão abre a conversa com a mensagem pronta no seu WhatsApp e marca a pessoa como chamada. Quem compra sai da lista sozinho.</p>
+        <p class="nota">O botão abre a conversa com a mensagem pronta no seu WhatsApp e marca a pessoa como chamada. Quem compra sai da lista sozinho. Chame primeiro quem entrou há menos tempo: nas primeiras horas a chance de fechar é bem maior.</p>
         <div id="lista-whats" class="lista-whats"></div>
       </div>
       <div class="card">
@@ -568,8 +568,16 @@
   // ---------- WhatsApp ----------
   var SITE = "https://www.beneaovelhinha.online";
   var PADRAO = {
-    abandono: "Oi, {nome}! Aqui é da Bené, a Ovelhinha 🐑\nVi que você começou o pedido do {produto} e não conseguiu finalizar. Aconteceu algum problema no pagamento? Posso te ajudar por aqui.\nSe quiser concluir agora: {link}",
+    abandono: "Oi, {nome}! Aqui é da Bené, a Ovelhinha 🐑\nVi que você começou o pedido do {produto} e {problema}. Aconteceu alguma coisa? Posso te ajudar por aqui.\nSe quiser concluir agora: {link}",
     lead: "Oi, {nome}! Aqui é da Bené, a Ovelhinha 🐑\nVocê deixou seu contato na nossa página. Separei 5 folhas grátis para seu filho começar a ler hoje:\n" + SITE + "/pdf/5-folhas-gratis.pdf\nQuantos anos ele tem? Te digo por qual folha começar."
+  };
+  // {problema} na mensagem muda conforme o que aconteceu no pagamento
+  var PROBLEMA = {
+    "Cartão recusado": "o cartão não passou",
+    "Pix venceu sem pagar": "o Pix venceu antes do pagamento",
+    "Gerou o Pix e não pagou": "o Pix ficou sem pagar",
+    "Pagamento não concluído": "o pagamento não foi concluído",
+    "Parou na tela de pagamento": "não conseguiu finalizar"
   };
   function lerMsg(k) { try { return localStorage.getItem("bene_painel_msg_" + k) || PADRAO[k]; } catch (e) { return PADRAO[k]; } }
   function salvarMsg(k, v) { try { localStorage.setItem("bene_painel_msg_" + k, v); } catch (e) {} }
@@ -590,7 +598,15 @@
     var nome = primeiroNome(r.nome);
     return t.replace(/, \{nome\}/g, nome ? ", " + nome : "").replace(/\{nome\}/g, nome)
       .replace(/\{produto\}/g, kit ? "kit da Bené para imprimir" : "aplicativo da Bené")
+      .replace(/\{problema\}/g, PROBLEMA[r.situacao] || "não conseguiu finalizar")
       .replace(/\{link\}/g, SITE + (kit ? "/kit/checkout/" : "/checkout/") + "?utm_source=whatsapp&utm_medium=recuperacao");
+  }
+  function haQuanto(ts) {
+    var m = Math.max(0, Math.round((Date.now() - Date.parse(ts)) / 60000));
+    if (!isFinite(m)) return "";
+    if (m < 60) return "há " + m + " min";
+    if (m < 1440) return "há " + Math.round(m / 60) + " h";
+    var d = Math.round(m / 1440); return "há " + d + (d === 1 ? " dia" : " dias");
   }
   function whatsLista() {
     var box = $("#lista-whats"); box.replaceChildren();
@@ -601,12 +617,12 @@
       var c = document.createElement("div"); c.className = "pessoa";
       var topo = document.createElement("div");
       var tag = document.createElement("span"); tag.className = "tag " + (r.tipo === "abandono" ? "ab" : "ld");
-      tag.textContent = r.tipo === "abandono" ? "Abandonou: " + r.detalhe : "Lead: " + (r.detalhe || "site");
+      tag.textContent = r.tipo === "abandono" ? r.detalhe + ": " + (r.situacao || "não pagou") : "Lead: " + (r.detalhe || "site");
       topo.appendChild(tag);
       if (r.chamado_em) { var ok = document.createElement("span"); ok.className = "tag ok"; ok.textContent = "Chamado em " + r.chamado_em; topo.appendChild(ok); }
       var nome = document.createElement("b"); nome.textContent = r.nome && r.nome.indexOf("@") < 0 ? r.nome : r.email;
       var m1 = document.createElement("div"); m1.className = "meta"; m1.textContent = foneBonito(r.whatsapp) + " · " + r.email;
-      var m2 = document.createElement("div"); m2.className = "meta"; m2.textContent = "Entrou em " + r.quando + " · " + F.int(r.emails_recebidos) + " e-mails recebidos";
+      var m2 = document.createElement("div"); m2.className = "meta"; m2.textContent = "Entrou em " + r.quando + " (" + haQuanto(r.quando_ts) + ") · " + F.int(r.emails_recebidos) + " e-mails recebidos";
       var acoes = document.createElement("div"); acoes.className = "acoes";
       var a = document.createElement("a"); a.className = "btn sol"; a.target = "_blank"; a.rel = "noopener noreferrer";
       a.textContent = r.chamado_em ? "Chamar de novo" : "Chamar no WhatsApp";

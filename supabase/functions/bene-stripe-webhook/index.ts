@@ -84,7 +84,11 @@ Deno.serve(async (req: Request) => {
   } else if (ev.type === "payment_intent.processing") {
     await sb.from("bene_compras").upsert({ ...base, status: "processando" }, { onConflict: "payment_intent" });
   } else if (ev.type === "payment_intent.payment_failed") {
-    await sb.from("bene_compras").upsert({ ...base, status: "falhou" }, { onConflict: "payment_intent" });
+    // guarda o motivo (ex.: "pix:payment_intent_payment_attempt_expired" ou "card:card_declined:insufficient_funds")
+    const le = pi.last_payment_error || {};
+    const tipo = le.payment_method?.type || le.payment_method_type || null;
+    const erro = [tipo, le.code, le.decline_code].filter(Boolean).join(":").slice(0, 120) || null;
+    await sb.from("bene_compras").upsert({ ...base, status: "falhou", erro, metodo: tipo }, { onConflict: "payment_intent" });
   }
   return new Response("ok");
 });

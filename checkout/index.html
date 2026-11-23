@@ -451,6 +451,10 @@
     if (error) {
       btn.disabled = false; txt.textContent = antes;
       erro.textContent = error.message || "O pagamento não foi concluído. Confira os dados e tente de novo.";
+      // cartão recusado: sugere o Pix, que não depende de limite e libera na hora
+      if (metodo === "card" && error.type !== "validation_error") {
+        erro.textContent += " Se preferir, escolha Pix acima: não depende do limite do cartão e libera o acesso na hora.";
+      }
       return;
     }
     if (paymentIntent.status === "succeeded" || paymentIntent.status === "processing") return obrigado(paymentIntent.id, paymentIntent.status);
