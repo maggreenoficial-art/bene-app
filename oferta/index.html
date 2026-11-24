@@ -64,16 +64,25 @@
   details.mais summary{cursor:pointer;font-weight:800;text-decoration:underline}
   /* primeira tela: título, o app funcionando e a compra */
   .hero{position:relative;background:linear-gradient(180deg,var(--ceu) 0%,#BFE5FB 70%,var(--ceu-fundo) 100%);padding:18px 0 0;overflow:hidden}
-  .hero-grade{display:grid;grid-template-areas:"texto" "palco" "compra";gap:22px;position:relative;z-index:2;text-align:center}
+  .hero-grade{display:grid;grid-template-columns:44% 1fr;grid-template-areas:"texto texto" "palco mini" "compra compra";gap:16px 14px;position:relative;z-index:2;text-align:center;align-items:center}
+  .hero-leva{grid-area:mini;text-align:left}
+  .hero-leva .leva{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.2rem;margin:0 0 6px}
+  .hero-leva .checks{font-size:.95rem;gap:7px;margin-bottom:12px}
+  .hero-leva .checks li{grid-template-columns:22px 1fr;gap:7px}
+  .hero-leva .checks li::before{width:20px;height:20px;background-size:12px}
+  .hero-leva .preco-linha{margin:0;gap:8px}
+  .hero-leva .preco-linha .v{font-size:2.3rem;white-space:nowrap}
+  @media (max-width:370px){.hero h1{font-size:1.55rem}.hero .sub{font-size:.98rem}.hero-leva .preco-linha .v{font-size:1.9rem}.hero-leva .checks{font-size:.88rem}}
+  .hero-leva .preco-linha .n{font-size:.85rem}
   .hero-texto{grid-area:texto}
-  .hero .logo{width:108px;height:auto;margin:0 auto 14px}
+  .hero .logo{width:78px;height:auto;margin:0 auto 8px}
   .hero h1{font-size:clamp(1.7rem,7.2vw,3.3rem);color:var(--tinta);text-wrap:balance}
   .hero .sub{font-size:1.05rem;font-weight:600;line-height:1.45;margin:12px auto 0;max-width:30em;text-wrap:pretty}
   .hero .sub b{white-space:nowrap}
-  .palco{grid-area:palco;position:relative;width:min(58vw,244px);margin:0 auto}
+  .palco{grid-area:palco;position:relative;width:100%;max-width:200px;margin:0 auto}
   .celular{aspect-ratio:780/1280;border:7px solid var(--tinta);border-radius:30px;overflow:hidden;background:#FFF8EE;box-shadow:6px 6px 0 var(--tinta)}
   .celular video,.celular img{width:100%;height:100%;object-fit:cover;display:block}
-  .etiqueta{position:absolute;right:-20%;top:9%;background:var(--sol);border:3px solid var(--tinta);border-radius:14px;box-shadow:3px 3px 0 var(--tinta);padding:4px 10px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;line-height:1.2;transform:rotate(5deg);white-space:nowrap}
+  .etiqueta{position:absolute;right:-12%;top:-4%;background:var(--sol);border:3px solid var(--tinta);border-radius:14px;box-shadow:3px 3px 0 var(--tinta);padding:3px 8px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.85rem;line-height:1.2;transform:rotate(5deg);white-space:nowrap}
   .hero-compra{grid-area:compra;max-width:420px;width:100%;margin:0 auto;text-align:left}
   .checks{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:9px;font-weight:700;font-size:1rem;line-height:1.35}
   .checks li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
@@ -85,12 +94,13 @@
   .morros{display:block;width:100%;height:70px;margin-top:8px;position:relative;z-index:1}
   @media (min-width:860px){
     .hero{padding-top:30px}
-    .hero-grade{grid-template-columns:1.1fr 1fr;grid-template-areas:"texto palco" "compra palco";text-align:left;column-gap:48px;align-items:start}
+    .hero-grade{grid-template-columns:1.1fr 1fr;grid-template-areas:"texto palco" "mini palco" "compra palco";text-align:left;column-gap:48px;row-gap:20px;align-items:start}
+    .hero-leva .checks{font-size:1.05rem}
     .hero .logo{width:140px;margin:0 0 18px}
     .hero .sub{margin-left:0;font-size:1.2rem}
     .hero-compra{margin:0}
     .hero .seguro{justify-content:flex-start}
-    .palco{width:300px;grid-row:1/3;align-self:center}
+    .palco{width:300px;max-width:none;grid-row:1/4;align-self:center}
   }
 
   /* blocos de texto */
@@ -242,24 +252,27 @@
       <div class="hero-texto">
         <img class="logo" src="img/logo.webp" alt="Bené" width="420" height="341">
         <h1 id="titulo">Seu filho conhece as letras, mas trava na hora de juntar?</h1>
-        <p class="sub">Com a ovelhinha Bené ele aprende a juntar os sons e a ler as primeiras palavras em <b>10 minutinhos por dia</b>, no celular.</p>
+        <p class="sub">Com a ovelhinha Bené ele aprende o som das sílabas e lê as primeiras palavras em <b>10 minutinhos por dia</b>, no celular.</p>
       </div>
       <div class="palco">
         <div class="celular"><video id="demo-video" muted playsinline autoplay preload="auto" poster="v/bola.webp" aria-label="Criança usando o aplicativo da Bené: toca nas sílabas BO e LA e cobre a palavra BOLA com o dedo"><source src="v/bola.mp4" type="video/mp4"></video></div>
         <span class="etiqueta" aria-hidden="true">BO + LA = BOLA</span>
       </div>
-      <div class="hero-compra">
+      <div class="hero-leva">
+        <p class="leva">Você leva:</p>
         <ul class="checks">
-          <li>120 atividades com palavras da Bíblia</li>
-          <li>Das sílabas às primeiras frases, em 4 níveis</li>
-          <li>Kit para imprimir e mais 4 bônus</li>
+          <li>App com 120 atividades</li>
+          <li>Kit para imprimir, 127 páginas</li>
+          <li>Mais 4 bônus</li>
         </ul>
-        <div class="preco-linha"><span class="v">R$ 37</span><span class="n">pagamento único<br>acesso na hora</span></div>
+        <div class="preco-linha"><span class="v">R$ 37</span><span class="n">pagamento<br>único</span></div>
+      </div>
+      <div class="hero-compra">
         <button class="botao botao-largo abrir-checkout" type="button">Quero o app da Bené</button>
         <div class="seguro">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pagamento seguro</span>
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Acesso liberado na hora</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>7 dias de garantia</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix ou cartão</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Acesso na hora</span>
         </div>
       </div>
     </div>
@@ -503,8 +516,9 @@ const CONFIG = window.BENE_CONFIG;
   const btn = document.getElementById("continuar");
 
   document.querySelectorAll(".abrir-checkout").forEach(b => b.addEventListener("click", () => {
-    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
-    setTimeout(() => document.getElementById("nome").focus(), 50);
+    b.disabled = true;
+    location.href = "/checkout/" + location.search;
+    setTimeout(() => { b.disabled = false; }, 4000);
   }));
   document.getElementById("fechar").addEventListener("click", () => dlg.close());
 
