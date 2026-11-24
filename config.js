@@ -103,7 +103,7 @@ window.BENE_CONFIG = {
     if (e.target && e.target.closest && e.target.closest("#comecar")) C.evento("quiz_inicio");
   }, true);
   // até onde a pessoa rola as páginas de venda
-  if (/^\/(oferta|veja)\/$/.test(location.pathname)) {
+  if (/^\/(oferta|veja|vsl)\/$/.test(location.pathname)) {
     var marcas = [25, 50, 75, 100];
     var rolou = function () {
       var h = document.documentElement.scrollHeight - innerHeight; if (h <= 0) return;
