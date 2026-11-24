@@ -35,6 +35,15 @@ window.BENE_CONFIG = {
   keys.forEach(function (k) { if (q.get(k)) utm[k] = q.get(k); });
   try { localStorage.setItem("bene_utm", JSON.stringify(utm)); } catch (e) {}
   C.utm = utm;
+  // acesso interno (você testando): abra qualquer página com ?interno=1 uma vez neste aparelho.
+  // A partir daí este aparelho não dispara o pixel nem conta visitas/eventos no painel. ?interno=0 desfaz.
+  try {
+    if (q.get("interno") === "1") localStorage.setItem("bene_interno", "1");
+    if (q.get("interno") === "0") localStorage.removeItem("bene_interno");
+  } catch (e) {}
+  C.interno = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  try { if (localStorage.getItem("bene_interno") === "1") C.interno = true; } catch (e) {}
+  if (C.interno) window.BENE_SEM_PIXEL = true;
   if (C.pixelId && !window.BENE_SEM_PIXEL) {
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', C.pixelId); fbq('track', 'PageView');
@@ -86,7 +95,7 @@ window.BENE_CONFIG = {
       var ref = ""; try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
       if (ref === location.hostname) ref = "";
       var b = { vid: C.vid(), pagina: location.pathname, ref: ref, utm_source: utm.utm_source || "", utm_campaign: utm.utm_campaign || "", utm_content: utm.utm_content || "", celular: /Mobi|Android|iPhone/i.test(navigator.userAgent) };
-      try { fetch("/api/v", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), keepalive: true }); } catch (e) {}
+      if (!C.interno) try { fetch("/api/v", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), keepalive: true }); } catch (e) {}
     })();
   })();
   // eventos do funil (painel: aba Funil). Cada evento conta uma vez por página aberta.
@@ -94,7 +103,7 @@ window.BENE_CONFIG = {
   C.evento = function (ev, dados, repetir) {
     if (!repetir && ja[ev]) return; ja[ev] = 1;
     var b = { evento: ev, vid: C.vid(), pagina: location.pathname, variante: C.variante(), dados: dados || null };
-    try { fetch("/api/v", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), keepalive: true }); } catch (e) {}
+    if (!C.interno) try { fetch("/api/v", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b), keepalive: true }); } catch (e) {}
   };
   // clique em comprar e início do quiz, em qualquer página
   document.addEventListener("click", function (e) {
