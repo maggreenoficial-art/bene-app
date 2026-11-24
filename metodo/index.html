@@ -280,6 +280,13 @@
   .faz li{display:grid;grid-template-columns:26px 1fr;gap:10px;font-size:1.05rem}
   .faz li::before{content:"";width:22px;height:22px;margin-top:3px;border:2.5px solid var(--tinta);border-radius:50%;background:var(--pasto) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A3426' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/14px no-repeat}
   @media (max-width:370px){.hero-m h1{font-size:1.5rem}.passos-m{font-size:.86rem}}
+  .alt-impresso{font-size:.92rem;font-weight:700;color:var(--tinta-suave);margin:12px auto 0;text-align:center;max-width:30em}
+  .alt-impresso a{color:var(--tinta);text-decoration:underline;text-underline-offset:3px}
+  .card-impresso{max-width:620px;margin:22px auto 0;background:var(--papel);border:3px dashed var(--tinta);border-radius:var(--r-lg);padding:20px 22px;display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:center;text-align:left}
+  .card-impresso img{width:76px;height:auto;border:2px solid var(--tinta);border-radius:10px}
+  .card-impresso h3{font-size:1.2rem;margin:0 0 4px}
+  .card-impresso p{margin:0 0 10px;font-size:.98rem;color:var(--tinta-suave)}
+  .card-impresso .botao{font-size:1rem;padding:10px 18px;background:var(--papel);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -292,7 +299,7 @@
     <h1 id="titulo">Seu filho não está atrasado. Ele aprendeu o nome das letras, mas ninguém ensinou o som.</h1>
     <p class="sub">É por isso que ele trava na hora de juntar. Com a ovelhinha Bené, ele treina o som das sílabas e lê as primeiras palavras em <b>10 minutinhos por dia</b>.</p>
     <div class="linha">
-      <div class="celular"><video id="demo-video" muted playsinline autoplay loop preload="auto" poster="/oferta/v/bola.webp" aria-label="Criança no aplicativo da Bené tocando BO e LA e cobrindo a palavra BOLA"><source src="/oferta/v/bola.mp4" type="video/mp4"></video></div>
+      <div class="celular"><video id="demo-video" muted playsinline autoplay loop preload="auto" poster="/oferta/v/tour.webp" aria-label="Passeio pelo aplicativo da Bené: tela inicial, níveis, atividade da BOLA, quebra-cabeça, alfabeto e kit para imprimir"><source src="/oferta/v/tour.mp4" type="video/mp4"></video></div>
       <ol class="passos-m" aria-label="Como é cada atividade">
         <li><span class="n" style="background:var(--azul)">1</span>Ouve o som</li>
         <li><span class="n" style="background:var(--coral)">2</span>Bate palma nas sílabas</li>
@@ -303,6 +310,7 @@
     <div class="compra-m">
       <a class="botao botao-largo cta-comprar" href="/checkout/">Quero começar hoje</a>
       <p class="nota"><b style="color:var(--tinta);font-size:1rem">R$ 37, pagamento único</b> · app + kit para imprimir + 4 bônus · acesso na hora · 7 dias de garantia</p>
+      <p class="alt-impresso">Prefere só as folhas para imprimir, sem o aplicativo? <a class="op-impresso" href="/kit/checkout/?oferta=impresso">Kit impresso por R$ 9,99</a></p>
     </div>
   </div>
 </header>
@@ -389,6 +397,10 @@
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix, cartão, Apple Pay e Google Pay</span>
       </div>
     </div>
+      <div class="card-impresso">
+        <img src="/oferta/img/kit_mockup.webp" alt="" width="76" height="68" loading="lazy">
+        <div><h3>Prefere só o papel? Kit impresso por R$ 9,99</h3><p>As 120 atividades em PDF (127 páginas) para imprimir em casa. Sem o aplicativo e sem os bônus.</p><a class="botao op-impresso" href="/kit/checkout/?oferta=impresso">Quero só o kit impresso</a></div>
+      </div>
   </div>
 </section>
 
@@ -468,6 +480,16 @@
     new IntersectionObserver(function(e){ passou = !e[0].isIntersecting && e[0].boundingClientRect.top < 0; upd(); }).observe(primeiro);
     new IntersectionObserver(function(e){ naOferta = e[0].isIntersecting; upd(); }).observe(oferta);
   }
+})();
+</script>
+<script>
+/* opção "só o kit impresso" (R$ 9,99): leva ao checkout do kit com as UTMs da visita */
+(function(){
+  var q = location.search ? "&" + location.search.slice(1) : "";
+  document.querySelectorAll(".op-impresso").forEach(function(a){
+    a.href = "/kit/checkout/?oferta=impresso" + q;
+    a.addEventListener("click", function(){ try { window.BENE_CONFIG.evento("clique_impresso", { pagina: location.pathname }); } catch(e) {} });
+  });
 })();
 </script>
 </body>

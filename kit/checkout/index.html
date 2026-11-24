@@ -136,6 +136,8 @@
     .botao{font-size:1.2rem;padding:13px 14px}
     .selos span{font-size:.75rem}
   }
+  .proximo{font-size:.92rem;color:var(--tinta-suave);margin:10px 0 0;text-align:center}
+  #form-pag[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -201,6 +203,11 @@
 <script>
 (function () {
   const C = window.BENE_CONFIG;
+  // opção "só o kit impresso" das páginas de venda (?oferta=impresso): o mesmo kit por R$ 9,99
+  const IMP = new URLSearchParams(location.search).get("oferta") === "impresso";
+  const VAL = IMP ? 9.99 : 5.99, VTXT = IMP ? "R$ 9,99" : "R$ 5,99";
+  document.querySelector(".total strong").textContent = VTXT;
+  document.getElementById("pagar-txt").textContent = "Pagar " + VTXT;
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const btn = $("pagar"), txt = $("pagar-txt"), erro = $("erro"), avisoPix = $("aviso-pix");
@@ -222,6 +229,7 @@
   function formDados() {
     btn.disabled = true;
     $("pagamento").innerHTML = "";
+    $("form-pag").hidden = true;
     const l = lead || {};
     $("bloco-quem").innerHTML = `<form id="form-dados" novalidate style="margin-bottom:18px">
       <p class="sec" style="margin-bottom:0">Para quem liberamos o acesso?</p>
@@ -229,7 +237,8 @@
       <label for="d-email">Seu melhor e-mail</label><input id="d-email" type="email" inputmode="email" autocomplete="email" value="${esc(l.email || "")}">
       <label for="d-whats">WhatsApp</label><input id="d-whats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}">
       <p class="erro" id="erro-dados" role="alert"></p>
-      <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar</button></form>`;
+      <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar para o pagamento</button>
+      <p class="proximo">No próximo passo você escolhe <b>Pix</b> (aprovado na hora) ou <b>cartão</b>.</p></form>`;
     const w = $("d-whats");
     const mask = () => { const d = w.value.replace(/\D/g, "").slice(0, 11); w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; };
     w.addEventListener("input", mask); mask();
@@ -284,7 +293,7 @@
       if (s && s.email === lead.email && s.clientSecret) return s;
     } catch (e) {}
     const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ produto: "kit", nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: "kit", utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
+      body: JSON.stringify({ produto: "kit", oferta: IMP ? "impresso" : "", nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: IMP ? "impresso" : "kit", utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.clientSecret) throw new Error(j.erro || "falha");
     const s = { email: lead.email, clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
@@ -293,6 +302,7 @@
   }
 
   async function iniciar() {
+    $("form-pag").hidden = false;
     mostrarQuem();
     erro.textContent = ""; btn.disabled = true;
     $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando as formas de pagamento…</div></div>';
@@ -346,7 +356,7 @@
     pe.on("ready", () => { btn.disabled = false; });
     pe.on("change", ev => {
       metodo = ev.value && ev.value.type || "";
-      txt.textContent = metodo === "pix" ? "Gerar o Pix de R$ 5,99" : "Pagar R$ 5,99";
+      txt.textContent = metodo === "pix" ? "Gerar o Pix de " + VTXT : "Pagar " + VTXT;
       erro.textContent = "";
     });
   }
@@ -360,8 +370,8 @@
   function abrirPix(px) {
     $("form-pag").hidden = true;
     $("pag-t").textContent = "Falta só pagar o Pix"; document.querySelector(".apoio").hidden = true;
-    BenePix.mostrar({ el: $("pix"), s: px, valor: "R$ 5,99", stripe, k: "kit", onPago: obrigado,
-      onCartao: () => { BenePix.limpar("kit"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = metodo === "pix" ? "Gerar o Pix de R$ 5,99" : "Pagar R$ 5,99"; } });
+    BenePix.mostrar({ el: $("pix"), s: px, valor: VTXT, stripe, k: "kit", onPago: obrigado,
+      onCartao: () => { BenePix.limpar("kit"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = metodo === "pix" ? "Gerar o Pix de " + VTXT : "Pagar " + VTXT; } });
     window.scrollTo({ top: $("pag-t").getBoundingClientRect().top + scrollY - 12, behavior: "smooth" });
   }
 
@@ -379,7 +389,7 @@
     e.preventDefault();
     if (!stripe || !elements) return;
     btn.disabled = true; const antes = txt.textContent; txt.textContent = metodo === "pix" ? "Gerando o Pix…" : "Processando…"; erro.textContent = "";
-    C.track("AddPaymentInfo", { value: 5.99, currency: "BRL", content_name: metodo || "pagamento" });
+    C.track("AddPaymentInfo", { value: VAL, currency: "BRL", content_name: metodo || "pagamento" });
     const whats = String(lead.whats).replace(/\D/g, "");
     if (metodo === "pix" && window.BenePix) {
       let r = null;
@@ -412,7 +422,7 @@
   if (window.matchMedia("(min-width:860px)").matches) document.querySelector(".bonus").open = true;
   lead = lerLead();
   // conta o IC uma vez por sessão (antes cada volta do app do banco contava de novo)
-  try { if (!sessionStorage.getItem("bene_pi_kit_ic")) { sessionStorage.setItem("bene_pi_kit_ic", "1"); C.track("InitiateCheckout", { value: 5.99, currency: "BRL", content_name: "kit" }); } } catch (e) { C.track("InitiateCheckout", { value: 5.99, currency: "BRL", content_name: "kit" }); }
+  try { if (!sessionStorage.getItem("bene_pi_kit_ic")) { sessionStorage.setItem("bene_pi_kit_ic", "1"); C.track("InitiateCheckout", { value: VAL, currency: "BRL", content_name: "kit" }); } } catch (e) { C.track("InitiateCheckout", { value: VAL, currency: "BRL", content_name: "kit" }); }
   if (valido(lead)) iniciar(); else formDados();
 })();
 </script>

@@ -260,6 +260,13 @@
   .errado{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.5rem;color:var(--coral);text-align:center;text-decoration:line-through;text-decoration-thickness:3px}
   .lista-simples{margin:0;padding-left:1.2em}
   .lista-simples li{margin-bottom:6px}
+  .alt-impresso{font-size:.92rem;font-weight:700;color:var(--tinta-suave);margin:12px auto 0;text-align:center;max-width:30em}
+  .alt-impresso a{color:var(--tinta);text-decoration:underline;text-underline-offset:3px}
+  .card-impresso{max-width:620px;margin:22px auto 0;background:var(--papel);border:3px dashed var(--tinta);border-radius:var(--r-lg);padding:20px 22px;display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:center;text-align:left}
+  .card-impresso img{width:76px;height:auto;border:2px solid var(--tinta);border-radius:10px}
+  .card-impresso h3{font-size:1.2rem;margin:0 0 4px}
+  .card-impresso p{margin:0 0 10px;font-size:.98rem;color:var(--tinta-suave)}
+  .card-impresso .botao{font-size:1rem;padding:10px 18px;background:var(--papel);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -288,6 +295,7 @@
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix ou cartão</span>
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>7 dias de garantia</span>
       </div>
+      <p class="alt-impresso">Prefere só as folhas para imprimir, sem o aplicativo? <a class="op-impresso" href="/kit/checkout/?oferta=impresso">Kit impresso por R$ 9,99</a></p>
     </div>
   </div>
 </header>
@@ -341,6 +349,10 @@
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix, cartão, Apple Pay e Google Pay</span>
       </div>
     </div>
+      <div class="card-impresso">
+        <img src="/oferta/img/kit_mockup.webp" alt="" width="76" height="68" loading="lazy">
+        <div><h3>Prefere só o papel? Kit impresso por R$ 9,99</h3><p>As 120 atividades em PDF (127 páginas) para imprimir em casa. Sem o aplicativo e sem os bônus.</p><a class="botao op-impresso" href="/kit/checkout/?oferta=impresso">Quero só o kit impresso</a></div>
+      </div>
   </div>
 </section>
 
@@ -430,6 +442,16 @@
     new IntersectionObserver(function(e){ passou = !e[0].isIntersecting && e[0].boundingClientRect.top < 0; upd(); }).observe(primeiro);
     new IntersectionObserver(function(e){ naOferta = e[0].isIntersecting; upd(); }).observe(oferta);
   }
+})();
+</script>
+<script>
+/* opção "só o kit impresso" (R$ 9,99): leva ao checkout do kit com as UTMs da visita */
+(function(){
+  var q = location.search ? "&" + location.search.slice(1) : "";
+  document.querySelectorAll(".op-impresso").forEach(function(a){
+    a.href = "/kit/checkout/?oferta=impresso" + q;
+    a.addEventListener("click", function(){ try { window.BENE_CONFIG.evento("clique_impresso", { pagina: location.pathname }); } catch(e) {} });
+  });
 })();
 </script>
 </body>

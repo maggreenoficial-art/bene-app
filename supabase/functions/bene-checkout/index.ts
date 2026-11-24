@@ -4,7 +4,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type", "access-control-allow-methods": "POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...cors, "content-type": "application/json; charset=utf-8" } });
-// produtos de entrada: o aplicativo (R$ 37) e o kit para imprimir (R$ 5,99)
+// produtos de entrada: o aplicativo (R$ 37) e o kit para imprimir (R$ 5,99 nos e-mails; R$ 9,99 como opção "só o impresso" nas páginas)
 const PRODUTOS: Record<string, { valor: number; nome: string; desc: string }> = {
   "app-bene": { valor: 3700, nome: "Aplicativo da Bené", desc: "Aplicativo da Bené: Método Fono-Fé + 5 bônus" },
   kit: { valor: 599, nome: "Bené - Kit para imprimir", desc: "Bené: kit Grafismo Fonético para imprimir (127 páginas)" },
@@ -97,7 +97,9 @@ Deno.serve(async (req: Request) => {
   const produto = PRODUTOS[String(b.produto ?? "")] ? String(b.produto) : "app-bene";
   const P = PRODUTOS[produto];
   const bump = b.bump === true && produto === "app-bene";
-  const valorTotal = P.valor + (bump ? BUMP.valor : 0);
+  // opção "só o kit impresso" das páginas de venda: o mesmo kit, por R$ 9,99
+  const impresso = produto === "kit" && b.oferta === "impresso";
+  const valorTotal = impresso ? 999 : P.valor + (bump ? BUMP.valor : 0);
   const utm = (b.utm && typeof b.utm === "object" && JSON.stringify(b.utm).length < 4000) ? b.utm as Record<string, string> : {};
   if (!rascunho && (nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10)) return json({ erro: "dados" }, 400);
 
@@ -123,6 +125,7 @@ Deno.serve(async (req: Request) => {
   f.set("description", P.desc);
   f.set("statement_descriptor_suffix", "BENE APP");
   f.set("metadata[produto]", produto);
+  if (impresso) f.set("metadata[oferta]", "impresso");
   if (!rascunho) {
     f.set("receipt_email", email);
     f.set("metadata[nome]", nome);

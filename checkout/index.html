@@ -146,6 +146,8 @@
     .botao{font-size:1.2rem;padding:13px 14px}
     .selos span{font-size:.75rem}
   }
+  .proximo{font-size:.92rem;color:var(--tinta-suave);margin:10px 0 0;text-align:center}
+  #form-pag[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -255,6 +257,7 @@
   function formDados() {
     btn.disabled = true;
     $("pagamento").innerHTML = "";
+    $("form-pag").hidden = true;
     const l = lead || {};
     $("bloco-quem").innerHTML = `<form id="form-dados" novalidate style="margin-bottom:18px">
       <p class="sec" style="margin-bottom:0">Para quem liberamos o acesso?</p>
@@ -262,7 +265,8 @@
       <label for="d-email">Seu melhor e-mail</label><input id="d-email" type="email" inputmode="email" autocomplete="email" value="${esc(l.email || "")}">
       <label for="d-whats">WhatsApp</label><input id="d-whats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}">
       <p class="erro" id="erro-dados" role="alert"></p>
-      <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar</button></form>`;
+      <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar para o pagamento</button>
+      <p class="proximo">No próximo passo você escolhe <b>Pix</b> (aprovado na hora) ou <b>cartão</b>.</p></form>`;
     const w = $("d-whats");
     const mask = () => { const d = w.value.replace(/\D/g, "").slice(0, 11); w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; };
     w.addEventListener("input", mask); mask();
@@ -326,6 +330,7 @@
   }
 
   async function iniciar() {
+    $("form-pag").hidden = false;
     mostrarQuem();
     erro.textContent = ""; btn.disabled = true;
     $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando as formas de pagamento…</div></div>';

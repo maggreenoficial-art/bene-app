@@ -240,6 +240,13 @@
     @keyframes pulo{from{transform:rotate(5deg) translateY(16px) scale(.8);opacity:0}to{transform:rotate(5deg);opacity:1}}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+  .alt-impresso{font-size:.92rem;font-weight:700;color:var(--tinta-suave);margin:12px auto 0;text-align:center;max-width:30em}
+  .alt-impresso a{color:var(--tinta);text-decoration:underline;text-underline-offset:3px}
+  .card-impresso{max-width:620px;margin:22px auto 0;background:var(--papel);border:3px dashed var(--tinta);border-radius:var(--r-lg);padding:20px 22px;display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:center;text-align:left}
+  .card-impresso img{width:76px;height:auto;border:2px solid var(--tinta);border-radius:10px}
+  .card-impresso h3{font-size:1.2rem;margin:0 0 4px}
+  .card-impresso p{margin:0 0 10px;font-size:.98rem;color:var(--tinta-suave)}
+  .card-impresso .botao{font-size:1rem;padding:10px 18px;background:var(--papel);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -255,8 +262,8 @@
         <p class="sub">Com a ovelhinha Bené ele aprende o som das sílabas e lê as primeiras palavras em <b>10 minutinhos por dia</b>, no celular.</p>
       </div>
       <div class="palco">
-        <div class="celular"><video id="demo-video" muted playsinline autoplay preload="auto" poster="v/bola.webp" aria-label="Criança usando o aplicativo da Bené: toca nas sílabas BO e LA e cobre a palavra BOLA com o dedo"><source src="v/bola.mp4" type="video/mp4"></video></div>
-        <span class="etiqueta" aria-hidden="true">BO + LA = BOLA</span>
+        <div class="celular"><video id="demo-video" muted playsinline autoplay loop preload="auto" poster="v/tour.webp" aria-label="Passeio pelo aplicativo da Bené: tela inicial, níveis, atividade da BOLA, quebra-cabeça de sílabas, alfabeto e kit para imprimir"><source src="v/tour.mp4" type="video/mp4"></video></div>
+        <span class="etiqueta" aria-hidden="true">Veja por dentro</span>
       </div>
       <div class="hero-leva">
         <p class="leva">Você leva:</p>
@@ -274,6 +281,7 @@
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix ou cartão</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Acesso na hora</span>
         </div>
+        <p class="alt-impresso">Prefere só as folhas para imprimir, sem o aplicativo? <a class="op-impresso" href="/kit/checkout/?oferta=impresso">Kit impresso por R$ 9,99</a></p>
       </div>
     </div>
   </div>
@@ -423,6 +431,10 @@
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix, cartão, Apple Pay e Google Pay</span>
       </div>
     </div>
+      <div class="card-impresso">
+        <img src="/oferta/img/kit_mockup.webp" alt="" width="76" height="68" loading="lazy">
+        <div><h3>Prefere só o papel? Kit impresso por R$ 9,99</h3><p>As 120 atividades em PDF (127 páginas) para imprimir em casa. Sem o aplicativo e sem os bônus.</p><a class="botao op-impresso" href="/kit/checkout/?oferta=impresso">Quero só o kit impresso</a></div>
+      </div>
   </div>
 </section>
 
@@ -547,11 +559,9 @@ const CONFIG = window.BENE_CONFIG;
     }
   });
 
-  // vídeo do app em loop, trocando de palavra
+  // passeio pelo aplicativo, em loop
   const vid = document.getElementById("demo-video");
   if (vid) {
-    const clipes = ["bola", "arca", "biblia"]; let i = 0;
-    vid.addEventListener("ended", () => { i = (i + 1) % clipes.length; vid.poster = "/oferta/v/" + clipes[i] + ".webp"; vid.src = "/oferta/v/" + clipes[i] + ".mp4"; vid.play().catch(() => {}); });
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) { vid.removeAttribute("autoplay"); vid.pause(); }
     else vid.play().catch(() => {});
   }
@@ -566,6 +576,17 @@ const CONFIG = window.BENE_CONFIG;
     new IntersectionObserver(([e]) => { passouHero = !e.isIntersecting; upd(); }).observe(hero);
     new IntersectionObserver(([e]) => { naOferta = e.isIntersecting; upd(); }).observe(oferta);
   }
+})();
+</script>
+
+<script>
+/* opção "só o kit impresso" (R$ 9,99): leva ao checkout do kit com as UTMs da visita */
+(function(){
+  var q = location.search ? "&" + location.search.slice(1) : "";
+  document.querySelectorAll(".op-impresso").forEach(function(a){
+    a.href = "/kit/checkout/?oferta=impresso" + q;
+    a.addEventListener("click", function(){ try { window.BENE_CONFIG.evento("clique_impresso", { pagina: location.pathname }); } catch(e) {} });
+  });
 })();
 </script>
 </body>
