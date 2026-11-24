@@ -150,14 +150,16 @@
       <div class="vivo-topo">
         <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)"><span class="ponto-vivo" aria-hidden="true"></span>No site agora</h3><div class="vivo-n" id="v-agora">—</div><p class="nota" style="margin:0">ativos nos últimos 5 min</p></div>
         <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)">Última hora</h3><div class="vivo-n" id="v-hora">—</div><p class="nota" style="margin:0">pessoas diferentes</p></div>
-        <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)">Checkouts (1 h)</h3><div class="vivo-n" id="v-check">—</div><p class="nota" style="margin:0">abriram o pagamento</p></div>
+        <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)">Checkouts hoje</h3><div class="vivo-n" id="v-check">—</div><p class="nota" style="margin:0" id="v-check-p">abriram o pagamento</p></div>
         <div class="card"><h3 style="font:800 .8rem Nunito,sans-serif;color:var(--suave)">Hoje</h3><div class="vivo-n" id="v-hoje">—</div><p class="nota" style="margin:0" id="v-hoje-p">—</p></div>
       </div>
       <div class="vivo-grade">
-        <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">De onde estão chegando (última hora)</h3><small class="nota" style="margin:0" id="v-atual">—</small></div>
+        <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0" id="v-titulo-mapa">De onde estão chegando (hoje)</h3><small class="nota" style="margin:0" id="v-atual">—</small></div>
           <div class="grafico" id="g-vivo"></div>
-          <div class="legenda-vivo"><span><i style="background:#3FB950"></i>agora (até 5 min)</span><span><i style="background:#5BA8E8"></i>até 1 hora</span><span><i style="background:#FFC94A"></i>abriu o checkout</span><span><i style="background:#8BD17C;border-width:3px"></i>pagou</span></div></div>
-        <div class="card"><h3>Quem está navegando</h3><p class="nota">Atualiza sozinho a cada 15 segundos. A cidade vem da conexão de internet, então é aproximada.</p><div class="feed" id="feed-vivo"></div></div>
+          <div class="legenda-vivo"><span><i style="background:#3FB950"></i>agora (até 5 min)</span><span><i style="background:#5BA8E8"></i>antes, hoje</span><span><i style="background:#FFC94A"></i>abriu o checkout</span><span><i style="background:#8BD17C;border-width:3px"></i>pagou</span></div></div>
+        <div class="card"><div class="barra-acoes"><h3 style="flex:1;margin:0">Quem passou pelo site</h3>
+          <div class="periodos" id="v-janela" role="group" aria-label="Período"><button class="btn" type="button" data-j="dia" aria-pressed="true">Hoje</button><button class="btn" type="button" data-j="hora" aria-pressed="false">Última hora</button></div></div>
+          <p class="nota">Atualiza sozinho a cada 15 segundos, sem precisar recarregar. A cidade vem da conexão de internet, então é aproximada.</p><div class="feed" id="feed-vivo"></div></div>
       </div>
     </section>
 
@@ -282,19 +284,31 @@
     try { sessionStorage.removeItem("bene_painel"); } catch (e) {}
     location.reload();
   });
-  $("#bt-atualizar").addEventListener("click", atualizar);
-  async function atualizar() {
-    var bt = $("#bt-atualizar"); bt.disabled = true; bt.textContent = "Atualizando…";
-    try { D = await carregar(senhaGuardada()); desenhar(); }
+  $("#bt-atualizar").addEventListener("click", function () { atualizar(false); });
+  var ocupado = false;
+  function abaAtual() { var a = (document.querySelector(".abas [aria-selected=true]") || {}).dataset; return a ? a.aba : "resumo"; }
+  // silencioso = atualização automática (não mexe no botão e não redesenha se a pessoa estiver digitando)
+  async function atualizar(silencioso) {
+    if (ocupado) return; ocupado = true;
+    var bt = $("#bt-atualizar"); if (silencioso !== true) { bt.disabled = true; bt.textContent = "Atualizando…"; }
+    try {
+      if (abaAtual() === "aovivo") await buscarVivo();
+      D = await carregar(senhaGuardada());
+      var digitando = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && document.activeElement.id !== "senha";
+      if (!(silencioso === true && digitando)) desenhar();
+    }
     catch (e) { if (e.message === "senha") location.reload(); }
-    bt.disabled = false; bt.textContent = "Atualizar";
+    ocupado = false; bt.disabled = false; bt.textContent = "Atualizar";
   }
   function abrir() {
     $("#entrar").hidden = true; $("#app").hidden = false;
     escolherAba((location.hash || "#resumo").slice(1));
     desenhar();
   }
-  setInterval(function () { if (D && document.visibilityState === "visible") atualizar(); }, 120000);
+  // tempo real: a cada 15 s enquanto o painel estiver na tela; ao voltar para o painel, atualiza na hora
+  setInterval(function () { if (D && document.visibilityState === "visible") atualizar(true); }, 15000);
+  document.addEventListener("visibilitychange", function () { if (D && document.visibilityState === "visible") atualizar(true); });
+  window.addEventListener("focus", function () { if (D) atualizar(true); });
   if (senhaGuardada()) carregar(senhaGuardada()).then(function (j) { D = j; abrir(); }).catch(function () {});
 
   // ---------- abas ----------
@@ -312,7 +326,7 @@
   // ---------- desenho geral ----------
   function desenhar() {
     var r = D.resumo || {};
-    $("#atualizado").textContent = "Atualizado às " + new Date(D.gerado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    $("#atualizado").textContent = "Atualizado às " + new Date(D.gerado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " · atualiza sozinho a cada 15 s";
     var fr = $("#frase"); fr.replaceChildren();
     [["Nos últimos 7 dias: "], [F.int(r.visitas_7d), 1], [" visitas no site, "], [F.int(r.leads_7d), 1], [" leads novos e "], [F.brl(r.receita_7d), 1], [" em vendas."]]
       .forEach(function (p) { var el = document.createElement(p[1] ? "b" : "span"); el.textContent = p[0]; fr.appendChild(el); });
@@ -358,6 +372,11 @@
     if (o === "direto") return "Direto";
     return o;
   };
+  // nome do anúncio legível (vem da UTM, às vezes codificado e com o id no fim)
+  function nomeAnuncio(a) {
+    a = String(a || ""); try { a = decodeURIComponent(a.replace(/\+/g, " ")); } catch (e) {}
+    return a.replace(/\|\s*\d*\s*$/, "").replace(/\s+—\s+Cópia$/i, "").trim();
+  }
   function haQuanto(iso) {
     var s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
     if (s < 60) return "agora"; if (s < 3600) return "há " + Math.floor(s / 60) + " min"; return "há " + Math.floor(s / 3600) + " h";
@@ -371,34 +390,42 @@
   async function buscarVivo() {
     try {
       var r = await fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ senha: senhaGuardada(), acao: "aovivo" }) });
-      if (r.ok) { VIVO = await r.json(); desenharVivo(); }
+      if (r.ok) { VIVO = await r.json(); VIVO._em = Date.now(); if (abaAtual() === "aovivo") desenharVivo(); }
     } catch (e) {}
   }
+  var JANELA = "dia";
+  document.querySelectorAll("#v-janela button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      JANELA = b.dataset.j;
+      document.querySelectorAll("#v-janela button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      $("#v-titulo-mapa").textContent = "De onde estão chegando (" + (JANELA === "dia" ? "hoje" : "última hora") + ")";
+      desenharVivo();
+    });
+  });
   function aoVivo() {
-    if (VIVO) desenharVivo(); else buscarVivo();
-    if (!vivoTimer) vivoTimer = setInterval(function () {
-      var aba = (document.querySelector(".abas [aria-selected=true]") || {}).dataset;
-      if (aba && aba.aba === "aovivo" && document.visibilityState === "visible") buscarVivo();
-      else { clearInterval(vivoTimer); vivoTimer = null; }
-    }, 15000);
+    if (VIVO) desenharVivo();
+    if (!VIVO || Date.now() - (VIVO._em || 0) > 10000) buscarVivo();
   }
   function desenharVivo() {
     var v = VIVO || {}, P = (v.pessoas || []).map(function (p) { p.e = etapaDe(p); return p; });
-    $("#v-agora").textContent = F.int(v.agora); $("#v-hora").textContent = F.int(v.hora); $("#v-check").textContent = F.int(v.checkouts_1h);
+    if (JANELA === "hora") P = P.filter(function (p) { return Date.now() - Date.parse(p.ultimo) < 3600000; });
+    $("#v-agora").textContent = F.int(v.agora); $("#v-hora").textContent = F.int(v.hora);
+    $("#v-check").textContent = F.int(v.checkouts_hoje != null ? v.checkouts_hoje : v.checkouts_1h);
+    $("#v-check-p").textContent = F.int(v.checkouts_1h) + " na última hora";
     $("#v-hoje").textContent = F.int(v.vendas_hoje) + (v.vendas_hoje === 1 ? " venda" : " vendas");
     $("#v-hoje-p").textContent = F.brl(v.receita_hoje) + " · " + F.int(v.visitas_hoje) + " visitantes";
     $("#v-atual").textContent = "atualizado " + new Date(v.gerado_em || Date.now()).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     mapaVivo("#g-vivo", P);
     var box = $("#feed-vivo"); box.replaceChildren();
-    if (!P.length) { box.innerHTML = '<p class="vazio">Ninguém na última hora.</p>'; return; }
-    P.slice(0, 60).forEach(function (p) {
+    if (!P.length) { box.innerHTML = '<p class="vazio">' + (JANELA === "dia" ? "Ninguém hoje ainda." : "Ninguém na última hora.") + '</p>'; return; }
+    P.slice(0, 300).forEach(function (p) {
       var chave = p.primeiro + "|" + p.cidade, novo = !vivoVistos[chave] && Object.keys(vivoVistos).length > 0;
       var it = document.createElement("div"); it.className = "item" + (novo ? " novo" : "");
       var pags = []; (p.paginas || []).forEach(function (x) { var n = NOMES[x] || x; if (pags[pags.length - 1] !== n) pags.push(n); });
       it.innerHTML = '<div class="l1"><span></span><span class="etp"></span></div><div class="l2 a"></div><div class="l2 b"></div>';
       it.querySelector(".l1 span").textContent = (p.cidade || "Cidade desconhecida") + (p.estado ? " - " + p.estado : "") + (p.pais && p.pais !== "BR" ? " (" + p.pais + ")" : "");
       var et = it.querySelector(".etp"); et.textContent = ETAPAS[p.e]; et.className = "etp e" + p.e;
-      it.querySelector(".a").textContent = haQuanto(p.ultimo) + " · " + ORIGENS_NOME(p.origem) + " · " + (p.celular ? "celular" : "computador");
+      it.querySelector(".a").textContent = haQuanto(p.ultimo) + " (" + new Date(p.ultimo).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + ") · " + ORIGENS_NOME(p.origem) + (nomeAnuncio(p.anuncio) ? " · anúncio " + nomeAnuncio(p.anuncio) : "") + " · " + (p.celular ? "celular" : "computador");
       it.querySelector(".b").textContent = pags.join(" → ");
       box.appendChild(it);
     });
@@ -414,11 +441,11 @@
     el.replaceChildren();
     var W = el.clientWidth, H = Math.min(Math.round(W * 0.95), 520);
     var proj = d3.geoMercator().fitSize([W, H], MAPA), path = d3.geoPath(proj);
-    var svg = d3.select(el).append("svg").attr("width", "100%").attr("viewBox", "0 0 " + W + " " + H).attr("role", "img").attr("aria-label", "Mapa do Brasil com as visitas da última hora");
+    var svg = d3.select(el).append("svg").attr("width", "100%").attr("viewBox", "0 0 " + W + " " + H).attr("role", "img").attr("aria-label", "Mapa do Brasil com as visitas");
     svg.append("g").selectAll("path").data(MAPA.features).join("path").attr("d", path).attr("fill", "#F7F3EA").attr("stroke", "#D8CBB4");
     var pts = pessoas.filter(function (p) { return p.pais === "BR" && p.lat != null && p.lon != null; });
     if (!pts.length) {
-      svg.append("text").attr("x", W / 2).attr("y", H / 2).attr("text-anchor", "middle").attr("fill", "#7A6455").style("font", "700 13px Nunito, sans-serif").text("Ninguém no Brasil na última hora.");
+      svg.append("text").attr("x", W / 2).attr("y", H / 2).attr("text-anchor", "middle").attr("fill", "#7A6455").style("font", "700 13px Nunito, sans-serif").text(JANELA === "dia" ? "Ninguém no Brasil hoje ainda." : "Ninguém no Brasil na última hora.");
       return;
     }
     var recente = function (p) { return Date.now() - Date.parse(p.ultimo) < 5 * 60000; };
@@ -447,10 +474,10 @@
 
   // ---------- funil ----------
   var HORAS = "168";
-  document.querySelectorAll(".periodos button").forEach(function (b) {
+  document.querySelectorAll(".periodos:not(#v-janela) button").forEach(function (b) {
     b.addEventListener("click", function () {
       HORAS = b.dataset.h;
-      document.querySelectorAll(".periodos button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      document.querySelectorAll(".periodos:not(#v-janela) button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
       funil();
     });
   });
