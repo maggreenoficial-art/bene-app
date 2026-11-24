@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Teste de leitura da Bené: o plano certo para o seu filho</title>
-<meta name="description" content="Responda 9 perguntas rápidas e receba um plano de leitura de 7 dias com o Método Fono-Fé, feito para a idade e a fase do seu filho.">
+<meta name="description" content="Responda 5 perguntas e descubra em que fase da leitura seu filho está e o que falta para ele juntar as sílabas. Para crianças de 3 a 7 anos.">
 <meta property="og:title" content="Seu filho está pronto para começar a ler?">
 <meta property="og:description" content="Teste de 1 minuto com a ovelhinha Bené. No final, um plano de 7 dias para fazer em casa.">
 <meta property="og:image" content="/oferta/img/og.jpg">
@@ -196,6 +196,11 @@
   .fixa .botao{font-size:1.1rem;padding:11px 18px;box-shadow:3px 3px 0 var(--tinta)}
   .rodape{text-align:center;font-size:.8rem;color:var(--tinta-suave);margin-top:30px}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .abre .q1{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.2rem;margin:16px 0 10px}
+  .idades{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .op-idade{font:inherit;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.05rem;line-height:1.1;padding:12px 4px;background:var(--sol);color:var(--tinta);border:3px solid var(--tinta);border-radius:16px;box-shadow:3px 3px 0 var(--tinta);cursor:pointer}
+  .op-idade.marcada,.op-idade:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--tinta);background:var(--pasto)}
+  @media (max-width:370px){.idades{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -233,7 +238,8 @@
   const G = () => ({ filho: "o", filha: "a", neto: "o", neta: "a", aluno: "x" }[A.quem] || "o");
   const rotulo = () => ({ filho: "seu filho", filha: "sua filha", neto: "seu neto", neta: "sua neta", aluno: "seu aluno" }[A.quem] || "seu filho");
   const N = () => A.nome ? esc(A.nome) : rotulo();             // "Davi" ou "seu filho"
-  const NM = () => A.nome ? esc(A.nome) : cap(rotulo());       // começo de frase
+  const NM = () => A.nome ? esc(A.nome) : cap(rotulo());
+  const deN = () => A.nome ? "de " + esc(A.nome) : (G() === "a" ? "da " : "do ") + rotulo();   // "de Davi" ou "do seu filho"       // começo de frase
   const ele = () => G() === "a" ? "ela" : G() === "x" ? "ele(a)" : "ele";
   const dele = () => G() === "a" ? "dela" : G() === "x" ? "dele(a)" : "dele";
   const o = () => G() === "a" ? "a" : G() === "x" ? "o(a)" : "o";
@@ -264,8 +270,8 @@
   const fase = () => FASES[A.fase] || FASES.letras;
 
   /* ---------- telas ---------- */
-  const PERGUNTAS = ["quem","nome","idade","fase","dif","tela","tempo","fe","obj"];
-  const ORDEM = ["abre","quem","nome","idade","fase","info1","dif","tela","info2","tempo","fe","obj","carrega","lead","resultado"];
+  const PERGUNTAS = ["idade","quem","fase","dif","fe"];
+  const ORDEM = ["abre","quem","fase","info1","dif","fe","carrega","lead","resultado"];
   let pos = 0;
   const hist = [];
 
@@ -313,22 +319,31 @@
 
   const T = {
     abre() {
+      const idades = [["3","3 anos"],["4","4 anos"],["5","5 anos"],["6","6 anos"],["7","7 ou mais"]];
       app.innerHTML = `<section class="tela abre">
-        <img class="bene" src="${BENE}" alt="A ovelhinha Bené acenando" width="180" height="240">
+        <img class="bene" src="${BENE}" alt="A ovelhinha Bené acenando" width="150" height="200">
         <div class="cartao">
-          <h1>Seu filho está pronto para começar a ler?</h1>
-          <p class="sub">Responda 9 perguntas rápidas e receba um <b>plano de leitura de 7 dias</b>, feito para a idade e a fase do seu filho.</p>
-          <button class="botao largo" id="comecar" type="button">Começar o teste</button>
+          <h1>Em que fase da leitura seu filho está?</h1>
+          <p class="sub">Responda 5 perguntas e descubra <b>o que falta para ele juntar as sílabas</b> e ler as primeiras palavras.</p>
+          <p class="q1" id="q1">Para começar: quantos anos ele tem?</p>
+          <div class="idades" role="radiogroup" aria-labelledby="q1">
+            ${idades.map(([v, t]) => `<button class="op-idade" type="button" role="radio" aria-checked="false" data-v="${v}">${t}</button>`).join("")}
+          </div>
           <ul class="fatos">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Leva 1 minuto</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>Gratuito</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 2"/></svg>Para crianças de 3 a 7 anos</li>
           </ul>
         </div></section>`;
-      document.getElementById("comecar").addEventListener("click", () => { C.trackCustom("QuizInicio"); prox(); });
+      app.querySelectorAll(".op-idade").forEach(b => b.addEventListener("click", () => {
+        A.idade = b.dataset.v;
+        b.classList.add("marcada"); b.setAttribute("aria-checked", "true");
+        C.trackCustom("QuizInicio"); C.trackCustom("QuizResposta", { pergunta: "idade", resposta: A.idade });
+        C.evento("quiz_inicio", { idade: A.idade });
+        setTimeout(prox, 220);
+      }));
     },
     quem() {
-      pergunta("quem", "Para quem é o plano de leitura?", "Assim a Bené já chama a criança do jeito certo.", [
+      pergunta("quem", "Você está fazendo o teste para quem?", "Assim a Bené já chama a criança do jeito certo.", [
         ["filho", "Para o meu filho"], ["filha", "Para a minha filha"], ["neto", "Para o meu neto"], ["neta", "Para a minha neta"], ["aluno", "Para uma criança da minha turma"]
       ]);
     },
@@ -441,7 +456,7 @@
       const passos = ["Vendo a fase de leitura", "Escolhendo as primeiras palavras", `Ajustando aos ${A.tempo === "20" ? "20" : A.tempo || "10"} minutos de vocês`, "Separando o versículo da semana"];
       app.innerHTML = `<section class="tela carrega"><div class="cartao">
         <img class="bene" src="${BENE}" alt="" width="150" height="200">
-        <h2>Montando o plano de ${N()}…</h2>
+        <h2>Montando o plano ${deN()}…</h2>
         <ul>${passos.map(p => `<li><span class="v">${CHECK}</span>${p}</li>`).join("")}</ul>
       </div></section>`;
       const lis = app.querySelectorAll("li");
@@ -451,7 +466,7 @@
     },
     lead() {
       const salvo = (() => { try { return JSON.parse(localStorage.getItem("bene_quiz_lead") || "{}"); } catch (e) { return {}; } })();
-      app.innerHTML = `<section class="tela"><div class="pergunta"><h2>O plano de ${N()} está pronto!</h2><p>Deixe seu contato para ver o plano. Ele fica salvo neste aparelho e você pode voltar quando quiser.</p></div>
+      app.innerHTML = `<section class="tela"><div class="pergunta"><h2>O plano ${deN()} está pronto!</h2><p>Deixe seu contato para ver o plano. Ele fica salvo neste aparelho e você pode voltar quando quiser.</p></div>
         <form class="cartao" id="f-lead" novalidate>
           <label for="l-nome">Seu nome</label>
           <input type="text" id="l-nome" autocomplete="name" required value="${esc(salvo.nome || "")}">
@@ -460,7 +475,7 @@
           <label for="l-whats">WhatsApp</label>
           <input type="tel" id="l-whats" autocomplete="tel" inputmode="tel" placeholder="(00) 00000-0000" required value="${esc(salvo.whats || "")}">
           <p class="erro" id="erro-lead" role="alert"></p>
-          <button class="botao largo verde" type="submit" id="ver-plano">Ver o plano de ${N()}</button>
+          <button class="botao largo verde" type="submit" id="ver-plano">Ver o plano ${deN()}</button>
           <p class="mini">Usamos seus dados só para falar com você sobre a Bené. Nada de spam.</p>
         </form></section>`;
       const w = document.getElementById("l-whats");
@@ -552,7 +567,7 @@
     app.innerHTML = `<section class="tela">
       <div class="res-topo">
         <span class="selo">Plano pronto</span>
-        <h1>Plano Fono-Fé de ${N()}</h1>
+        <h1>Plano Fono-Fé ${deN()}</h1>
         <ul class="pilulas"><li>${idadeTxt()}</li><li>Fase: ${f.nome}</li><li>${min} min por dia</li></ul>
       </div>
 
@@ -594,7 +609,7 @@
 
       <div class="oferta-box bloco" id="oferta">
         <img class="app-img" src="/oferta/img/hero_app.webp" alt="O aplicativo da Bené aberto no celular" width="240" height="240" loading="lazy">
-        <h2>O plano de ${N()} já está pronto no aplicativo da Bené</h2>
+        <h2>O plano ${deN()} já está pronto no aplicativo da Bené</h2>
         <p class="apoio">Todas as palavras, os níveis e os 7 estímulos, prontos ${promessa}.</p>
         <ul class="itens">
           <li class="principal"><span class="ok">${CHECK}</span><span>Aplicativo da Bené: 4 níveis e 120 atividades, do primeiro som às primeiras frases</span><small>principal</small></li>
@@ -609,7 +624,7 @@
         </ul>
         <p class="preco"><span class="rs">R$</span><span class="v">37</span></p>
         <p class="preco-nota">Pagamento único. Não é assinatura. Acesso na hora e para sempre.</p>
-        <button class="botao largo comprar" type="button">Começar o plano de ${N()}</button>
+        <button class="botao largo comprar" type="button">Começar o plano ${deN()}</button>
         <p class="erro" id="erro-pag" role="alert" style="text-align:center"></p>
         <div class="seguro">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pix, cartão, Apple Pay e Google Pay</span>
