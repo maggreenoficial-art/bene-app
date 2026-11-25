@@ -200,6 +200,8 @@
   let pag = null;          // { clientSecret, pk, id } do pagamento (nasce sem dados)
   let preparo = null;      // promessa do pagamento + Stripe.js
   const total = () => bump ? 56.9 : C.preco;
+  const DEBUG = /[?&]debug=1/.test(location.search);
+  function dbg(m) { if (!DEBUG) return; let p = document.getElementById("dbg"); if (!p) { p = document.createElement("pre"); p.id = "dbg"; p.style.cssText = "white-space:pre-wrap;font-size:11px;background:#111;color:#0f0;padding:8px;margin:8px"; document.body.prepend(p); } p.textContent += (performance.now() / 1000).toFixed(1) + "s " + m + "\n"; }
 
   function rotulo() {
     $("total-v").textContent = brl(total());
@@ -275,13 +277,16 @@
   function preparar() {
     if (preparo) return preparo;
     preparo = (async () => {
+      dbg("preparar: inicio; Stripe=" + !!window.Stripe);
       const [s, okStripe] = await Promise.all([criarRascunho(), esperar(() => window.Stripe, 20000)]);
+      dbg("rascunho ok " + (s && s.id) + "; Stripe=" + okStripe);
       if (!okStripe) throw new Error("stripe");
       pag = s; stripe = Stripe(s.pk, { locale: "pt-BR" });
       try { sessionStorage.setItem("bene_pk", s.pk); } catch (e) {}
       // voltou depois de pagar: segue direto
       try {
         const p0 = (await stripe.retrievePaymentIntent(s.clientSecret)).paymentIntent;
+        dbg("retrieve: " + (p0 && p0.status));
         if (p0 && (p0.status === "succeeded" || p0.status === "processing")) { obrigado(p0.id, p0.status); return s; }
         if (p0 && p0.status === "canceled") { sessionStorage.removeItem("bene_pi2"); preparo = null; return preparar(); }
         if (p0 && typeof p0.amount === "number" && p0.amount >= 5690) { bump = true; $("bump-ck").checked = true; $("bump").classList.add("marcado"); rotulo(); }
@@ -289,7 +294,7 @@
       $("bump").hidden = false;
       return s;
     })();
-    preparo.catch(() => { preparo = null; });
+    preparo.catch(e => { dbg("preparar ERRO " + (e && e.message)); preparo = null; });
     return preparo;
   }
   preparar().catch(() => {});
@@ -359,6 +364,7 @@
     C.evento(metodo === "pix" ? "pix_clique" : "cartao_clique");
     // garante o pagamento pronto (tenta de novo se a internet falhou)
     try { await preparar(); } catch (er) { try { await preparar(); } catch (er2) { C.evento("pag_erro", { msg: String(er2.message || "").slice(0, 60) }, true); libera(); erro.textContent = "A internet oscilou e o pagamento não carregou. Toque no botão de novo."; return; } }
+    dbg("submit: preparado, gravando dados");
     // grava os dados no pagamento
     try {
       const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "dados", id: pag.id, nome: lead.nome, email: lead.email, whatsapp: lead.whats, variante: lead.variante }) });
@@ -368,11 +374,13 @@
         else throw new Error("dados");
       }
     } catch (er) { C.evento("pag_erro", { msg: "dados" }, true); libera(); erro.textContent = "Não conseguimos registrar seus dados. Confira e toque de novo."; return; }
+    dbg("dados ok; gerando " + metodo);
     C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo });
     const fone = "+55" + lead.whats;
     if (metodo === "pix") {
       let r = null;
       try { r = await BenePix.gerar({ stripe, clientSecret: pag.clientSecret, k: "app", email: lead.email, pk: pag.pk, billing: { name: lead.nome, email: lead.email, phone: fone } }); } catch (er) { r = null; }
+      dbg("pix: " + JSON.stringify(r && (r.error || (r.pix ? "ok" : r.pago ? "pago" : r))).slice(0, 200));
       if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
       if (r && r.pix) { C.evento("pix_gerado", null, true); libera(); return abrirPix(r.pix); }
       const msg = r && r.error ? (r.error.message || "") : "";
