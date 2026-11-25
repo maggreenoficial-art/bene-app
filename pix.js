@@ -13,6 +13,7 @@ window.BenePix = (function () {
     return null;
   }
   function limpar(k) { try { localStorage.removeItem(KEY(k)); } catch (e) {} }
+  function guardar(k, s) { try { localStorage.setItem(KEY(k), JSON.stringify(s)); } catch (e) {} }
 
   // confirma o Pix sem a janela do Stripe e devolve o código copia e cola
   async function gerar(o) {
@@ -60,7 +61,8 @@ window.BenePix = (function () {
   var timer = null;
   function parar() { if (timer) { clearInterval(timer); timer = null; } }
 
-  // o: { el, s, valor, stripe, k, onPago(id, status), onCartao(), onExpirou() }
+  // o: { el, s, valor, stripe | endpoint, k, onPago(id, status), onCartao(), onExpirou() }
+  // com "endpoint", confere o pagamento pelo servidor (não precisa do Stripe.js)
   function mostrar(o) {
     estilo(); parar();
     var s = o.s, el = o.el;
@@ -112,7 +114,9 @@ window.BenePix = (function () {
     async function conferir() {
       if (conferindo) return; conferindo = true;
       try {
-        var r = await o.stripe.retrievePaymentIntent(s.cs), pi = r && r.paymentIntent;
+        var pi = null;
+        if (o.stripe) { var r = await o.stripe.retrievePaymentIntent(s.cs); pi = r && r.paymentIntent; }
+        else if (o.endpoint) { var rr = await fetch(o.endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "status", id: s.id }) }); pi = rr.ok ? await rr.json() : null; }
         if (pi && (pi.status === "succeeded" || pi.status === "processing")) { parar(); limpar(o.k); o.onPago(pi.id, pi.status); }
         else if (pi && (pi.status === "requires_payment_method" || pi.status === "canceled")) {
           parar(); limpar(o.k);
@@ -131,5 +135,5 @@ window.BenePix = (function () {
     conferir();
   }
 
-  return { salvo: salvo, limpar: limpar, gerar: gerar, mostrar: mostrar, parar: parar };
+  return { salvo: salvo, limpar: limpar, guardar: guardar, gerar: gerar, mostrar: mostrar, parar: parar };
 })();

@@ -80,6 +80,44 @@ async function salvarDados(b: Record<string, unknown>, sk: string) {
   return json({ ok: true, umClique: !!customer });
 }
 
+// Pix sem depender do Stripe.js no celular (mais rápido e não trava em internet fraca):
+// POST {acao:"pix", id, nome, email, whatsapp, variante} grava os dados e devolve o código copia e cola.
+async function gerarPix(b: Record<string, unknown>, sk: string) {
+  const d = await salvarDados(b, sk);
+  if (d.status !== 200) return d;
+  const id = String(b.id), nome = String(b.nome ?? "").trim().slice(0, 120), email = String(b.email ?? "").trim().toLowerCase().slice(0, 160);
+  const whatsapp = String(b.whatsapp ?? "").replace(/\D/g, "").slice(0, 15);
+  let pi = await (await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { headers: H(sk) })).json();
+  let q = pi?.next_action?.pix_display_qr_code;
+  // ainda sem Pix válido: confirma o pagamento como Pix (se já tinha um Pix aberto e válido, devolve o mesmo)
+  if (!(pi.status === "requires_action" && q?.data && (!q.expires_at || q.expires_at * 1000 > Date.now() + 120000))) {
+    const f = new URLSearchParams();
+    f.set("payment_method_data[type]", "pix");
+    f.set("payment_method_data[billing_details][name]", nome);
+    f.set("payment_method_data[billing_details][email]", email);
+    if (whatsapp) f.set("payment_method_data[billing_details][phone]", "+55" + whatsapp);
+    f.set("payment_method_options[pix][expires_after_seconds]", "14400");
+    f.set("return_url", "https://www.beneaovelhinha.online/obrigado/");
+    const r = await fetch(`https://api.stripe.com/v1/payment_intents/${id}/confirm`, { method: "POST", headers: H(sk), body: f });
+    pi = await r.json();
+    if (!r.ok) { console.error("pix", pi?.error?.type, pi?.error?.code, pi?.error?.message); return json({ erro: "pix", msg: pi?.error?.message || "" }, 502); }
+    q = pi?.next_action?.pix_display_qr_code;
+  }
+  if (pi.status === "succeeded" || pi.status === "processing") return json({ pago: { id: pi.id, status: pi.status } });
+  if (!q?.data) return json({ erro: "pix" }, 502);
+  return json({ pix: { id: pi.id, code: q.data, img: q.image_url_png || "", exp: q.expires_at || Math.floor(Date.now() / 1000) + 14400 }, valor: pi.amount });
+}
+
+// a página do Pix confere se já pagou: POST {acao:"status", id} -> {status}
+async function statusPagamento(b: Record<string, unknown>, sk: string) {
+  const id = String(b.id ?? "");
+  if (!/^pi_[A-Za-z0-9]{10,64}$/.test(id)) return json({ erro: "dados" }, 400);
+  const r = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { headers: H(sk) });
+  const pi = await r.json();
+  if (!r.ok || !PRODUTOS[String(pi?.metadata?.produto)]) return json({ erro: "compra" }, 404);
+  return json({ id: pi.id, status: pi.status, amount: pi.amount });
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   if (req.method !== "POST") return json({ erro: "metodo" }, 405);
@@ -89,6 +127,8 @@ Deno.serve(async (req: Request) => {
   try { b = await req.json(); } catch { return json({ erro: "json" }, 400); }
   if (b.acao === "bump") return await trocarBump(b, sk);
   if (b.acao === "dados") return await salvarDados(b, sk);
+  if (b.acao === "pix") return await gerarPix(b, sk);
+  if (b.acao === "status") return await statusPagamento(b, sk);
   const rascunho = b.rascunho === true;
   const nome = String(b.nome ?? "").trim().slice(0, 120);
   const email = String(b.email ?? "").trim().toLowerCase().slice(0, 160);
