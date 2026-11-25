@@ -427,6 +427,7 @@
       var et = it.querySelector(".etp"); et.textContent = ETAPAS[p.e]; et.className = "etp e" + p.e;
       it.querySelector(".a").textContent = haQuanto(p.ultimo) + " (" + new Date(p.ultimo).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + ") · " + ORIGENS_NOME(p.origem) + (nomeAnuncio(p.anuncio) ? " · anúncio " + nomeAnuncio(p.anuncio) : "") + " · " + (p.celular ? "celular" : "computador");
       it.querySelector(".b").textContent = pags.join(" → ");
+      if (p.ip) { var ipl = document.createElement("div"); ipl.className = "l2"; ipl.style.opacity = ".75"; ipl.textContent = "IP " + p.ip + (p.vid ? " · visitante " + String(p.vid).slice(0, 8) : ""); it.appendChild(ipl); }
       box.appendChild(it);
     });
     P.forEach(function (p) { vivoVistos[p.primeiro + "|" + p.cidade] = 1; });

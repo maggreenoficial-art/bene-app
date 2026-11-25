@@ -1,4 +1,5 @@
-// Registra uma visita no Supabase com a cidade que a Vercel descobre pelo IP (o IP não é guardado).
+// Registra uma visita no Supabase com a cidade que a Vercel descobre pelo IP.
+// O IP só é guardado nas visitas ao checkout e é apagado depois de 7 dias.
 // Chamado pelo config.js em todas as páginas do site.
 const SB = "https://acbksachtpypwtbgwyxh.supabase.co/rest/v1/bene_visitas";
 // eventos do funil (rolagem, clique em comprar, lead, checkout…) vão para outra tabela
@@ -45,6 +46,10 @@ module.exports = async (req, res) => {
     lon: num(cab(req, "x-vercel-ip-longitude")),
     celular: !!b.celular,
   };
+  // IP só de quem abre o checkout (para bloquear clonador de oferta); o banco apaga depois de 7 dias
+  if (/^\/(kit\/)?checkout\//.test(linha.pagina)) {
+    linha.ip = corta(String(req.headers["x-real-ip"] || String(req.headers["x-forwarded-for"] || "").split(",")[0] || "").trim(), 60);
+  }
   try {
     await fetch(SB, {
       method: "POST",
