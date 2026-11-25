@@ -289,7 +289,7 @@
       <label for="d-whats">WhatsApp</label><input id="d-whats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}">
       <p class="erro" id="erro-dados" role="alert"></p>
       <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar para o pagamento</button>
-      <p class="proximo">No próximo passo você escolhe <b>Pix</b> (aprovado na hora) ou <b>cartão</b>.</p></form>`;
+      <p class="proximo">No próximo passo o seu <b>Pix</b> fica pronto em 1 toque (aprovado na hora). Também aceitamos <b>cartão</b>.</p></form>`;
     const w = $("d-whats");
     const mask = () => { const d = w.value.replace(/\D/g, "").slice(0, 11); w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; };
     w.addEventListener("input", mask); mask();
@@ -359,6 +359,9 @@
     let s;
     try { const r = await Promise.all([criarPagamento(), esperarStripe()]); s = r[0]; }
     catch (e) {
+      // internet lenta ou o Stripe demorou: tenta mais uma vez sozinho antes de mostrar o erro
+      if (!iniciar.tentou) { iniciar.tentou = true; C.evento("pag_erro", { msg: String(e.message || "").slice(0, 60), tentativa: 1 }, true); return setTimeout(iniciar, 1500); }
+      C.evento("pag_erro", { msg: String(e.message || "").slice(0, 60), tentativa: 2 }, true);
       pixTxt.textContent = "Gerar meu Pix de " + brl(total());
       erro.textContent = e.message === "config"
         ? "O pagamento está sendo configurado. Volte em alguns minutos."
