@@ -26,6 +26,34 @@ window.BENE_CONFIG = {
     if (z > 1.05 && z < 3) { h.style.fontSize = (100 * Math.min(z, 1.1) / z).toFixed(1) + "%"; h.setAttribute("data-fonte", z.toFixed(2)); }
   } catch (e) {}
 })();
+/* Visitantes bloqueados (ex.: clonador de oferta). Põe o id do visitante (vid do painel) na lista.
+   O navegador dele ganha o cookie bene_b e, a partir daí, o servidor só entrega a página de alerta. */
+(function () {
+  var BLOQ = ["a4c70419-895b-43b4-99fa-6b7f8147cf50"];
+  function bloqueia() {
+    try { document.documentElement.style.display = "none"; } catch (e) {}
+    document.cookie = "bene_b=1; path=/; max-age=63072000; samesite=lax; secure";
+    try { localStorage.setItem("bene_b", "1"); } catch (e) {}
+    window.BENE_SEM_PIXEL = true; window.BENE_SEM_VISITA = true;
+    if (/[?&]r=\d/.test(location.search)) {
+      // o servidor não barrou (sem cookie?): mostra o alerta aqui mesmo, sem recarregar de novo
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.innerHTML = '<div style="font:18px/1.5 system-ui;max-width:520px;margin:60px auto;padding:24px;color:#fff;background:#2a201b;border:3px solid #e5484d;border-radius:20px"><h1 style="margin:0 0 12px">Acesso bloqueado</h1><p>Este acesso foi identificado copiando a página, a oferta e os materiais do app da Bené. O conteúdo é protegido pela Lei 9.610/98.</p></div>';
+        document.body.style.background = "#1c1512"; document.documentElement.style.display = "";
+      });
+      return;
+    }
+    location.replace(location.pathname + "?r=" + Date.now());
+  }
+  function checa() {
+    var v = ""; try { v = localStorage.getItem("bene_vid") || ""; } catch (e) {}
+    try { var t = window.ltUtm && window.ltUtm(); if (t && t.vid) v = String(t.vid); } catch (e) {}
+    var b = ""; try { b = localStorage.getItem("bene_b") || ""; } catch (e) {}
+    if (b === "1" || (v && BLOQ.indexOf(v) >= 0)) { window.BENE_BLOQ = true; bloqueia(); return true; }
+    return false;
+  }
+  if (!checa()) { var n = 0; (function de_novo() { if (window.BENE_BLOQ || n++ > 20) return; if (!checa()) setTimeout(de_novo, 250); })(); }
+})();
 (function () {
   var C = window.BENE_CONFIG;
   var q = new URLSearchParams(location.search);
