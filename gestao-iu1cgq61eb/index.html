@@ -223,6 +223,20 @@
     </section>
 
     <section data-sec="whats" hidden style="display:grid;gap:16px">
+      <div class="card" id="robo">
+        <div class="barra-acoes"><h3 style="flex:1;margin:0">Número da Bené (recuperação automática)</h3><span class="nota" id="robo-atual" style="margin:0"></span></div>
+        <p class="nota">Roda no seu computador (Docker). Manda 1 mensagem para quem preencheu o checkout do app e não pagou, das 8h às 21h. Quem responde SAIR não recebe mais.</p>
+        <p style="margin:6px 0"><b>Conexão:</b> <span id="robo-est">—</span> &nbsp; <b>Enviadas hoje:</b> <span id="robo-hoje">—</span></p>
+        <p style="margin:6px 0"><b>Envio automático:</b> <span id="robo-ativo">—</span> <button class="btn" id="robo-liga" type="button" style="margin-left:8px">—</button></p>
+        <div id="robo-conectar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0">
+          <button class="btn" type="button" id="robo-qr">Conectar por QR Code</button>
+          <input id="robo-num" inputmode="tel" placeholder="DDD + número" style="padding:8px 10px;border:2px solid var(--tinta);border-radius:10px;font:inherit;width:170px">
+          <button class="btn" type="button" id="robo-cod">Conectar pelo número</button>
+          <button class="btn" type="button" id="robo-sair">Desconectar</button>
+        </div>
+        <div id="robo-cx" style="text-align:center"></div>
+        <details style="margin-top:8px"><summary class="nota" style="cursor:pointer">Últimas mensagens e acontecimentos</summary><div id="robo-fila" class="nota"></div><pre id="robo-log" class="nota" style="white-space:pre-wrap;font-size:.75rem"></pre></details>
+      </div>
       <div class="card">
         <div class="barra-acoes"><h3 style="flex:1;margin:0">Para chamar no WhatsApp (30 dias)</h3>
           <label class="filtro"><input type="checkbox" id="so-pendentes" checked> Só quem ainda não foi chamado</label></div>
@@ -788,6 +802,46 @@
     g.append("rect").attr("y", 17).attr("height", 11).attr("rx", 3).attr("width", function (r) { return Math.max(2, x(r[campoV])); }).attr("fill", "#5BA8E8");
     g.append("text").attr("x", function (r) { return Math.max(2, x(r[campoV])) + 6; }).attr("y", 27).attr("fill", "#7A6455").style("font", "700 12px Nunito, sans-serif").text(function (r) { return f(r[campoV]); });
   }
+
+  /* ===== robô de WhatsApp (número da Bené) ===== */
+  (function () {
+    var tim = null, ativoAgora = false;
+    function api(o) { o.senha = senhaGuardada(); return fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(o) }).then(function (r) { return r.json(); }); }
+    var NOMES_EST = { open: "✅ conectado", close: "desconectado", connecting: "conectando…", sem_instancia: "nenhum número conectado", evolution_iniciando: "Docker iniciando…" };
+    function desenha(d) {
+      var e = d.estado || null, el = function (id) { return document.getElementById(id); };
+      var velho = !e || (Date.now() - new Date(e.em).getTime() > 3 * 60000);
+      el("robo-est").textContent = velho ? "⚠️ o computador não responde (Docker desligado?)" : (NOMES_EST[e.estado] || e.estado);
+      el("robo-hoje").textContent = e ? e.hoje : "—";
+      el("robo-atual").textContent = e ? "computador visto " + new Date(e.em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
+      ativoAgora = !!d.ativo;
+      el("robo-ativo").textContent = d.ativo ? "ligado" : "desligado";
+      el("robo-liga").textContent = d.ativo ? "Desligar envio" : "Ligar envio";
+      var cx = el("robo-cx"); cx.replaceChildren();
+      if (e && !velho && e.estado !== "open" && (e.qr || e.pairing)) {
+        if (e.pairing) { var p = document.createElement("div"); p.style.cssText = "font:800 2.2rem monospace;letter-spacing:.3em;margin:8px 0"; p.textContent = e.pairing; cx.appendChild(p);
+          var n1 = document.createElement("p"); n1.className = "nota"; n1.textContent = "No WhatsApp Business: ⋮ → Dispositivos conectados → Conectar dispositivo → Conectar com número de telefone, e digite o código."; cx.appendChild(n1); }
+        if (e.qr) { var im = document.createElement("img"); im.src = e.qr; im.width = 240; im.alt = "QR Code do WhatsApp"; im.style.border = "2px solid var(--tinta)"; im.style.borderRadius = "12px"; cx.appendChild(im);
+          var n2 = document.createElement("p"); n2.className = "nota"; n2.textContent = "No WhatsApp Business: ⋮ → Dispositivos conectados → Conectar dispositivo, e aponte para o QR. Ele muda a cada ~25 s."; cx.appendChild(n2); }
+      }
+      el("robo-log").textContent = e && e.log ? e.log.join("\n") : "";
+      var f = el("robo-fila"); f.replaceChildren();
+      (d.fila || []).forEach(function (m) { var l = document.createElement("div"); l.textContent = new Date(m.criado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) + " · " + (m.nome || "") + " " + m.telefone + " · " + m.status + (m.erro ? " (" + m.erro + ")" : ""); f.appendChild(l); });
+      if (!(d.fila || []).length) f.textContent = "Nenhuma mensagem ainda.";
+    }
+    function puxa() { api({ acao: "whats_robo" }).then(desenha).catch(function () {}); }
+    function cmd(c, numero) { document.getElementById("robo-cx").textContent = "Pedindo ao computador… (até 20 s)"; api({ acao: "whats_robo_cmd", cmd: c, numero: numero || "" }).then(function () { setTimeout(puxa, 4000); }); }
+    document.getElementById("robo-qr").addEventListener("click", function () { cmd("qr"); });
+    document.getElementById("robo-cod").addEventListener("click", function () { var n = document.getElementById("robo-num").value.replace(/\D/g, ""); if (n.length < 10) { alert("Digite o número com DDD."); return; } cmd("numero", n); });
+    document.getElementById("robo-sair").addEventListener("click", function () { if (confirm("Desconectar o WhatsApp da Bené?")) cmd("sair"); });
+    document.getElementById("robo-liga").addEventListener("click", function () {
+      var liga = !ativoAgora;
+      if (liga && !confirm("Ligar o envio automático? As mensagens de recuperação começam a sair (das 8h às 21h).")) return;
+      api({ acao: "whats_robo_ativo", ativo: liga }).then(puxa);
+    });
+    setInterval(function () { if (abaAtual() === "whats" && !document.hidden) puxa(); }, 5000);
+    document.querySelectorAll('.abas button[data-aba="whats"]').forEach(function (b) { b.addEventListener("click", function () { setTimeout(puxa, 50); }); });
+  })();
 })();
 </script>
 </body>

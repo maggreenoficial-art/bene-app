@@ -17,6 +17,16 @@ Deno.serve(async (req) => {
   if (!token || req.headers.get("x-bene-token") !== token) return json({ erro: "token inválido" }, 401);
   const ativo = (await cfg("whats_ativo")) === "sim";
 
+  // o computador manda como está a conexão (e o QR/código, quando está conectando) e recebe o comando do painel
+  if (b.acao === "sync") {
+    const rel = { estado: String(b.estado || "?").slice(0, 40), qr: typeof b.qr === "string" && b.qr.length < 60000 ? b.qr : null, pairing: b.pairing ? String(b.pairing).slice(0, 20) : null, numero: b.numero ? String(b.numero).slice(0, 20) : null, hoje: Number(b.hoje) || 0, log: Array.isArray(b.log) ? b.log.slice(0, 15).map((x: unknown) => String(x).slice(0, 160)) : [], em: new Date().toISOString() };
+    await sb.from("bene_cfg").upsert({ nome: "whats_estado", valor: JSON.stringify(rel) });
+    const cmd = await cfg("whats_cmd");
+    if (cmd) await sb.from("bene_cfg").delete().eq("nome", "whats_cmd");
+    let c = null; try { c = cmd ? JSON.parse(cmd) : null; } catch { /* comando inválido */ }
+    return json({ ativo, cmd: c });
+  }
+
   if (b.acao === "status") {
     const { data } = await sb.from("bene_whats").select("status").gte("criado_em", new Date(Date.now() - 7 * 864e5).toISOString());
     const cont: Record<string, number> = {};

@@ -47,6 +47,27 @@ Deno.serve(async (req: Request) => {
     await sb.from("bene_whats_contatos").insert({ email, tipo: String(b.tipo || "").slice(0, 30) || null });
     return json({ ok: true });
   }
+  // robô de WhatsApp (roda no computador): estado, QR/código, fila e comandos
+  if (b.acao === "whats_robo") {
+    const [est, at, fila] = await Promise.all([
+      sb.from("bene_cfg").select("valor").eq("nome", "whats_estado").maybeSingle(),
+      sb.from("bene_cfg").select("valor").eq("nome", "whats_ativo").maybeSingle(),
+      sb.from("bene_whats").select("id,criado_em,enviado_em,status,telefone,nome,erro").order("criado_em", { ascending: false }).limit(20),
+    ]);
+    let e: Record<string, unknown> | null = null; try { e = est.data ? JSON.parse(est.data.valor) : null; } catch { /* vazio */ }
+    return json({ estado: e, ativo: at.data?.valor === "sim", fila: (fila.data || []).map((m) => ({ ...m, telefone: String(m.telefone || "").replace(/^55/, "").replace(/(\d{2})(\d+)(\d{4})$/, "($1) •••••-$3"), nome: String(m.nome || "").split(" ")[0] })) });
+  }
+  if (b.acao === "whats_robo_cmd") {
+    const cmd = String(b.cmd || "");
+    if (!["qr", "numero", "sair"].includes(cmd)) return json({ erro: "cmd" }, 400);
+    const numero = String(b.numero || "").replace(/\D/g, "").slice(0, 13);
+    await sb.from("bene_cfg").upsert({ nome: "whats_cmd", valor: JSON.stringify({ cmd, numero, em: new Date().toISOString() }) });
+    return json({ ok: true });
+  }
+  if (b.acao === "whats_robo_ativo") {
+    await sb.from("bene_cfg").upsert({ nome: "whats_ativo", valor: b.ativo === true ? "sim" : "nao" });
+    return json({ ok: true, ativo: b.ativo === true });
+  }
   // mapa ao vivo: só as visitas da última hora (o painel pede de 15 em 15 segundos)
   if (b.acao === "aovivo") {
     const r = await sb.rpc("bene_painel_aovivo");
