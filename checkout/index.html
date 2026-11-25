@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Pagamento seguro: Aplicativo da Bené</title>
-<meta name="theme-color" content="#7EC8F2">
+<title>Finalizar compra: Aplicativo da Bené</title>
+<meta name="theme-color" content="#4A3426">
 <link rel="icon" href="/img/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,528 +13,434 @@
 <link rel="preconnect" href="https://js.stripe.com"><link rel="preconnect" href="https://api.stripe.com"><link rel="preconnect" href="https://acbksachtpypwtbgwyxh.supabase.co">
 <script src="https://js.stripe.com/v3/" async></script>
 <script src="/config.js"></script>
-<script src="/pix.js"></script>
+<script src="/pix.js?v=3"></script>
 <script src="https://www.metricasrapida.cloud/t.js" async></script>
 <style>
   :root{
     --ceu:#7EC8F2; --ceu-claro:#EAF6FE; --ceu-fundo:#F4FAFF;
     --tinta:#4A3426; --tinta-suave:#6B5546;
     --sol:#FFC94A; --sol-claro:#FFF4D6;
-    --pasto:#8BD17C; --pasto-escuro:#5FA84F; --pasto-claro:#EAF7E6;
-    --coral:#F26B6B; --azul:#5BA8E8;
+    --pasto:#8BD17C; --pasto-escuro:#3F8A31; --pasto-claro:#EAF7E6;
+    --coral:#F26B6B; --azul:#5BA8E8; --erro:#B3261E;
     --contorno:3px solid var(--tinta);
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{font-family:'Nunito',system-ui,sans-serif;color:var(--tinta);background:var(--ceu-fundo);font-size:1.0625rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+  body{font-family:'Nunito',system-ui,sans-serif;color:var(--tinta);background:#F2F4F7;font-size:1.0625rem;line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:110px}
   h1,h2,h3{font-family:'Baloo 2',system-ui,sans-serif;line-height:1.15;margin:0}
-  p{margin:0 0 .8em}
+  p{margin:0}
   img{display:block;max-width:100%}
-  :focus-visible{outline:4px solid var(--azul);outline-offset:3px;border-radius:8px}
+  button{font:inherit}
+  :focus-visible{outline:4px solid var(--azul);outline-offset:2px;border-radius:8px}
 
-  .faixa{background:var(--tinta);color:#fff;font-weight:800;font-size:.85rem;text-align:center;padding:7px 12px;display:flex;justify-content:center;align-items:center;gap:8px}
-  .faixa svg{width:15px;height:15px}
-  header{background:var(--ceu);border-bottom:var(--contorno)}
-  .cab{max-width:980px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .cab img{width:76px;height:auto}
-  .passos{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.85rem}
-  .passos span{display:flex;align-items:center;gap:6px}
-  .passos i{font-style:normal;width:24px;height:24px;border:2.5px solid var(--tinta);border-radius:50%;display:grid;place-items:center;background:#fff;font-size:.8rem}
-  .passos .feito i{background:var(--pasto)}
-  .passos .agora i{background:var(--sol)}
-  .passos .linha{width:18px;height:3px;background:var(--tinta);border-radius:2px}
+  /* topo simples, como app de compras */
+  .topo{background:var(--tinta);color:#fff;position:sticky;top:0;z-index:5}
+  .topo-in{max-width:560px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .topo b{font-family:'Baloo 2',sans-serif;font-size:1.2rem}
+  .topo span{display:flex;align-items:center;gap:6px;font-weight:800;font-size:.85rem;color:#D7F5CF}
+  .topo svg{width:16px;height:16px}
 
-  main{max-width:980px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:18px}
-  @media (min-width:860px){main{grid-template-columns:minmax(0,1fr) 380px;align-items:start;padding-top:32px}.resumo{position:sticky;top:20px;order:2}}
-  .cartao{background:#fff;border:var(--contorno);border-radius:24px;box-shadow:5px 5px 0 var(--tinta);padding:20px 18px}
-  h1{font-size:1.7rem;margin-bottom:4px}
-  .apoio{color:var(--tinta-suave);margin:0 0 16px}
+  main{max-width:560px;margin:0 auto;padding:12px 12px 24px;display:grid;gap:10px}
+  .bloco{background:#fff;border-radius:16px;padding:16px;border:1.5px solid #E3E6EB}
+  .bloco h2{font-size:1.15rem;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .bloco h2 i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--tinta);color:#fff;display:grid;place-items:center;font-size:.85rem;font-family:'Nunito',sans-serif;font-weight:800}
 
-  /* resumo */
-  .resumo h2{font-size:1.25rem;margin-bottom:12px}
-  .produto{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;padding-bottom:14px;border-bottom:3px dotted var(--tinta)}
-  .produto img{width:64px;height:64px;object-fit:cover;object-position:top;border:2.5px solid var(--tinta);border-radius:14px;background:var(--ceu-claro)}
-  .produto b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.15rem;line-height:1.2}
-  .produto small{color:var(--tinta-suave);font-weight:700}
-  .bonus summary{cursor:pointer;font-weight:800;padding:10px 0 2px;font-size:.95rem}
-  .itens{list-style:none;padding:0;margin:8px 0 12px;display:grid;gap:7px;font-size:.92rem;font-weight:700}
-  .itens li{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:start}
-  .itens svg{width:18px;height:18px;margin-top:2px}
-  .itens em{font-style:normal;font-size:.75rem;font-weight:800;background:var(--sol-claro);border:2px solid var(--tinta);border-radius:99px;padding:0 8px}
-  .total{display:flex;justify-content:space-between;align-items:baseline;border-top:3px dotted var(--tinta);padding-top:12px;margin-top:4px}
-  .total span{font-weight:800}
-  .total strong{font-family:'Baloo 2',sans-serif;font-size:2rem;line-height:1}
-  .total-nota{font-size:.85rem;color:var(--tinta-suave);font-weight:700;text-align:right;margin:2px 0 0}
+  /* produto */
+  .prod{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:center}
+  .prod img{width:76px;height:76px;object-fit:cover;object-position:top;border-radius:12px;border:1.5px solid #E3E6EB;background:var(--ceu-claro)}
+  .prod b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.15rem;line-height:1.2}
+  .prod small{display:block;color:var(--tinta-suave);font-weight:700;font-size:.9rem;line-height:1.35;margin-top:2px}
+  .prod .preco{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.25rem;margin-top:4px}
+  .prod .preco em{font-style:normal;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;color:var(--pasto-escuro);margin-left:6px}
+  .inclui{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .inclui span{background:var(--pasto-claro);color:var(--pasto-escuro);font-weight:800;font-size:.8rem;border-radius:99px;padding:3px 10px}
 
   /* dados */
-  .quem{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--ceu-claro);border:2.5px solid var(--tinta);border-radius:16px;padding:10px 14px;margin-bottom:18px;font-size:.92rem}
-  .quem b{display:block}
-  .quem button{appearance:none;background:none;border:0;font:inherit;font-weight:800;text-decoration:underline;color:var(--tinta);cursor:pointer;padding:6px}
-  label{display:block;font-weight:800;margin:12px 0 6px;font-size:.95rem}
-  input{width:100%;font:inherit;font-weight:700;color:var(--tinta);background:#fff;border:2px solid var(--tinta);border-radius:14px;padding:13px 14px}
-  input:focus{outline:none;box-shadow:0 0 0 3px var(--azul)}
-  .sec{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.25rem;margin:4px 0 10px}
-  #pagamento{min-height:220px}
-  .carregando{display:grid;place-items:center;min-height:200px;color:var(--tinta-suave);font-weight:800}
-  .carregando i{width:34px;height:34px;border:4px solid var(--ceu-claro);border-top-color:var(--azul);border-radius:50%;animation:gira .8s linear infinite;margin-bottom:10px}
-  @keyframes gira{to{transform:rotate(360deg)}}
-  .botao{appearance:none;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.35rem;color:var(--tinta);background:var(--pasto);border:var(--contorno);border-radius:18px;box-shadow:5px 5px 0 var(--tinta);padding:14px 20px;cursor:pointer;margin-top:18px;line-height:1.2}
-  .botao svg{width:22px;height:22px}
-  .botao:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--tinta)}
-  .botao[disabled]{opacity:.65;cursor:wait}
-  .erro{color:#B3261E;font-weight:800;min-height:1.2em;margin:10px 0 0;font-size:.95rem}
-  .aviso{background:var(--sol-claro);border:2.5px dashed var(--tinta);border-radius:16px;padding:12px 14px;margin-top:14px;font-weight:700;font-size:.95rem}
-  .aviso[hidden]{display:none}
-  /* order bump */
-  .bump{display:grid;grid-template-columns:30px 56px minmax(0,1fr);gap:10px;align-items:start;background:var(--sol-claro);border:3px dashed var(--tinta);border-radius:18px;padding:14px 12px;margin-top:18px;cursor:pointer;font-size:.92rem;line-height:1.4;font-weight:600}
-  .bump input{width:26px;height:26px;margin:2px 0 0;accent-color:#5FA84F;cursor:pointer}
-  .bump img{width:56px;height:56px;object-fit:cover;border:2.5px solid var(--tinta);border-radius:12px;background:#fff}
-  .bump b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.08rem;line-height:1.2;margin-bottom:3px}
-  .bump em{display:inline-block;font-style:normal;font-weight:800;font-size:.78rem;background:var(--coral);color:#fff;border-radius:99px;padding:1px 9px;margin-top:5px}
-  .bump.marcado{background:var(--pasto-claro);border-style:solid}
-  .bump[hidden]{display:none}
-  .linha-bump{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:.9rem;padding:8px 0 2px}
-  .linha-bump[hidden]{display:none}
+  label{display:block;font-weight:800;font-size:.95rem;margin:12px 0 5px}
+  label:first-of-type{margin-top:0}
+  input[type=text],input[type=email],input[type=tel]{width:100%;font:inherit;font-weight:700;font-size:1.05rem;color:var(--tinta);padding:13px 14px;border:2px solid #C9CED6;border-radius:12px;background:#fff;-webkit-appearance:none}
+  input:focus{outline:none;border-color:var(--azul);box-shadow:0 0 0 3px #CFE6FA}
+  input.ruim{border-color:var(--erro);background:#FFF6F5}
+  .dica{font-size:.82rem;color:var(--tinta-suave);font-weight:700;margin-top:4px}
+  .msg{font-size:.85rem;color:var(--erro);font-weight:800;margin-top:4px;min-height:0}
+  .sugere{appearance:none;background:var(--sol-claro);border:2px dashed var(--tinta);border-radius:10px;padding:6px 10px;margin-top:6px;font-weight:800;font-size:.88rem;color:var(--tinta);cursor:pointer;text-align:left}
 
-  /* segurança */
-  .seguranca{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start;background:var(--pasto-claro);border:2.5px solid var(--tinta);border-radius:18px;padding:14px;margin-top:18px}
-  .cadeado{width:52px;height:52px;border:var(--contorno);border-radius:16px;background:var(--pasto);display:grid;place-items:center}
-  .cadeado svg{width:28px;height:28px}
-  .seguranca b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.1rem}
-  .seguranca p{margin:2px 0 0;font-size:.9rem;color:var(--tinta-suave)}
-  .selos{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:center}
-  .selos span{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--tinta);border-radius:99px;padding:5px 11px;font-size:.8rem;font-weight:800}
-  .selos svg{width:15px;height:15px}
-  .garantia{display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:center;margin-top:16px;font-size:.9rem}
-  .garantia svg{width:60px;height:60px}
-  .garantia b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.05rem}
-  footer{text-align:center;font-size:.8rem;color:var(--tinta-suave);padding:0 16px 30px}
-
-  /* celular: nada pode passar da largura da tela (inclusive com a fonte do celular aumentada) */
-  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-  body{overflow-x:hidden}
-  main{grid-template-columns:minmax(0,1fr)}
-  .cartao,#pagamento,#form-pag,.produto>div,.seguranca>div,.garantia>div{min-width:0}
-  .quem{flex-wrap:wrap}
-  .quem>div{min-width:0;flex:1 1 180px;overflow-wrap:anywhere}
-  .itens li{grid-template-columns:20px minmax(0,1fr) auto}
-  .cab{flex-wrap:wrap}
-  .passos{flex-wrap:wrap}
-  input{min-width:0}
-  @media (max-width:859px){
-    .faixa{font-size:.75rem;padding:5px 10px}
-    .resumo{padding:12px 14px}
-    .resumo h2{display:none}
-    .produto{grid-template-columns:48px minmax(0,1fr);gap:10px;padding-bottom:8px}
-    .produto img{width:48px;height:48px;border-radius:12px}
-    .produto b{font-size:1.05rem}
-    .produto small{font-size:.8rem;line-height:1.3;display:block}
-    .bonus summary{padding:6px 0 0;font-size:.88rem}
-    .total{padding-top:8px}
-    .total strong{font-size:1.5rem}
-    .total-nota{font-size:.78rem}
-    .apoio{font-size:.95rem;margin-bottom:12px}
-  }
-  @media (max-width:420px){
-    .cab{padding:8px 12px}
-    .cab img{width:62px}
-    .passos{font-size:.8rem;gap:6px}
-    main{padding:14px 12px 40px;gap:14px}
-    .cartao{padding:16px 14px;border-radius:20px;box-shadow:4px 4px 0 var(--tinta)}
-    h1{font-size:1.45rem}
-    .total strong{font-size:1.7rem}
-    .botao{font-size:1.2rem;padding:13px 14px}
-    .selos span{font-size:.75rem}
-  }
-  .proximo{font-size:.92rem;color:var(--tinta-suave);margin:10px 0 0;text-align:center}
-  #form-pag[hidden]{display:none}
-  .pix-cta{margin-top:4px}
-  .pix-cta .botao{margin-top:14px}
-  .pix-vant{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin:10px 0 0;font-size:.9rem;font-weight:800;color:var(--tinta-suave)}
-  .pix-vant span::before{content:"✓ ";color:var(--pasto-escuro)}
-  .ou-cartao{appearance:none;display:block;margin:14px auto 0;background:none;border:0;font:inherit;font-weight:800;color:var(--tinta);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
-  .leva-mini{background:var(--pasto-claro);border:2.5px solid var(--tinta);border-radius:16px;padding:10px 14px;margin:0 0 6px;font-weight:700;font-size:.95rem;line-height:1.45}
-  .leva-mini b{font-family:'Baloo 2',sans-serif}
+  /* forma de pagamento */
+  .opcao{display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;border:2px solid #C9CED6;border-radius:14px;padding:14px;cursor:pointer;margin-top:10px;background:#fff}
+  .opcao:first-of-type{margin-top:0}
+  .opcao input{width:22px;height:22px;margin:0;accent-color:var(--tinta)}
+  .opcao b{display:block;font-size:1.02rem}
+  .opcao small{display:block;font-weight:700;color:var(--tinta-suave);font-size:.85rem}
+  .opcao .tag{font-size:.72rem;font-weight:800;background:var(--pasto);border-radius:99px;padding:3px 9px;white-space:nowrap}
+  .opcao.sel{border-color:var(--tinta);background:var(--pasto-claro)}
+  .opcao svg{width:26px;height:26px}
+  #cartao-box{margin-top:12px}
   #cartao-box[hidden]{display:none}
+  .carregando{padding:16px;text-align:center;font-weight:700;color:var(--tinta-suave)}
+
+  /* bump */
+  .bump{display:grid;grid-template-columns:24px 52px minmax(0,1fr);gap:10px;align-items:start;background:var(--sol-claro);border:2px dashed var(--tinta);border-radius:14px;padding:12px;cursor:pointer;font-size:.9rem;line-height:1.4;font-weight:600}
+  .bump input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--tinta)}
+  .bump img{width:52px;height:52px;border-radius:10px;border:1.5px solid var(--tinta)}
+  .bump b{display:block;font-size:.98rem;line-height:1.3;margin-bottom:2px}
+  .bump em{display:inline-block;font-style:normal;font-weight:800;font-size:.78rem;background:var(--coral);color:#fff;border-radius:99px;padding:1px 8px;margin-top:4px}
+  .bump.marcado{background:#FFE9A8}
+
+  /* garantia e confiança */
+  .confia{display:grid;gap:10px;font-size:.9rem;font-weight:700;color:var(--tinta-suave)}
+  .confia div{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center}
+  .confia svg{width:26px;height:26px}
+  .confia b{color:var(--tinta)}
+
+  /* barra fixa de pagar (como nos apps de compra) */
+  .barra{position:fixed;left:0;right:0;bottom:0;z-index:10;background:#fff;border-top:1.5px solid #D5D9E0;box-shadow:0 -4px 16px rgba(0,0,0,.08);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .barra-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+  .barra .tot small{display:block;font-size:.78rem;font-weight:800;color:var(--tinta-suave)}
+  .barra .tot strong{font-family:'Baloo 2',sans-serif;font-size:1.45rem;line-height:1}
+  .pagar{appearance:none;border:0;border-radius:14px;background:var(--pasto-escuro);color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.25rem;padding:14px 12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px}
+  .pagar svg{width:22px;height:22px}
+  .pagar[disabled]{opacity:.65;cursor:wait}
+  .erro-geral{background:#FFF0EE;border:2px solid var(--erro);color:var(--erro);border-radius:12px;padding:10px 12px;font-weight:800;font-size:.92rem}
+  .erro-geral:empty{display:none}
+
+  /* tela do Pix (pix.js) */
+  #pix-tela[hidden],#form[hidden],.barra[hidden]{display:none}
+  #pix .botao{appearance:none;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.3rem;color:var(--tinta);background:var(--pasto);border:var(--contorno);border-radius:16px;box-shadow:4px 4px 0 var(--tinta);padding:14px 18px;cursor:pointer;margin-top:8px;line-height:1.2}
+  #pix .botao svg{width:22px;height:22px}
+  @keyframes gira{to{transform:rotate(360deg)}}
+  .gira{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:gira .8s linear infinite}
+  footer{max-width:560px;margin:4px auto 0;padding:0 16px;text-align:center;font-size:.78rem;color:var(--tinta-suave);font-weight:700}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="faixa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Ambiente seguro e criptografado</div>
-<header>
-  <div class="cab">
-    <img src="/oferta/img/logo.webp" alt="Bené" width="76" height="62">
-    <div class="passos" aria-label="Passo 2 de 2">
-      <span class="feito"><i>✓</i>Seus dados</span><span class="linha" aria-hidden="true"></span><span class="agora"><i>2</i>Pagamento</span>
-    </div>
-  </div>
-</header>
+<div class="topo"><div class="topo-in"><b>Finalizar compra</b><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Compra segura</span></div></div>
 
 <main>
-  <aside class="cartao resumo" aria-labelledby="resumo-t">
-    <h2 id="resumo-t">Seu pedido</h2>
-    <div class="produto">
-      <img src="/oferta/img/tela_home.webp" alt="" width="64" height="64">
-      <div><b>Aplicativo da Bené</b><small>Método Fono-Fé: 4 níveis e 120 atividades</small></div>
-    </div>
-    <details class="bonus"><summary>+ 5 bônus inclusos</summary>
-    <ul class="itens">
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Kit completo em PDF, 127 páginas</span><em>bônus</em></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Alfabeto da Bené</span><em>bônus</em></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Versículos para colorir</span><em>bônus</em></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Quebra-cabeça de sílabas</span><em>bônus</em></li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Cantando com a Bené</span><em>bônus</em></li>
-    </ul>
-    </details>
-    <div class="linha-bump" id="linha-bump" hidden><span>+ Níveis 5 e 6 (historinhas)</span><span>R$ 19,90</span></div>
-    <div class="total"><span>Total</span><strong id="total-v">R$ 37,00</strong></div>
-    <p class="total-nota">Pagamento único. Não é assinatura.</p>
-  </aside>
-
-  <section class="cartao" aria-labelledby="pag-t">
-    <h1 id="pag-t">Falta só o pagamento</h1>
-    <p class="apoio">Pague com Pix e o acesso ao aplicativo chega no seu e-mail assim que o pagamento cair.</p>
-
-    <div id="bloco-quem"></div>
-
-    <form id="form-pag" novalidate>
-      <p class="leva-mini" id="leva-mini">Você leva: <b>app com 120 atividades</b> + kit para imprimir + 4 bônus. <b id="leva-v">R$ 37,00</b>, uma vez só, com garantia de 7 dias.</p>
-      <label class="bump" id="bump" hidden>
-        <input type="checkbox" id="bump-ck">
-        <img src="/img/p/barco.webp" alt="" width="56" height="56">
-        <span><b>Sim! Quero também os Níveis 5 e 6 por + R$ 19,90</b>30 historinhas da Bíblia para ele ler sozinho, de Noé à ressurreição de Jesus. Liberado junto com o aplicativo.<br><em>Só nesta tela. Depois custa R$ 47</em></span>
-      </label>
-      <div class="pix-cta" id="pix-cta">
-        <button class="botao" type="button" id="pix-btn" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
-          <span id="pix-txt">Gerar meu Pix de R$ 37,00</span>
-        </button>
-        <p class="pix-vant"><span>Aprovado na hora</span><span>Não precisa de cartão</span><span>Acesso no seu e-mail</span></p>
-        <button class="ou-cartao" type="button" id="ou-cartao">Prefiro pagar com cartão</button>
-      </div>
-      <div id="cartao-box" hidden>
-        <p class="sec">Pagar com cartão</p>
-        <div id="pagamento"></div>
-        <button class="botao" type="submit" id="pagar" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          <span id="pagar-txt">Pagar R$ 37,00</span>
-        </button>
-        <button class="ou-cartao" type="button" id="ou-pix">Voltar para o Pix</button>
-      </div>
-      <p class="erro" id="erro" role="alert"></p>
-      <div class="aviso" id="aviso-pix" hidden>O seu Pix continua valendo. Pague pelo aplicativo do banco e esta página avança sozinha quando o pagamento for confirmado.</div>
-    </form>
-    <div id="pix" hidden></div>
-
-    <div class="seguranca">
-      <span class="cadeado"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg></span>
+  <section class="bloco" aria-label="Seu pedido">
+    <div class="prod">
+      <img src="/oferta/img/tela_home.webp" alt="" width="76" height="76">
       <div>
-        <b>Pagamento 100% seguro</b>
-        <p>Seus dados viajam criptografados e o pagamento é processado pelo Stripe, usado por milhões de empresas no mundo. A Bené não vê nem guarda os dados do seu cartão.</p>
+        <b>Aplicativo da Bené</b>
+        <small>App com 120 atividades + kit para imprimir (127 páginas) + 4 bônus</small>
+        <div class="preco" id="preco-prod">R$ 37,00<em>pagamento único</em></div>
       </div>
-    </div>
-    <div class="selos">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Conexão criptografada</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Processado pelo Stripe</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Acesso na hora</span>
-    </div>
-    <div class="garantia">
-      <svg viewBox="0 0 130 130" aria-hidden="true"><circle cx="65" cy="65" r="60" fill="#FFC94A" stroke="#4A3426" stroke-width="5"/><circle cx="65" cy="65" r="46" fill="#fff" stroke="#4A3426" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/><text x="65" y="68" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="42" fill="#4A3426">7</text><text x="65" y="90" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="15" fill="#4A3426">dias</text></svg>
-      <div><b>Garantia de 7 dias</b>Se não for para vocês, peça o reembolso em até 7 dias e devolvemos todo o valor.</div>
     </div>
   </section>
+
+  <form id="form" novalidate>
+    <div style="display:grid;gap:10px">
+      <section class="bloco" aria-labelledby="t-dados">
+        <h2 id="t-dados"><i>1</i>Seus dados</h2>
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" autocomplete="name" autocapitalize="words" placeholder="Seu nome">
+        <p class="msg" id="m-nome"></p>
+        <label for="whats">WhatsApp</label>
+        <input type="tel" id="whats" inputmode="tel" autocomplete="tel-national" placeholder="(00) 00000-0000">
+        <p class="msg" id="m-whats"></p>
+        <label for="email">E-mail</label>
+        <input type="email" id="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="seuemail@gmail.com">
+        <p class="dica">O acesso ao aplicativo chega neste e-mail.</p>
+        <p class="msg" id="m-email"></p>
+        <div id="sug"></div>
+      </section>
+
+      <section class="bloco" aria-labelledby="t-pag">
+        <h2 id="t-pag"><i>2</i>Forma de pagamento</h2>
+        <label class="opcao sel" id="op-pix">
+          <input type="radio" name="metodo" value="pix" checked>
+          <div><b>Pix</b><small>Aprovado na hora. Não precisa de cartão.</small></div>
+          <span class="tag">Recomendado</span>
+        </label>
+        <label class="opcao" id="op-card">
+          <input type="radio" name="metodo" value="card">
+          <div><b>Cartão de crédito</b><small>Visa, Mastercard e outros</small></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        </label>
+        <div id="cartao-box" hidden><div id="pagamento"><div class="carregando">Carregando o cartão…</div></div></div>
+      </section>
+
+      <label class="bump" id="bump" hidden>
+        <input type="checkbox" id="bump-ck">
+        <img src="/img/p/barco.webp" alt="" width="52" height="52">
+        <span><b>Adicionar Níveis 5 e 6 por + R$ 19,90</b>30 historinhas da Bíblia para ele ler sozinho. Liberado junto com o aplicativo.<br><em>Só nesta tela. Depois custa R$ 47</em></span>
+      </label>
+
+      <p class="erro-geral" id="erro" role="alert"></p>
+
+      <section class="bloco confia" aria-label="Garantias">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="#3F8A31" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg><span><b>Garantia de 7 dias.</b> Se não gostar, devolvemos todo o valor.</span></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="#3F8A31" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span><b>Acesso na hora</b> no seu e-mail, assim que o pagamento é confirmado.</span></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="#3F8A31" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span><b>Pagamento seguro</b> processado pelo Stripe. Não é assinatura.</span></div>
+      </section>
+    </div>
+  </form>
+
+  <section class="bloco" id="pix-tela" hidden aria-live="polite"><div id="pix"></div></section>
 </main>
-<footer>Bené. Pagamento processado pelo Stripe. Este site não faz parte do Facebook ou da Meta.</footer>
+<footer>Bené · Este site não faz parte do Facebook ou da Meta.</footer>
+
+<div class="barra" id="barra">
+  <div class="barra-in">
+    <div class="tot"><small>Total</small><strong id="total-v">R$ 37,00</strong></div>
+    <button class="pagar" type="submit" form="form" id="pagar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      <span id="pagar-txt">Gerar Pix</span>
+    </button>
+  </div>
+</div>
 
 <script>
 (function () {
   const C = window.BENE_CONFIG;
   const $ = id => document.getElementById(id);
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const btn = $("pagar"), txt = $("pagar-txt"), erro = $("erro"), avisoPix = $("aviso-pix");
-  let stripe, elements, clientSecret, piId, metodo = "", lead = null, bump = false;
-  const total = () => bump ? 56.9 : C.preco;
   const brl = v => "R$ " + v.toFixed(2).replace(".", ",");
-  const textoBotao = () => metodo === "pix" ? "Gerar o Pix de " + brl(total()) : "Pagar " + brl(total()) + " no cartão";
-  const pixBtn = $("pix-btn"), pixTxt = $("pix-txt");
-  let peMontado = false;
-  function mostrarBump() {
-    $("bump-ck").checked = bump; $("bump").classList.toggle("marcado", bump);
-    $("linha-bump").hidden = !bump; $("total-v").textContent = brl(total());
-    $("leva-v").textContent = brl(total());
-    txt.textContent = textoBotao(); pixTxt.textContent = "Gerar meu Pix de " + brl(total());
+  const form = $("form"), btn = $("pagar"), erro = $("erro");
+  let metodo = "pix", bump = false, stripe = null, elements = null, peMontado = false, cardOk = false;
+  let pag = null;          // { clientSecret, pk, id } do pagamento (nasce sem dados)
+  let preparo = null;      // promessa do pagamento + Stripe.js
+  const total = () => bump ? 56.9 : C.preco;
+
+  function rotulo() {
+    $("total-v").textContent = brl(total());
+    const t = $("pagar-txt"); if (t && !btn.disabled) t.textContent = metodo === "pix" ? "Gerar Pix" : "Pagar " + brl(total());
   }
 
+  /* ---------- dados: preenche o que já tem (quiz, página de vendas) ---------- */
   function lerLead() {
     for (const k of ["bene_checkout", "bene_quiz_lead"]) {
-      try { const v = JSON.parse(localStorage.getItem(k) || "null"); if (v && v.email) return v; } catch (e) {}
+      try { const v = JSON.parse(localStorage.getItem(k) || "null"); if (v && (v.email || v.nome)) return v; } catch (e) {}
     }
     return null;
   }
-  const valido = l => l && String(l.nome || "").trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(l.email || "") && String(l.whats || "").replace(/\D/g, "").length >= 10;
+  const w = $("whats");
+  function mascara() { const d = w.value.replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, "").slice(0, 11); w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; }
+  w.addEventListener("input", mascara);
+  const l0 = lerLead();
+  if (l0) { $("nome").value = l0.nome || ""; $("email").value = l0.email || ""; w.value = l0.whats || l0.whatsapp || ""; mascara(); }
 
-  function mostrarQuem() {
-    $("bloco-quem").innerHTML = `<div class="quem"><div>Acesso para<b>${esc(lead.nome)}</b>${esc(lead.email)}</div><button type="button" id="alterar">Alterar</button></div>`;
-    $("alterar").addEventListener("click", formDados);
+  // e-mail digitado errado é o motivo nº 1 de "paguei e não recebi": sugere o domínio certo
+  const DOM = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com.br", "yahoo.com", "icloud.com", "live.com", "bol.com.br", "uol.com.br", "hotmail.com.br", "outlook.com.br"];
+  function dist(a, b) { const m = []; for (let i = 0; i <= a.length; i++) { m[i] = [i]; for (let j = 1; j <= b.length; j++) m[i][j] = i ? Math.min(m[i-1][j] + 1, m[i][j-1] + 1, m[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)) : j; } return m[a.length][b.length]; }
+  function sugerir() {
+    const v = $("email").value.trim().toLowerCase(), box = $("sug"); box.replaceChildren();
+    const at = v.lastIndexOf("@"); if (at < 1) return;
+    const dom = v.slice(at + 1); if (!dom || DOM.includes(dom)) return;
+    let melhor = "", d = 9; DOM.forEach(x => { const k = dist(dom, x); if (k < d) { d = k; melhor = x; } });
+    if (d > 0 && d <= 2) {
+      const certo = v.slice(0, at + 1) + melhor;
+      const b = document.createElement("button"); b.type = "button"; b.className = "sugere";
+      b.textContent = "Você quis dizer " + certo + "? Toque para corrigir";
+      b.addEventListener("click", () => { $("email").value = certo; box.replaceChildren(); C.evento("email_corrigido"); });
+      box.appendChild(b);
+    }
   }
+  $("email").addEventListener("blur", sugerir);
+  $("email").addEventListener("input", () => { if ($("sug").firstChild) sugerir(); });
 
-  function formDados() {
-    btn.disabled = true;
-    $("pagamento").innerHTML = "";
-    $("form-pag").hidden = true;
-    const l = lead || {};
-    $("bloco-quem").innerHTML = `<form id="form-dados" novalidate style="margin-bottom:18px">
-      <p class="sec" style="margin-bottom:0">Para quem liberamos o acesso?</p>
-      <label for="d-nome">Seu nome</label><input id="d-nome" autocomplete="name" value="${esc(l.nome || "")}">
-      <label for="d-email">Seu melhor e-mail</label><input id="d-email" type="email" inputmode="email" autocomplete="email" value="${esc(l.email || "")}">
-      <label for="d-whats">WhatsApp</label><input id="d-whats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}">
-      <p class="erro" id="erro-dados" role="alert"></p>
-      <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar para o pagamento</button>
-      <p class="proximo">No próximo passo o seu <b>Pix</b> fica pronto em 1 toque (aprovado na hora). Também aceitamos <b>cartão</b>.</p></form>`;
-    const w = $("d-whats");
-    const mask = () => { const d = w.value.replace(/\D/g, "").slice(0, 11); w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; };
-    w.addEventListener("input", mask); mask();
-    $("form-dados").addEventListener("submit", async e => {
-      e.preventDefault();
-      const n = { nome: $("d-nome").value.trim(), email: $("d-email").value.trim().toLowerCase(), whats: w.value.replace(/\D/g, ""), variante: (lead && lead.variante) || C.variante() || "direto" };
-      const er = $("erro-dados");
-      if (n.nome.length < 2) { er.textContent = "Escreva seu nome."; return; }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(n.email)) { er.textContent = "Confira o e-mail: é com ele que você entra no aplicativo."; return; }
-      if (n.whats.length < 10) { er.textContent = "Digite o WhatsApp com DDD."; return; }
-      lead = n;
-      try { localStorage.setItem("bene_checkout", JSON.stringify(lead)); } catch (err) {}
-      C.track("Lead", { content_name: "checkout" });
-      C.salvarLead({ nome: n.nome, email: n.email, whatsapp: n.whats, origem: "checkout", variante: n.variante, dados: { utm: C.utm } });
-      iniciar();
-    });
-    setTimeout(() => $("d-nome").focus(), 50);
+  let comecou = false;
+  form.addEventListener("focusin", () => { if (!comecou) { comecou = true; C.evento("dados_inicio"); } });
+
+  function validar() {
+    const n = $("nome").value.trim(), e = $("email").value.trim().toLowerCase(), z = w.value.replace(/\D/g, "");
+    const regras = [
+      ["nome", "m-nome", n.length >= 2, "Escreva seu nome."],
+      ["whats", "m-whats", z.length >= 10 && /^[1-9][1-9]/.test(z), "Digite o WhatsApp com DDD."],
+      ["email", "m-email", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e), "Confira o e-mail: é nele que chega o acesso."],
+    ];
+    let primeiro = null;
+    regras.forEach(([id, m, ok, msg]) => { $(id).classList.toggle("ruim", !ok); $(m).textContent = ok ? "" : msg; if (!ok && !primeiro) primeiro = $(id); });
+    if (primeiro) { primeiro.focus(); primeiro.scrollIntoView({ block: "center", behavior: "smooth" }); C.evento("dados_erro", { campo: primeiro.id }, true); return null; }
+    return { nome: n, email: e, whats: z, variante: (l0 && l0.variante) || C.variante() || "direto" };
   }
+  ["nome", "whats", "email"].forEach(id => $(id).addEventListener("input", () => { if ($(id).classList.contains("ruim")) { $(id).classList.remove("ruim"); $("m-" + id).textContent = ""; } }));
 
-  function sessionPk() { try { return sessionStorage.getItem("bene_pk") || ""; } catch (e) { return ""; } }
+  /* ---------- o pagamento é preparado em segundo plano, enquanto ela preenche ---------- */
   function cookie(n) { const m = document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)")); return m ? decodeURIComponent(m[1]) : ""; }
-  function fbc() {
-    const c = cookie("_fbc"); if (c) return c;
-    const id = C.utm && C.utm.fbclid; return id ? "fb.1." + Date.now() + "." + id : "";
-  }
+  function fbc() { const c = cookie("_fbc"); if (c) return c; const id = C.utm && C.utm.fbclid; return id ? "fb.1." + Date.now() + "." + id : ""; }
+  function rastreio() { let t = {}; try { t = window.ltUtm ? (window.ltUtm() || {}) : {}; } catch (e) {} return Object.assign({}, C.utm || {}, t); }
+  async function esperar(cond, ms) { for (let i = 0; i < ms / 100 && !cond(); i++) await new Promise(r => setTimeout(r, 100)); return cond(); }
 
-  // UTMs do Métricas Rápida (t.js) + as que o site guardou na entrada
-  function rastreio() {
-    let t = {};
-    try { t = window.ltUtm ? (window.ltUtm() || {}) : {}; } catch (e) {}
-    return Object.assign({}, C.utm || {}, t);
-  }
-
-  // espera o t.js do Métricas Rápida carregar (até 3 s) para o pagamento levar o vid
-  async function esperarRastreio() {
-    for (let i = 0; i < 15 && !window.ltUtm; i++) await new Promise(r => setTimeout(r, 100));
-  }
-  // o Stripe.js carrega sem travar a página; espera ele aqui (até 15 s)
-  async function esperarStripe() {
-    for (let i = 0; i < 150 && !window.Stripe; i++) await new Promise(r => setTimeout(r, 100));
-    if (!window.Stripe) throw new Error("stripe");
-  }
-
-  async function criarPagamento() {
-    await esperarRastreio();
-    // Pix já gerado neste aparelho (a pessoa foi ao app do banco e voltou): usa o mesmo pagamento
-    const px = window.BenePix && BenePix.salvo("app", lead.email);
-    if (px) return { email: lead.email, clientSecret: px.cs, pk: px.pk, id: px.id, pix: px };
-    // reaproveita o mesmo pagamento se a página for recarregada
-    try {
-      const s = JSON.parse(sessionStorage.getItem("bene_pi") || "null");
-      if (s && s.email === lead.email && s.clientSecret) return s;
-    } catch (e) {}
+  async function criarRascunho() {
+    try { const s = JSON.parse(sessionStorage.getItem("bene_pi2") || "null"); if (s && s.clientSecret) return s; } catch (e) {}
+    await esperar(() => window.ltUtm, 2000);
     const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
+      body: JSON.stringify({ rascunho: true, variante: (l0 && l0.variante) || C.variante(), utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.clientSecret) throw new Error(j.erro || "falha");
-    const s = { email: lead.email, clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
-    try { sessionStorage.setItem("bene_pi", JSON.stringify(s)); } catch (e) {}
+    const s = { clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
+    try { sessionStorage.setItem("bene_pi2", JSON.stringify(s)); } catch (e) {}
     return s;
   }
-
-  async function iniciar() {
-    $("form-pag").hidden = false;
-    mostrarQuem();
-    erro.textContent = ""; btn.disabled = true; pixBtn.disabled = true; pixTxt.textContent = "Preparando o seu Pix…";
-    let s;
-    try { const r = await Promise.all([criarPagamento(), esperarStripe()]); s = r[0]; }
-    catch (e) {
-      // internet lenta ou o Stripe demorou: tenta mais uma vez sozinho antes de mostrar o erro
-      if (!iniciar.tentou) { iniciar.tentou = true; C.evento("pag_erro", { msg: String(e.message || "").slice(0, 60), tentativa: 1 }, true); return setTimeout(iniciar, 1500); }
-      C.evento("pag_erro", { msg: String(e.message || "").slice(0, 60), tentativa: 2 }, true);
-      pixTxt.textContent = "Gerar meu Pix de " + brl(total());
-      erro.textContent = e.message === "config"
-        ? "O pagamento está sendo configurado. Volte em alguns minutos."
-        : "Não conseguimos carregar o pagamento. Atualize a página e tente de novo.";
-      return;
-    }
-    clientSecret = s.clientSecret; piId = s.id;
-    try { sessionStorage.setItem("bene_pk", s.pk); } catch (e) {}
-    stripe = Stripe(s.pk, { locale: "pt-BR" });
-    // voltou depois de pagar (ou com o Pix ainda aberto): não monta o pagamento de novo
-    try {
-      const r0 = await stripe.retrievePaymentIntent(clientSecret), p0 = r0 && r0.paymentIntent;
-      if (p0 && (p0.status === "succeeded" || p0.status === "processing")) { if (window.BenePix) BenePix.limpar("app"); return obrigado(p0.id, p0.status); }
-      if (p0 && typeof p0.amount === "number") { bump = p0.amount >= 5690; mostrarBump(); }
-      if (s.pix && p0 && p0.status === "requires_action") abrirPix(s.pix);
-      else if (s.pix && window.BenePix) BenePix.limpar("app");
-    } catch (e) {}
-    metodo = "pix"; pixBtn.disabled = false; $("bump").hidden = false; mostrarBump();
-    C.evento("pag_visto");
+  const post = body => fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  // o pagamento (rascunho) fica pronto em segundo plano; o Pix sai pelo servidor, sem depender do Stripe.js no celular
+  function preparar() {
+    if (preparo) return preparo;
+    preparo = (async () => {
+      const s = await criarRascunho();
+      pag = s;
+      try { sessionStorage.setItem("bene_pk", s.pk); } catch (e) {}
+      try {
+        const p0 = await (await post({ acao: "status", id: s.id })).json();
+        if (p0 && (p0.status === "succeeded" || p0.status === "processing")) { obrigado(p0.id, p0.status); return s; }
+        if (p0 && p0.status === "canceled") { sessionStorage.removeItem("bene_pi2"); preparo = null; return preparar(); }
+        if (p0 && typeof p0.amount === "number" && p0.amount >= 5690) { bump = true; $("bump-ck").checked = true; $("bump").classList.add("marcado"); rotulo(); }
+      } catch (e) {}
+      $("bump").hidden = false;
+      return s;
+    })();
+    preparo.catch(() => { preparo = null; });
+    return preparo;
   }
+  // Stripe.js só é necessário para o cartão
+  async function carregarStripe() {
+    await preparar();
+    if (stripe) return;
+    if (!(await esperar(() => window.Stripe, 20000))) throw new Error("stripe");
+    stripe = Stripe(pag.pk, { locale: "pt-BR" });
+  }
+  preparar().catch(() => {});
 
-  // cartão: só monta o formulário do Stripe quando a pessoa escolhe
-  function montarCartao() {
+  /* ---------- Pix ou cartão ---------- */
+  document.querySelectorAll('input[name="metodo"]').forEach(r => r.addEventListener("change", () => {
+    metodo = document.querySelector('input[name="metodo"]:checked').value;
+    $("op-pix").classList.toggle("sel", metodo === "pix"); $("op-card").classList.toggle("sel", metodo === "card");
+    $("cartao-box").hidden = metodo !== "card"; erro.textContent = ""; rotulo();
+    if (metodo === "card") { C.evento("cartao_aberto"); montarCartao(); }
+  }));
+
+  async function montarCartao() {
     if (peMontado) return; peMontado = true;
-    $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando o pagamento com cartão…</div></div>';
+    try { await carregarStripe(); } catch (e) { peMontado = false; $("pagamento").innerHTML = '<div class="carregando">O cartão não carregou. Toque em Cartão de novo ou pague com Pix.</div>'; return; }
     elements = stripe.elements({
-      clientSecret,
+      clientSecret: pag.clientSecret,
       fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" }],
-      appearance: {
-        theme: "stripe",
-        variables: {
-          colorPrimary: "#4A3426", colorText: "#4A3426", colorTextSecondary: "#6B5546", colorBackground: "#FFFFFF",
-          colorDanger: "#B3261E", fontFamily: "Nunito, system-ui, sans-serif", fontSizeBase: "16px",
-          borderRadius: "14px", spacingUnit: "4px", focusBoxShadow: "0 0 0 3px #5BA8E8"
-        },
-        rules: {
-          ".AccordionItem": { border: "2.5px solid #4A3426", boxShadow: "3px 3px 0 #4A3426", fontWeight: "800" },
-          ".AccordionItem--selected": { backgroundColor: "#FFF4D6" },
-          ".Input": { border: "2px solid #4A3426", boxShadow: "none", fontWeight: "700" },
-          ".Input:focus": { boxShadow: "0 0 0 3px #5BA8E8", borderColor: "#4A3426" },
-          ".Label": { fontWeight: "800" },
-          ".RadioIcon": { colorIcon: "#4A3426" }
-        }
-      }
+      appearance: { theme: "stripe", variables: { colorPrimary: "#4A3426", colorText: "#4A3426", colorDanger: "#B3261E", fontFamily: "Nunito, system-ui, sans-serif", fontSizeBase: "16px", borderRadius: "12px" },
+        rules: { ".Input": { border: "2px solid #C9CED6", boxShadow: "none", fontWeight: "700" }, ".Input:focus": { borderColor: "#5BA8E8", boxShadow: "0 0 0 3px #CFE6FA" }, ".Label": { fontWeight: "800" } } }
     });
     const pe = elements.create("payment", {
-      layout: { type: "accordion", defaultCollapsed: false, radios: true, spacedAccordionItems: true },
-      paymentMethodOrder: ["card", "apple_pay", "google_pay", "pix"],
+      layout: { type: "tabs" },
+      paymentMethodOrder: ["card", "apple_pay", "google_pay"],
       fields: { billingDetails: { name: "never", email: "never", phone: "never" } },
+      wallets: { applePay: "auto", googlePay: "auto" },
       business: { name: "Bené" }
     });
-    $("pagamento").innerHTML = "";
-    pe.mount("#pagamento");
-    pe.on("ready", () => { btn.disabled = false; });
-    pe.on("change", ev => {
-      metodo = ev.value && ev.value.type || "card";
-      txt.textContent = textoBotao();
-      erro.textContent = "";
-    });
+    $("pagamento").replaceChildren(); pe.mount("#pagamento");
+    pe.on("change", ev => { cardOk = !!ev.complete; if (ev.value && ev.value.type === "pix") { document.querySelector('input[value="pix"]').click(); } });
   }
 
-  $("ou-cartao").addEventListener("click", () => {
-    if (!stripe) return;
-    $("pix-cta").hidden = true; $("cartao-box").hidden = false; metodo = "card"; txt.textContent = textoBotao();
-    erro.textContent = ""; montarCartao(); C.evento("cartao_aberto");
+  /* ---------- order bump ---------- */
+  $("bump-ck").addEventListener("change", async () => {
+    const ck = $("bump-ck"), quer = ck.checked;
+    ck.disabled = true; btn.disabled = true; erro.textContent = "";
+    try {
+      await preparar();
+      const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "bump", id: pag.id, email: $("email").value.trim().toLowerCase(), bump: quer }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) throw new Error("bump");
+      if (elements) await elements.fetchUpdates();
+      bump = quer; $("bump").classList.toggle("marcado", bump); rotulo();
+      if (quer) { C.trackCustom("BumpMarcado", { valor: 19.9 }); C.evento("bump_marcado", null, true); } else C.trackCustom("BumpDesmarcado", {});
+    } catch (e) { ck.checked = !quer; erro.textContent = "Não conseguimos atualizar o pedido agora. Tente de novo."; }
+    ck.disabled = false; btn.disabled = false; rotulo();
   });
-  $("ou-pix").addEventListener("click", () => {
-    $("cartao-box").hidden = true; $("pix-cta").hidden = false; metodo = "pix"; erro.textContent = "";
+
+  /* ---------- pagar (um toque) ---------- */
+  function ocupado(sim, texto) {
+    btn.disabled = sim;
+    if (sim) btn.innerHTML = '<span class="gira" aria-hidden="true"></span><span id="pagar-txt">' + texto + "</span>";
+    else { btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span id="pagar-txt"></span>'; }
+  }
+  function txtAtual() { return metodo === "pix" ? "Gerar Pix" : "Pagar " + brl(total()); }
+  function libera() { ocupado(false); $("pagar-txt").textContent = txtAtual(); }
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    erro.textContent = "";
+    const lead = validar(); if (!lead) return;
+    if (metodo === "card" && peMontado && !cardOk) { erro.textContent = "Preencha os dados do cartão acima."; $("cartao-box").scrollIntoView({ block: "center", behavior: "smooth" }); return; }
+    ocupado(true, metodo === "pix" ? "Gerando o seu Pix…" : "Processando…");
+    try { localStorage.setItem("bene_checkout", JSON.stringify(lead)); } catch (er) {}
+    C.track("Lead", { content_name: "checkout" });
+    C.salvarLead({ nome: lead.nome, email: lead.email, whatsapp: lead.whats, origem: "checkout", variante: lead.variante, dados: { utm: C.utm } });
+    C.evento(metodo === "pix" ? "pix_clique" : "cartao_clique");
+    // garante o pagamento pronto (tenta de novo se a internet falhou)
+    try { await preparar(); } catch (er) { try { await preparar(); } catch (er2) { C.evento("pag_erro", { msg: String(er2.message || "").slice(0, 60) }, true); libera(); erro.textContent = "A internet oscilou. Toque no botão de novo."; return; } }
+    const dados = { id: pag.id, nome: lead.nome, email: lead.email, whatsapp: lead.whats, variante: lead.variante };
+    // se este pagamento já foi usado (pago ou cancelado), cria outro e tenta de novo
+    async function enviar(acao) {
+      let r = await post(Object.assign({ acao }, dados)), j = await r.json().catch(() => ({}));
+      if (r.status === 409 || r.status === 404) {
+        sessionStorage.removeItem("bene_pi2"); preparo = null; await preparar(); dados.id = pag.id;
+        r = await post(Object.assign({ acao }, dados)); j = await r.json().catch(() => ({}));
+      }
+      return { ok: r.ok, j };
+    }
+    C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo });
+    const fone = "+55" + lead.whats;
+    if (metodo === "pix") {
+      let res = null;
+      try { res = await enviar("pix"); } catch (er) { try { res = await enviar("pix"); } catch (er2) { res = null; } }
+      const j = res ? res.j : {};
+      if (j.pago) return obrigado(j.pago.id, j.pago.status);
+      if (j.pix) {
+        const px = { email: lead.email, id: j.pix.id, pk: pag.pk, code: j.pix.code, img: j.pix.img, exp: j.pix.exp, valor: j.valor };
+        BenePix.guardar("app", px);
+        C.evento("pix_gerado", null, true); libera(); return abrirPix(px);
+      }
+      C.evento("pix_erro", { msg: String(j.msg || j.erro || "rede").slice(0, 120) }, true); libera();
+      erro.textContent = j.erro === "dados" ? "Confira seu nome, WhatsApp e e-mail e toque de novo." : "Não conseguimos gerar o Pix agora. Toque em Gerar Pix de novo.";
+      return;
+    }
+    // cartão: grava os dados no pagamento
+    try { const d = await enviar("dados"); if (!d.ok) throw new Error("dados"); } catch (er) { C.evento("pag_erro", { msg: "dados" }, true); libera(); erro.textContent = "Não conseguimos registrar seus dados. Confira e toque de novo."; return; }
+    // cartão
+    if (!elements) { await montarCartao(); libera(); erro.textContent = "Preencha os dados do cartão e toque em Pagar."; return; }
+    const { error, paymentIntent } = await stripe.confirmPayment({ elements, confirmParams: { return_url: location.origin + "/obrigado/", payment_method_data: { billing_details: { name: lead.nome, email: lead.email, phone: fone } } }, redirect: "if_required" });
+    if (error) {
+      libera();
+      erro.textContent = (error.message || "O pagamento não foi concluído.") + (error.type !== "validation_error" ? " Se preferir, escolha Pix: não depende do limite do cartão." : "");
+      if (error.type !== "validation_error") C.evento("cartao_erro", { code: error.decline_code || error.code || error.type || "" }, true);
+      return;
+    }
+    if (paymentIntent && (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")) return obrigado(paymentIntent.id, paymentIntent.status);
+    libera();
   });
-  pixBtn.addEventListener("click", () => { metodo = "pix"; gerarPix(); });
+
+  function abrirPix(px) {
+    form.hidden = true; $("barra").hidden = true; $("pix-tela").hidden = false;
+    document.body.style.paddingBottom = "24px";
+    BenePix.mostrar({ el: $("pix"), s: px, valor: brl(px.valor ? px.valor / 100 : total()), endpoint: C.checkoutEndpoint, k: "app", onPago: obrigado,
+      onCartao: () => {
+        BenePix.limpar("app"); $("pix-tela").hidden = true; form.hidden = false; $("barra").hidden = false; document.body.style.paddingBottom = "";
+        document.querySelector('input[value="card"]').click();
+        $("cartao-box").scrollIntoView({ block: "center", behavior: "smooth" });
+      } });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   function obrigado(id, status) {
-    // pago: segue para as ofertas de 1 clique; Pix ainda processando: a página de obrigado espera a confirmação
+    try { sessionStorage.removeItem("bene_pi2"); } catch (e) {}
     if (status === "succeeded") { location.href = "/oferta-1/?pi=" + encodeURIComponent(id); return; }
     location.href = "/obrigado/?payment_intent=" + encodeURIComponent(id) + "&redirect_status=" + encodeURIComponent(status);
   }
 
-  function abrirPix(px) {
-    $("form-pag").hidden = true;
-    $("pag-t").textContent = "Falta só pagar o Pix"; document.querySelector(".apoio").hidden = true;
-    BenePix.mostrar({ el: $("pix"), s: px, valor: brl(total()), stripe, k: "app", onPago: obrigado,
-      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; $("pix-cta").hidden = true; $("cartao-box").hidden = false; metodo = "card"; montarCartao(); txt.textContent = textoBotao(); C.evento("cartao_aberto"); } });
-    window.scrollTo({ top: $("pag-t").getBoundingClientRect().top + scrollY - 12, behavior: "smooth" });
-  }
-
-  $("bump-ck").addEventListener("change", async () => {
-    const ck = $("bump-ck"), quer = ck.checked;
-    ck.disabled = true; btn.disabled = true; pixBtn.disabled = true; erro.textContent = "";
+  // Pix já gerado neste aparelho (foi ao app do banco e voltou): mostra o mesmo Pix
+  (async () => {
+    const em = $("email").value.trim().toLowerCase();
+    const px = em && window.BenePix && BenePix.salvo("app", em);
+    if (!px) return;
     try {
-      const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "bump", id: piId, email: lead.email, bump: quer }) });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.ok) throw new Error("bump");
-      if (elements) await elements.fetchUpdates();
-      bump = quer; mostrarBump();
-      if (quer) { C.trackCustom("BumpMarcado", { valor: 19.9 }); C.evento("bump_marcado", null, true); } else C.trackCustom("BumpDesmarcado", {});
-    } catch (e) {
-      ck.checked = !quer; erro.textContent = "Não conseguimos atualizar o pedido agora. Tente de novo.";
-    }
-    ck.disabled = false; btn.disabled = !peMontado; pixBtn.disabled = false;
-  });
+      const p0 = await (await post({ acao: "status", id: px.id })).json();
+      if (p0 && (p0.status === "succeeded" || p0.status === "processing")) { BenePix.limpar("app"); return obrigado(p0.id, p0.status); }
+      if (p0 && p0.status === "requires_action") { bump = p0.amount >= 5690; px.valor = p0.amount; rotulo(); abrirPix(px); }
+      else BenePix.limpar("app");
+    } catch (e) {}
+  })();
 
-  let vigiando = false;
-  function vigiarPix() {
-    if (vigiando) return; vigiando = true;
-    avisoPix.hidden = false;
-    const t = setInterval(async () => {
-      const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
-      if (paymentIntent && (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")) { clearInterval(t); obrigado(paymentIntent.id, paymentIntent.status === "succeeded" ? "succeeded" : "processing"); }
-    }, 4000);
-  }
-
-  async function gerarPix() {
-    if (!stripe || !clientSecret) return;
-    pixBtn.disabled = true; const antes = pixTxt.textContent; pixTxt.textContent = "Gerando o seu Pix…"; erro.textContent = "";
-    C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: "pix" });
-    C.evento("pix_clique");
-    const whats = String(lead.whats).replace(/\D/g, "");
-    let r = null;
-    try { r = await BenePix.gerar({ stripe, clientSecret, k: "app", email: lead.email, pk: sessionPk(), billing: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }); } catch (e) { r = null; }
-    pixBtn.disabled = false; pixTxt.textContent = antes;
-    if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
-    if (r && r.pix) { C.evento("pix_gerado", null, true); return abrirPix(r.pix); }
-    const msg = r && r.error ? (r.error.message || "") : "";
-    C.evento("pix_erro", { msg: msg.slice(0, 120) }, true);
-    erro.textContent = (msg ? msg + " " : "Não conseguimos gerar o Pix agora. ") + "Tente de novo em alguns segundos ou toque em \"Prefiro pagar com cartão\".";
-  }
-
-  $("form-pag").addEventListener("submit", async e => {
-    e.preventDefault();
-    if (metodo === "pix") return gerarPix();
-    if (!stripe || !elements) return;
-    btn.disabled = true; const antes = txt.textContent; txt.textContent = metodo === "pix" ? "Gerando o Pix…" : "Processando…"; erro.textContent = "";
-    C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo || "pagamento" });
-    const whats = String(lead.whats).replace(/\D/g, "");
-    if (metodo === "pix" && window.BenePix) {
-      let r = null;
-      try { r = await BenePix.gerar({ stripe, clientSecret, k: "app", email: lead.email, pk: sessionPk(), billing: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }); } catch (e) { r = null; }
-      if (r && r.error && r.error.type === "invalid_request_error") { console.warn("pix proprio", r.error.code); r = null; }
-      if (r && r.error) { btn.disabled = false; txt.textContent = antes; erro.textContent = r.error.message || "Não conseguimos gerar o Pix. Tente de novo."; return; }
-      if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
-      if (r && r.pix) { btn.disabled = false; txt.textContent = antes; C.evento("pix_gerado", null, true); return abrirPix(r.pix); }
-      // sem o Pix próprio: segue com a janela do Stripe
-    }
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: location.origin + "/obrigado/",
-        payment_method_data: { billing_details: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }
-      },
-      redirect: "if_required"
-    });
-    if (error) {
-      btn.disabled = false; txt.textContent = antes;
-      erro.textContent = error.message || "O pagamento não foi concluído. Confira os dados e tente de novo.";
-      if (error.type !== "validation_error") C.evento("cartao_erro", { code: error.decline_code || error.code || error.type || "" }, true);
-      // cartão recusado: sugere o Pix, que não depende de limite e libera na hora
-      if (metodo === "card" && error.type !== "validation_error") {
-        erro.textContent += " Se preferir, toque em \"Voltar para o Pix\": não depende do limite do cartão e libera o acesso na hora.";
-      }
-      return;
-    }
-    if (paymentIntent.status === "succeeded" || paymentIntent.status === "processing") return obrigado(paymentIntent.id, paymentIntent.status);
-    // Pix: o QR Code foi mostrado e a pessoa fechou antes de pagar
-    btn.disabled = false; txt.textContent = "Ver o Pix de novo";
-    vigiarPix();
-  });
-
-  if (window.matchMedia("(min-width:860px)").matches) document.querySelector(".bonus").open = true;
-  lead = lerLead();
+  rotulo();
   C.evento("checkout_aberto");
-  // conta o IC uma vez por sessão (antes cada volta do app do banco contava de novo)
   try { if (!sessionStorage.getItem("bene_pi_ic")) { sessionStorage.setItem("bene_pi_ic", "1"); C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); } } catch (e) { C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); }
-  if (valido(lead)) iniciar(); else formDados();
 })();
 </script>
 </body>

@@ -245,7 +245,7 @@
     const n = $("nome").value.trim(), e = $("email").value.trim().toLowerCase(), z = w.value.replace(/\D/g, "");
     const regras = [
       ["nome", "m-nome", n.length >= 2, "Escreva seu nome."],
-      ["whats", "m-whats", z.length >= 10 && !/^0+$/.test(z), "Digite o WhatsApp com DDD."],
+      ["whats", "m-whats", z.length >= 10 && /^[1-9][1-9]/.test(z), "Digite o WhatsApp com DDD."],
       ["email", "m-email", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e), "Confira o e-mail: é nele que chega o acesso."],
     ];
     let primeiro = null;

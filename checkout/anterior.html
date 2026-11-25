@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-fonte>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Pagamento seguro: Aplicativo da Bené</title>
+<meta name="theme-color" content="#7EC8F2">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://js.stripe.com"><link rel="preconnect" href="https://api.stripe.com"><link rel="preconnect" href="https://acbksachtpypwtbgwyxh.supabase.co">
+<script src="https://js.stripe.com/v3/" async></script>
+<script src="/config.js"></script>
+<script src="/pix.js"></script>
+<script src="https://www.metricasrapida.cloud/t.js" async></script>
+<style>
+  :root{
+    --ceu:#7EC8F2; --ceu-claro:#EAF6FE; --ceu-fundo:#F4FAFF;
+    --tinta:#4A3426; --tinta-suave:#6B5546;
+    --sol:#FFC94A; --sol-claro:#FFF4D6;
+    --pasto:#8BD17C; --pasto-escuro:#5FA84F; --pasto-claro:#EAF7E6;
+    --coral:#F26B6B; --azul:#5BA8E8;
+    --contorno:3px solid var(--tinta);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:'Nunito',system-ui,sans-serif;color:var(--tinta);background:var(--ceu-fundo);font-size:1.0625rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Baloo 2',system-ui,sans-serif;line-height:1.15;margin:0}
+  p{margin:0 0 .8em}
+  img{display:block;max-width:100%}
+  :focus-visible{outline:4px solid var(--azul);outline-offset:3px;border-radius:8px}
+
+  .faixa{background:var(--tinta);color:#fff;font-weight:800;font-size:.85rem;text-align:center;padding:7px 12px;display:flex;justify-content:center;align-items:center;gap:8px}
+  .faixa svg{width:15px;height:15px}
+  header{background:var(--ceu);border-bottom:var(--contorno)}
+  .cab{max-width:980px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .cab img{width:76px;height:auto}
+  .passos{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.85rem}
+  .passos span{display:flex;align-items:center;gap:6px}
+  .passos i{font-style:normal;width:24px;height:24px;border:2.5px solid var(--tinta);border-radius:50%;display:grid;place-items:center;background:#fff;font-size:.8rem}
+  .passos .feito i{background:var(--pasto)}
+  .passos .agora i{background:var(--sol)}
+  .passos .linha{width:18px;height:3px;background:var(--tinta);border-radius:2px}
+
+  main{max-width:980px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:18px}
+  @media (min-width:860px){main{grid-template-columns:minmax(0,1fr) 380px;align-items:start;padding-top:32px}.resumo{position:sticky;top:20px;order:2}}
+  .cartao{background:#fff;border:var(--contorno);border-radius:24px;box-shadow:5px 5px 0 var(--tinta);padding:20px 18px}
+  h1{font-size:1.7rem;margin-bottom:4px}
+  .apoio{color:var(--tinta-suave);margin:0 0 16px}
+
+  /* resumo */
+  .resumo h2{font-size:1.25rem;margin-bottom:12px}
+  .produto{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;padding-bottom:14px;border-bottom:3px dotted var(--tinta)}
+  .produto img{width:64px;height:64px;object-fit:cover;object-position:top;border:2.5px solid var(--tinta);border-radius:14px;background:var(--ceu-claro)}
+  .produto b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.15rem;line-height:1.2}
+  .produto small{color:var(--tinta-suave);font-weight:700}
+  .bonus summary{cursor:pointer;font-weight:800;padding:10px 0 2px;font-size:.95rem}
+  .itens{list-style:none;padding:0;margin:8px 0 12px;display:grid;gap:7px;font-size:.92rem;font-weight:700}
+  .itens li{display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:start}
+  .itens svg{width:18px;height:18px;margin-top:2px}
+  .itens em{font-style:normal;font-size:.75rem;font-weight:800;background:var(--sol-claro);border:2px solid var(--tinta);border-radius:99px;padding:0 8px}
+  .total{display:flex;justify-content:space-between;align-items:baseline;border-top:3px dotted var(--tinta);padding-top:12px;margin-top:4px}
+  .total span{font-weight:800}
+  .total strong{font-family:'Baloo 2',sans-serif;font-size:2rem;line-height:1}
+  .total-nota{font-size:.85rem;color:var(--tinta-suave);font-weight:700;text-align:right;margin:2px 0 0}
+
+  /* dados */
+  .quem{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--ceu-claro);border:2.5px solid var(--tinta);border-radius:16px;padding:10px 14px;margin-bottom:18px;font-size:.92rem}
+  .quem b{display:block}
+  .quem button{appearance:none;background:none;border:0;font:inherit;font-weight:800;text-decoration:underline;color:var(--tinta);cursor:pointer;padding:6px}
+  label{display:block;font-weight:800;margin:12px 0 6px;font-size:.95rem}
+  input{width:100%;font:inherit;font-weight:700;color:var(--tinta);background:#fff;border:2px solid var(--tinta);border-radius:14px;padding:13px 14px}
+  input:focus{outline:none;box-shadow:0 0 0 3px var(--azul)}
+  .sec{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.25rem;margin:4px 0 10px}
+  #pagamento{min-height:220px}
+  .carregando{display:grid;place-items:center;min-height:200px;color:var(--tinta-suave);font-weight:800}
+  .carregando i{width:34px;height:34px;border:4px solid var(--ceu-claro);border-top-color:var(--azul);border-radius:50%;animation:gira .8s linear infinite;margin-bottom:10px}
+  @keyframes gira{to{transform:rotate(360deg)}}
+  .botao{appearance:none;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.35rem;color:var(--tinta);background:var(--pasto);border:var(--contorno);border-radius:18px;box-shadow:5px 5px 0 var(--tinta);padding:14px 20px;cursor:pointer;margin-top:18px;line-height:1.2}
+  .botao svg{width:22px;height:22px}
+  .botao:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--tinta)}
+  .botao[disabled]{opacity:.65;cursor:wait}
+  .erro{color:#B3261E;font-weight:800;min-height:1.2em;margin:10px 0 0;font-size:.95rem}
+  .aviso{background:var(--sol-claro);border:2.5px dashed var(--tinta);border-radius:16px;padding:12px 14px;margin-top:14px;font-weight:700;font-size:.95rem}
+  .aviso[hidden]{display:none}
+  /* order bump */
+  .bump{display:grid;grid-template-columns:30px 56px minmax(0,1fr);gap:10px;align-items:start;background:var(--sol-claro);border:3px dashed var(--tinta);border-radius:18px;padding:14px 12px;margin-top:18px;cursor:pointer;font-size:.92rem;line-height:1.4;font-weight:600}
+  .bump input{width:26px;height:26px;margin:2px 0 0;accent-color:#5FA84F;cursor:pointer}
+  .bump img{width:56px;height:56px;object-fit:cover;border:2.5px solid var(--tinta);border-radius:12px;background:#fff}
+  .bump b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.08rem;line-height:1.2;margin-bottom:3px}
+  .bump em{display:inline-block;font-style:normal;font-weight:800;font-size:.78rem;background:var(--coral);color:#fff;border-radius:99px;padding:1px 9px;margin-top:5px}
+  .bump.marcado{background:var(--pasto-claro);border-style:solid}
+  .bump[hidden]{display:none}
+  .linha-bump{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:.9rem;padding:8px 0 2px}
+  .linha-bump[hidden]{display:none}
+
+  /* segurança */
+  .seguranca{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start;background:var(--pasto-claro);border:2.5px solid var(--tinta);border-radius:18px;padding:14px;margin-top:18px}
+  .cadeado{width:52px;height:52px;border:var(--contorno);border-radius:16px;background:var(--pasto);display:grid;place-items:center}
+  .cadeado svg{width:28px;height:28px}
+  .seguranca b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.1rem}
+  .seguranca p{margin:2px 0 0;font-size:.9rem;color:var(--tinta-suave)}
+  .selos{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:center}
+  .selos span{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--tinta);border-radius:99px;padding:5px 11px;font-size:.8rem;font-weight:800}
+  .selos svg{width:15px;height:15px}
+  .garantia{display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:center;margin-top:16px;font-size:.9rem}
+  .garantia svg{width:60px;height:60px}
+  .garantia b{display:block;font-family:'Baloo 2',sans-serif;font-size:1.05rem}
+  footer{text-align:center;font-size:.8rem;color:var(--tinta-suave);padding:0 16px 30px}
+
+  /* celular: nada pode passar da largura da tela (inclusive com a fonte do celular aumentada) */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{overflow-x:hidden}
+  main{grid-template-columns:minmax(0,1fr)}
+  .cartao,#pagamento,#form-pag,.produto>div,.seguranca>div,.garantia>div{min-width:0}
+  .quem{flex-wrap:wrap}
+  .quem>div{min-width:0;flex:1 1 180px;overflow-wrap:anywhere}
+  .itens li{grid-template-columns:20px minmax(0,1fr) auto}
+  .cab{flex-wrap:wrap}
+  .passos{flex-wrap:wrap}
+  input{min-width:0}
+  @media (max-width:859px){
+    .faixa{font-size:.75rem;padding:5px 10px}
+    .resumo{padding:12px 14px}
+    .resumo h2{display:none}
+    .produto{grid-template-columns:48px minmax(0,1fr);gap:10px;padding-bottom:8px}
+    .produto img{width:48px;height:48px;border-radius:12px}
+    .produto b{font-size:1.05rem}
+    .produto small{font-size:.8rem;line-height:1.3;display:block}
+    .bonus summary{padding:6px 0 0;font-size:.88rem}
+    .total{padding-top:8px}
+    .total strong{font-size:1.5rem}
+    .total-nota{font-size:.78rem}
+    .apoio{font-size:.95rem;margin-bottom:12px}
+  }
+  @media (max-width:420px){
+    .cab{padding:8px 12px}
+    .cab img{width:62px}
+    .passos{font-size:.8rem;gap:6px}
+    main{padding:14px 12px 40px;gap:14px}
+    .cartao{padding:16px 14px;border-radius:20px;box-shadow:4px 4px 0 var(--tinta)}
+    h1{font-size:1.45rem}
+    .total strong{font-size:1.7rem}
+    .botao{font-size:1.2rem;padding:13px 14px}
+    .selos span{font-size:.75rem}
+  }
+  .proximo{font-size:.92rem;color:var(--tinta-suave);margin:10px 0 0;text-align:center}
+  #form-pag[hidden]{display:none}
+  .pix-cta{margin-top:4px}
+  .pix-cta .botao{margin-top:14px}
+  .pix-vant{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin:10px 0 0;font-size:.9rem;font-weight:800;color:var(--tinta-suave)}
+  .pix-vant span::before{content:"✓ ";color:var(--pasto-escuro)}
+  .ou-cartao{appearance:none;display:block;margin:14px auto 0;background:none;border:0;font:inherit;font-weight:800;color:var(--tinta);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
+  .leva-mini{background:var(--pasto-claro);border:2.5px solid var(--tinta);border-radius:16px;padding:10px 14px;margin:0 0 6px;font-weight:700;font-size:.95rem;line-height:1.45}
+  .leva-mini b{font-family:'Baloo 2',sans-serif}
+  #cartao-box[hidden]{display:none}
+</style>
+</head>
+<body>
+<div class="faixa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Ambiente seguro e criptografado</div>
+<header>
+  <div class="cab">
+    <img src="/oferta/img/logo.webp" alt="Bené" width="76" height="62">
+    <div class="passos" aria-label="Passo 2 de 2">
+      <span class="feito"><i>✓</i>Seus dados</span><span class="linha" aria-hidden="true"></span><span class="agora"><i>2</i>Pagamento</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <aside class="cartao resumo" aria-labelledby="resumo-t">
+    <h2 id="resumo-t">Seu pedido</h2>
+    <div class="produto">
+      <img src="/oferta/img/tela_home.webp" alt="" width="64" height="64">
+      <div><b>Aplicativo da Bené</b><small>Método Fono-Fé: 4 níveis e 120 atividades</small></div>
+    </div>
+    <details class="bonus"><summary>+ 5 bônus inclusos</summary>
+    <ul class="itens">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Kit completo em PDF, 127 páginas</span><em>bônus</em></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Alfabeto da Bené</span><em>bônus</em></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Versículos para colorir</span><em>bônus</em></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Quebra-cabeça de sílabas</span><em>bônus</em></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#5FA84F" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>Cantando com a Bené</span><em>bônus</em></li>
+    </ul>
+    </details>
+    <div class="linha-bump" id="linha-bump" hidden><span>+ Níveis 5 e 6 (historinhas)</span><span>R$ 19,90</span></div>
+    <div class="total"><span>Total</span><strong id="total-v">R$ 37,00</strong></div>
+    <p class="total-nota">Pagamento único. Não é assinatura.</p>
+  </aside>
+
+  <section class="cartao" aria-labelledby="pag-t">
+    <h1 id="pag-t">Falta só o pagamento</h1>
+    <p class="apoio">Pague com Pix e o acesso ao aplicativo chega no seu e-mail assim que o pagamento cair.</p>
+
+    <div id="bloco-quem"></div>
+
+    <form id="form-pag" novalidate>
+      <p class="leva-mini" id="leva-mini">Você leva: <b>app com 120 atividades</b> + kit para imprimir + 4 bônus. <b id="leva-v">R$ 37,00</b>, uma vez só, com garantia de 7 dias.</p>
+      <label class="bump" id="bump" hidden>
+        <input type="checkbox" id="bump-ck">
+        <img src="/img/p/barco.webp" alt="" width="56" height="56">
+        <span><b>Sim! Quero também os Níveis 5 e 6 por + R$ 19,90</b>30 historinhas da Bíblia para ele ler sozinho, de Noé à ressurreição de Jesus. Liberado junto com o aplicativo.<br><em>Só nesta tela. Depois custa R$ 47</em></span>
+      </label>
+      <div class="pix-cta" id="pix-cta">
+        <button class="botao" type="button" id="pix-btn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          <span id="pix-txt">Gerar meu Pix de R$ 37,00</span>
+        </button>
+        <p class="pix-vant"><span>Aprovado na hora</span><span>Não precisa de cartão</span><span>Acesso no seu e-mail</span></p>
+        <button class="ou-cartao" type="button" id="ou-cartao">Prefiro pagar com cartão</button>
+      </div>
+      <div id="cartao-box" hidden>
+        <p class="sec">Pagar com cartão</p>
+        <div id="pagamento"></div>
+        <button class="botao" type="submit" id="pagar" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <span id="pagar-txt">Pagar R$ 37,00</span>
+        </button>
+        <button class="ou-cartao" type="button" id="ou-pix">Voltar para o Pix</button>
+      </div>
+      <p class="erro" id="erro" role="alert"></p>
+      <div class="aviso" id="aviso-pix" hidden>O seu Pix continua valendo. Pague pelo aplicativo do banco e esta página avança sozinha quando o pagamento for confirmado.</div>
+    </form>
+    <div id="pix" hidden></div>
+
+    <div class="seguranca">
+      <span class="cadeado"><svg viewBox="0 0 24 24" fill="none" stroke="#4A3426" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg></span>
+      <div>
+        <b>Pagamento 100% seguro</b>
+        <p>Seus dados viajam criptografados e o pagamento é processado pelo Stripe, usado por milhões de empresas no mundo. A Bené não vê nem guarda os dados do seu cartão.</p>
+      </div>
+    </div>
+    <div class="selos">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Conexão criptografada</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Processado pelo Stripe</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Acesso na hora</span>
+    </div>
+    <div class="garantia">
+      <svg viewBox="0 0 130 130" aria-hidden="true"><circle cx="65" cy="65" r="60" fill="#FFC94A" stroke="#4A3426" stroke-width="5"/><circle cx="65" cy="65" r="46" fill="#fff" stroke="#4A3426" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/><text x="65" y="68" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="42" fill="#4A3426">7</text><text x="65" y="90" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="15" fill="#4A3426">dias</text></svg>
+      <div><b>Garantia de 7 dias</b>Se não for para vocês, peça o reembolso em até 7 dias e devolvemos todo o valor.</div>
+    </div>
+  </section>
+</main>
+<footer>Bené. Pagamento processado pelo Stripe. Este site não faz parte do Facebook ou da Meta.</footer>
+
+<script>
+(function () {
+  const C = window.BENE_CONFIG;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const btn = $("pagar"), txt = $("pagar-txt"), erro = $("erro"), avisoPix = $("aviso-pix");
+  let stripe, elements, clientSecret, piId, metodo = "", lead = null, bump = false;
+  const total = () => bump ? 56.9 : C.preco;
+  const brl = v => "R$ " + v.toFixed(2).replace(".", ",");
+  const textoBotao = () => metodo === "pix" ? "Gerar o Pix de " + brl(total()) : "Pagar " + brl(total()) + " no cartão";
+  const pixBtn = $("pix-btn"), pixTxt = $("pix-txt");
+  let peMontado = false;
+  function mostrarBump() {
+    $("bump-ck").checked = bump; $("bump").classList.toggle("marcado", bump);
+    $("linha-bump").hidden = !bump; $("total-v").textContent = brl(total());
+    $("leva-v").textContent = brl(total());
+    txt.textContent = textoBotao(); pixTxt.textContent = "Gerar meu Pix de " + brl(total());
+  }
+
+  function lerLead() {
+    for (const k of ["bene_checkout", "bene_quiz_lead"]) {
+      try { const v = JSON.parse(localStorage.getItem(k) || "null"); if (v && v.email) return v; } catch (e) {}
+    }
+    return null;
+  }
+  const valido = l => l && String(l.nome || "").trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(l.email || "") && String(l.whats || "").replace(/\D/g, "").length >= 10;
+
+  function mostrarQuem() {
+    $("bloco-quem").innerHTML = `<div class="quem"><div>Acesso para<b>${esc(lead.nome)}</b>${esc(lead.email)}</div><button type="button" id="alterar">Alterar</button></div>`;
+    $("alterar").addEventListener("click", formDados);
+  }
+
+  function formDados() {
+    btn.disabled = true;
+    $("pagamento").innerHTML = "";
+    $("form-pag").hidden = true;
+    const l = lead || {};
+    $("bloco-quem").innerHTML = `<form id="form-dados" novalidate style="margin-bottom:18px">
+      <p class="sec" style="margin-bottom:0">Para quem liberamos o acesso?</p>
+      <label for="d-nome">Seu nome</label><input id="d-nome" autocomplete="name" value="${esc(l.nome || "")}">
+      <label for="d-email">Seu melhor e-mail</label><input id="d-email" type="email" inputmode="email" autocomplete="email" value="${esc(l.email || "")}">
+      <label for="d-whats">WhatsApp</label><input id="d-whats" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" value="${esc(l.whats || "")}">
+      <p class="erro" id="erro-dados" role="alert"></p>
+      <button class="botao" type="submit" style="background:var(--sol);margin-top:8px">Continuar para o pagamento</button>
+      <p class="proximo">No próximo passo o seu <b>Pix</b> fica pronto em 1 toque (aprovado na hora). Também aceitamos <b>cartão</b>.</p></form>`;
+    const w = $("d-whats");
+    const mask = () => { const d = w.value.replace(/\D/g, "").slice(0, 11); w.value = d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; };
+    w.addEventListener("input", mask); mask();
+    $("form-dados").addEventListener("submit", async e => {
+      e.preventDefault();
+      const n = { nome: $("d-nome").value.trim(), email: $("d-email").value.trim().toLowerCase(), whats: w.value.replace(/\D/g, ""), variante: (lead && lead.variante) || C.variante() || "direto" };
+      const er = $("erro-dados");
+      if (n.nome.length < 2) { er.textContent = "Escreva seu nome."; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(n.email)) { er.textContent = "Confira o e-mail: é com ele que você entra no aplicativo."; return; }
+      if (n.whats.length < 10) { er.textContent = "Digite o WhatsApp com DDD."; return; }
+      lead = n;
+      try { localStorage.setItem("bene_checkout", JSON.stringify(lead)); } catch (err) {}
+      C.track("Lead", { content_name: "checkout" });
+      C.salvarLead({ nome: n.nome, email: n.email, whatsapp: n.whats, origem: "checkout", variante: n.variante, dados: { utm: C.utm } });
+      iniciar();
+    });
+    setTimeout(() => $("d-nome").focus(), 50);
+  }
+
+  function sessionPk() { try { return sessionStorage.getItem("bene_pk") || ""; } catch (e) { return ""; } }
+  function cookie(n) { const m = document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)")); return m ? decodeURIComponent(m[1]) : ""; }
+  function fbc() {
+    const c = cookie("_fbc"); if (c) return c;
+    const id = C.utm && C.utm.fbclid; return id ? "fb.1." + Date.now() + "." + id : "";
+  }
+
+  // UTMs do Métricas Rápida (t.js) + as que o site guardou na entrada
+  function rastreio() {
+    let t = {};
+    try { t = window.ltUtm ? (window.ltUtm() || {}) : {}; } catch (e) {}
+    return Object.assign({}, C.utm || {}, t);
+  }
+
+  // espera o t.js do Métricas Rápida carregar (até 3 s) para o pagamento levar o vid
+  async function esperarRastreio() {
+    for (let i = 0; i < 15 && !window.ltUtm; i++) await new Promise(r => setTimeout(r, 100));
+  }
+  // o Stripe.js carrega sem travar a página; espera ele aqui (até 15 s)
+  async function esperarStripe() {
+    for (let i = 0; i < 150 && !window.Stripe; i++) await new Promise(r => setTimeout(r, 100));
+    if (!window.Stripe) throw new Error("stripe");
+  }
+
+  async function criarPagamento() {
+    await esperarRastreio();
+    // Pix já gerado neste aparelho (a pessoa foi ao app do banco e voltou): usa o mesmo pagamento
+    const px = window.BenePix && BenePix.salvo("app", lead.email);
+    if (px) return { email: lead.email, clientSecret: px.cs, pk: px.pk, id: px.id, pix: px };
+    // reaproveita o mesmo pagamento se a página for recarregada
+    try {
+      const s = JSON.parse(sessionStorage.getItem("bene_pi") || "null");
+      if (s && s.email === lead.email && s.clientSecret) return s;
+    } catch (e) {}
+    const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: lead.nome, email: lead.email, whatsapp: String(lead.whats).replace(/\D/g, ""), variante: lead.variante || C.variante(), utm: rastreio(), fbp: cookie("_fbp"), fbc: fbc(), url: location.origin + "/obrigado/" }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.clientSecret) throw new Error(j.erro || "falha");
+    const s = { email: lead.email, clientSecret: j.clientSecret, pk: j.publishableKey, id: j.id };
+    try { sessionStorage.setItem("bene_pi", JSON.stringify(s)); } catch (e) {}
+    return s;
+  }
+
+  async function iniciar() {
+    $("form-pag").hidden = false;
+    mostrarQuem();
+    erro.textContent = ""; btn.disabled = true; pixBtn.disabled = true; pixTxt.textContent = "Preparando o seu Pix…";
+    let s;
+    try { const r = await Promise.all([criarPagamento(), esperarStripe()]); s = r[0]; }
+    catch (e) {
+      // internet lenta ou o Stripe demorou: tenta mais uma vez sozinho antes de mostrar o erro
+      if (!iniciar.tentou) { iniciar.tentou = true; C.evento("pag_erro", { msg: String(e.message || "").slice(0, 60), tentativa: 1 }, true); return setTimeout(iniciar, 1500); }
+      C.evento("pag_erro", { msg: String(e.message || "").slice(0, 60), tentativa: 2 }, true);
+      pixTxt.textContent = "Gerar meu Pix de " + brl(total());
+      erro.textContent = e.message === "config"
+        ? "O pagamento está sendo configurado. Volte em alguns minutos."
+        : "Não conseguimos carregar o pagamento. Atualize a página e tente de novo.";
+      return;
+    }
+    clientSecret = s.clientSecret; piId = s.id;
+    try { sessionStorage.setItem("bene_pk", s.pk); } catch (e) {}
+    stripe = Stripe(s.pk, { locale: "pt-BR" });
+    // voltou depois de pagar (ou com o Pix ainda aberto): não monta o pagamento de novo
+    try {
+      const r0 = await stripe.retrievePaymentIntent(clientSecret), p0 = r0 && r0.paymentIntent;
+      if (p0 && (p0.status === "succeeded" || p0.status === "processing")) { if (window.BenePix) BenePix.limpar("app"); return obrigado(p0.id, p0.status); }
+      if (p0 && typeof p0.amount === "number") { bump = p0.amount >= 5690; mostrarBump(); }
+      if (s.pix && p0 && p0.status === "requires_action") abrirPix(s.pix);
+      else if (s.pix && window.BenePix) BenePix.limpar("app");
+    } catch (e) {}
+    metodo = "pix"; pixBtn.disabled = false; $("bump").hidden = false; mostrarBump();
+    C.evento("pag_visto");
+  }
+
+  // cartão: só monta o formulário do Stripe quando a pessoa escolhe
+  function montarCartao() {
+    if (peMontado) return; peMontado = true;
+    $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando o pagamento com cartão…</div></div>';
+    elements = stripe.elements({
+      clientSecret,
+      fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" }],
+      appearance: {
+        theme: "stripe",
+        variables: {
+          colorPrimary: "#4A3426", colorText: "#4A3426", colorTextSecondary: "#6B5546", colorBackground: "#FFFFFF",
+          colorDanger: "#B3261E", fontFamily: "Nunito, system-ui, sans-serif", fontSizeBase: "16px",
+          borderRadius: "14px", spacingUnit: "4px", focusBoxShadow: "0 0 0 3px #5BA8E8"
+        },
+        rules: {
+          ".AccordionItem": { border: "2.5px solid #4A3426", boxShadow: "3px 3px 0 #4A3426", fontWeight: "800" },
+          ".AccordionItem--selected": { backgroundColor: "#FFF4D6" },
+          ".Input": { border: "2px solid #4A3426", boxShadow: "none", fontWeight: "700" },
+          ".Input:focus": { boxShadow: "0 0 0 3px #5BA8E8", borderColor: "#4A3426" },
+          ".Label": { fontWeight: "800" },
+          ".RadioIcon": { colorIcon: "#4A3426" }
+        }
+      }
+    });
+    const pe = elements.create("payment", {
+      layout: { type: "accordion", defaultCollapsed: false, radios: true, spacedAccordionItems: true },
+      paymentMethodOrder: ["card", "apple_pay", "google_pay", "pix"],
+      fields: { billingDetails: { name: "never", email: "never", phone: "never" } },
+      business: { name: "Bené" }
+    });
+    $("pagamento").innerHTML = "";
+    pe.mount("#pagamento");
+    pe.on("ready", () => { btn.disabled = false; });
+    pe.on("change", ev => {
+      metodo = ev.value && ev.value.type || "card";
+      txt.textContent = textoBotao();
+      erro.textContent = "";
+    });
+  }
+
+  $("ou-cartao").addEventListener("click", () => {
+    if (!stripe) return;
+    $("pix-cta").hidden = true; $("cartao-box").hidden = false; metodo = "card"; txt.textContent = textoBotao();
+    erro.textContent = ""; montarCartao(); C.evento("cartao_aberto");
+  });
+  $("ou-pix").addEventListener("click", () => {
+    $("cartao-box").hidden = true; $("pix-cta").hidden = false; metodo = "pix"; erro.textContent = "";
+  });
+  pixBtn.addEventListener("click", () => { metodo = "pix"; gerarPix(); });
+
+  function obrigado(id, status) {
+    // pago: segue para as ofertas de 1 clique; Pix ainda processando: a página de obrigado espera a confirmação
+    if (status === "succeeded") { location.href = "/oferta-1/?pi=" + encodeURIComponent(id); return; }
+    location.href = "/obrigado/?payment_intent=" + encodeURIComponent(id) + "&redirect_status=" + encodeURIComponent(status);
+  }
+
+  function abrirPix(px) {
+    $("form-pag").hidden = true;
+    $("pag-t").textContent = "Falta só pagar o Pix"; document.querySelector(".apoio").hidden = true;
+    BenePix.mostrar({ el: $("pix"), s: px, valor: brl(total()), stripe, k: "app", onPago: obrigado,
+      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; $("pix-cta").hidden = true; $("cartao-box").hidden = false; metodo = "card"; montarCartao(); txt.textContent = textoBotao(); C.evento("cartao_aberto"); } });
+    window.scrollTo({ top: $("pag-t").getBoundingClientRect().top + scrollY - 12, behavior: "smooth" });
+  }
+
+  $("bump-ck").addEventListener("change", async () => {
+    const ck = $("bump-ck"), quer = ck.checked;
+    ck.disabled = true; btn.disabled = true; pixBtn.disabled = true; erro.textContent = "";
+    try {
+      const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "bump", id: piId, email: lead.email, bump: quer }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) throw new Error("bump");
+      if (elements) await elements.fetchUpdates();
+      bump = quer; mostrarBump();
+      if (quer) { C.trackCustom("BumpMarcado", { valor: 19.9 }); C.evento("bump_marcado", null, true); } else C.trackCustom("BumpDesmarcado", {});
+    } catch (e) {
+      ck.checked = !quer; erro.textContent = "Não conseguimos atualizar o pedido agora. Tente de novo.";
+    }
+    ck.disabled = false; btn.disabled = !peMontado; pixBtn.disabled = false;
+  });
+
+  let vigiando = false;
+  function vigiarPix() {
+    if (vigiando) return; vigiando = true;
+    avisoPix.hidden = false;
+    const t = setInterval(async () => {
+      const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
+      if (paymentIntent && (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")) { clearInterval(t); obrigado(paymentIntent.id, paymentIntent.status === "succeeded" ? "succeeded" : "processing"); }
+    }, 4000);
+  }
+
+  async function gerarPix() {
+    if (!stripe || !clientSecret) return;
+    pixBtn.disabled = true; const antes = pixTxt.textContent; pixTxt.textContent = "Gerando o seu Pix…"; erro.textContent = "";
+    C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: "pix" });
+    C.evento("pix_clique");
+    const whats = String(lead.whats).replace(/\D/g, "");
+    let r = null;
+    try { r = await BenePix.gerar({ stripe, clientSecret, k: "app", email: lead.email, pk: sessionPk(), billing: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }); } catch (e) { r = null; }
+    pixBtn.disabled = false; pixTxt.textContent = antes;
+    if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
+    if (r && r.pix) { C.evento("pix_gerado", null, true); return abrirPix(r.pix); }
+    const msg = r && r.error ? (r.error.message || "") : "";
+    C.evento("pix_erro", { msg: msg.slice(0, 120) }, true);
+    erro.textContent = (msg ? msg + " " : "Não conseguimos gerar o Pix agora. ") + "Tente de novo em alguns segundos ou toque em \"Prefiro pagar com cartão\".";
+  }
+
+  $("form-pag").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (metodo === "pix") return gerarPix();
+    if (!stripe || !elements) return;
+    btn.disabled = true; const antes = txt.textContent; txt.textContent = metodo === "pix" ? "Gerando o Pix…" : "Processando…"; erro.textContent = "";
+    C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo || "pagamento" });
+    const whats = String(lead.whats).replace(/\D/g, "");
+    if (metodo === "pix" && window.BenePix) {
+      let r = null;
+      try { r = await BenePix.gerar({ stripe, clientSecret, k: "app", email: lead.email, pk: sessionPk(), billing: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }); } catch (e) { r = null; }
+      if (r && r.error && r.error.type === "invalid_request_error") { console.warn("pix proprio", r.error.code); r = null; }
+      if (r && r.error) { btn.disabled = false; txt.textContent = antes; erro.textContent = r.error.message || "Não conseguimos gerar o Pix. Tente de novo."; return; }
+      if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
+      if (r && r.pix) { btn.disabled = false; txt.textContent = antes; C.evento("pix_gerado", null, true); return abrirPix(r.pix); }
+      // sem o Pix próprio: segue com a janela do Stripe
+    }
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: location.origin + "/obrigado/",
+        payment_method_data: { billing_details: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }
+      },
+      redirect: "if_required"
+    });
+    if (error) {
+      btn.disabled = false; txt.textContent = antes;
+      erro.textContent = error.message || "O pagamento não foi concluído. Confira os dados e tente de novo.";
+      if (error.type !== "validation_error") C.evento("cartao_erro", { code: error.decline_code || error.code || error.type || "" }, true);
+      // cartão recusado: sugere o Pix, que não depende de limite e libera na hora
+      if (metodo === "card" && error.type !== "validation_error") {
+        erro.textContent += " Se preferir, toque em \"Voltar para o Pix\": não depende do limite do cartão e libera o acesso na hora.";
+      }
+      return;
+    }
+    if (paymentIntent.status === "succeeded" || paymentIntent.status === "processing") return obrigado(paymentIntent.id, paymentIntent.status);
+    // Pix: o QR Code foi mostrado e a pessoa fechou antes de pagar
+    btn.disabled = false; txt.textContent = "Ver o Pix de novo";
+    vigiarPix();
+  });
+
+  if (window.matchMedia("(min-width:860px)").matches) document.querySelector(".bonus").open = true;
+  lead = lerLead();
+  C.evento("checkout_aberto");
+  // conta o IC uma vez por sessão (antes cada volta do app do banco contava de novo)
+  try { if (!sessionStorage.getItem("bene_pi_ic")) { sessionStorage.setItem("bene_pi_ic", "1"); C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); } } catch (e) { C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); }
+  if (valido(lead)) iniciar(); else formDados();
+})();
+</script>
+</body>
+</html>
