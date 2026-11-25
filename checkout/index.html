@@ -148,6 +148,14 @@
   }
   .proximo{font-size:.92rem;color:var(--tinta-suave);margin:10px 0 0;text-align:center}
   #form-pag[hidden]{display:none}
+  .pix-cta{margin-top:4px}
+  .pix-cta .botao{margin-top:14px}
+  .pix-vant{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin:10px 0 0;font-size:.9rem;font-weight:800;color:var(--tinta-suave)}
+  .pix-vant span::before{content:"✓ ";color:var(--pasto-escuro)}
+  .ou-cartao{appearance:none;display:block;margin:14px auto 0;background:none;border:0;font:inherit;font-weight:800;color:var(--tinta);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
+  .leva-mini{background:var(--pasto-claro);border:2.5px solid var(--tinta);border-radius:16px;padding:10px 14px;margin:0 0 6px;font-weight:700;font-size:.95rem;line-height:1.45}
+  .leva-mini b{font-family:'Baloo 2',sans-serif}
+  #cartao-box[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -184,22 +192,34 @@
 
   <section class="cartao" aria-labelledby="pag-t">
     <h1 id="pag-t">Falta só o pagamento</h1>
-    <p class="apoio">Escolha como prefere pagar. O acesso ao aplicativo é liberado assim que o pagamento é confirmado.</p>
+    <p class="apoio">Pague com Pix e o acesso ao aplicativo chega no seu e-mail assim que o pagamento cair.</p>
 
     <div id="bloco-quem"></div>
 
     <form id="form-pag" novalidate>
-      <p class="sec">Forma de pagamento</p>
-      <div id="pagamento"><div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando as formas de pagamento…</div></div></div>
+      <p class="leva-mini" id="leva-mini">Você leva: <b>app com 120 atividades</b> + kit para imprimir + 4 bônus. <b id="leva-v">R$ 37,00</b>, uma vez só, com garantia de 7 dias.</p>
       <label class="bump" id="bump" hidden>
         <input type="checkbox" id="bump-ck">
         <img src="/img/p/barco.webp" alt="" width="56" height="56">
         <span><b>Sim! Quero também os Níveis 5 e 6 por + R$ 19,90</b>30 historinhas da Bíblia para ele ler sozinho, de Noé à ressurreição de Jesus. Liberado junto com o aplicativo.<br><em>Só nesta tela. Depois custa R$ 47</em></span>
       </label>
-      <button class="botao" type="submit" id="pagar" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-        <span id="pagar-txt">Pagar R$ 37,00</span>
-      </button>
+      <div class="pix-cta" id="pix-cta">
+        <button class="botao" type="button" id="pix-btn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          <span id="pix-txt">Gerar meu Pix de R$ 37,00</span>
+        </button>
+        <p class="pix-vant"><span>Aprovado na hora</span><span>Não precisa de cartão</span><span>Acesso no seu e-mail</span></p>
+        <button class="ou-cartao" type="button" id="ou-cartao">Prefiro pagar com cartão</button>
+      </div>
+      <div id="cartao-box" hidden>
+        <p class="sec">Pagar com cartão</p>
+        <div id="pagamento"></div>
+        <button class="botao" type="submit" id="pagar" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <span id="pagar-txt">Pagar R$ 37,00</span>
+        </button>
+        <button class="ou-cartao" type="button" id="ou-pix">Voltar para o Pix</button>
+      </div>
       <p class="erro" id="erro" role="alert"></p>
       <div class="aviso" id="aviso-pix" hidden>O seu Pix continua valendo. Pague pelo aplicativo do banco e esta página avança sozinha quando o pagamento for confirmado.</div>
     </form>
@@ -234,11 +254,14 @@
   let stripe, elements, clientSecret, piId, metodo = "", lead = null, bump = false;
   const total = () => bump ? 56.9 : C.preco;
   const brl = v => "R$ " + v.toFixed(2).replace(".", ",");
-  const textoBotao = () => metodo === "pix" ? "Gerar o Pix de " + brl(total()) : "Pagar " + brl(total());
+  const textoBotao = () => metodo === "pix" ? "Gerar o Pix de " + brl(total()) : "Pagar " + brl(total()) + " no cartão";
+  const pixBtn = $("pix-btn"), pixTxt = $("pix-txt");
+  let peMontado = false;
   function mostrarBump() {
     $("bump-ck").checked = bump; $("bump").classList.toggle("marcado", bump);
     $("linha-bump").hidden = !bump; $("total-v").textContent = brl(total());
-    txt.textContent = textoBotao();
+    $("leva-v").textContent = brl(total());
+    txt.textContent = textoBotao(); pixTxt.textContent = "Gerar meu Pix de " + brl(total());
   }
 
   function lerLead() {
@@ -332,12 +355,11 @@
   async function iniciar() {
     $("form-pag").hidden = false;
     mostrarQuem();
-    erro.textContent = ""; btn.disabled = true;
-    $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando as formas de pagamento…</div></div>';
+    erro.textContent = ""; btn.disabled = true; pixBtn.disabled = true; pixTxt.textContent = "Preparando o seu Pix…";
     let s;
     try { const r = await Promise.all([criarPagamento(), esperarStripe()]); s = r[0]; }
     catch (e) {
-      $("pagamento").innerHTML = "";
+      pixTxt.textContent = "Gerar meu Pix de " + brl(total());
       erro.textContent = e.message === "config"
         ? "O pagamento está sendo configurado. Volte em alguns minutos."
         : "Não conseguimos carregar o pagamento. Atualize a página e tente de novo.";
@@ -354,6 +376,14 @@
       if (s.pix && p0 && p0.status === "requires_action") abrirPix(s.pix);
       else if (s.pix && window.BenePix) BenePix.limpar("app");
     } catch (e) {}
+    metodo = "pix"; pixBtn.disabled = false; $("bump").hidden = false; mostrarBump();
+    C.evento("pag_visto");
+  }
+
+  // cartão: só monta o formulário do Stripe quando a pessoa escolhe
+  function montarCartao() {
+    if (peMontado) return; peMontado = true;
+    $("pagamento").innerHTML = '<div class="carregando"><div style="text-align:center"><i style="display:block;margin:0 auto 10px"></i>Carregando o pagamento com cartão…</div></div>';
     elements = stripe.elements({
       clientSecret,
       fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" }],
@@ -376,19 +406,29 @@
     });
     const pe = elements.create("payment", {
       layout: { type: "accordion", defaultCollapsed: false, radios: true, spacedAccordionItems: true },
-      paymentMethodOrder: ["pix", "card", "apple_pay", "google_pay"],
+      paymentMethodOrder: ["card", "apple_pay", "google_pay", "pix"],
       fields: { billingDetails: { name: "never", email: "never", phone: "never" } },
       business: { name: "Bené" }
     });
     $("pagamento").innerHTML = "";
     pe.mount("#pagamento");
-    pe.on("ready", () => { btn.disabled = false; $("bump").hidden = false; });
+    pe.on("ready", () => { btn.disabled = false; });
     pe.on("change", ev => {
-      metodo = ev.value && ev.value.type || "";
+      metodo = ev.value && ev.value.type || "card";
       txt.textContent = textoBotao();
       erro.textContent = "";
     });
   }
+
+  $("ou-cartao").addEventListener("click", () => {
+    if (!stripe) return;
+    $("pix-cta").hidden = true; $("cartao-box").hidden = false; metodo = "card"; txt.textContent = textoBotao();
+    erro.textContent = ""; montarCartao(); C.evento("cartao_aberto");
+  });
+  $("ou-pix").addEventListener("click", () => {
+    $("cartao-box").hidden = true; $("pix-cta").hidden = false; metodo = "pix"; erro.textContent = "";
+  });
+  pixBtn.addEventListener("click", () => { metodo = "pix"; gerarPix(); });
 
   function obrigado(id, status) {
     // pago: segue para as ofertas de 1 clique; Pix ainda processando: a página de obrigado espera a confirmação
@@ -400,24 +440,24 @@
     $("form-pag").hidden = true;
     $("pag-t").textContent = "Falta só pagar o Pix"; document.querySelector(".apoio").hidden = true;
     BenePix.mostrar({ el: $("pix"), s: px, valor: brl(total()), stripe, k: "app", onPago: obrigado,
-      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; btn.disabled = false; txt.textContent = textoBotao(); } });
+      onCartao: () => { BenePix.limpar("app"); $("form-pag").hidden = false; $("pag-t").textContent = "Falta só o pagamento"; document.querySelector(".apoio").hidden = false; $("pix-cta").hidden = true; $("cartao-box").hidden = false; metodo = "card"; montarCartao(); txt.textContent = textoBotao(); C.evento("cartao_aberto"); } });
     window.scrollTo({ top: $("pag-t").getBoundingClientRect().top + scrollY - 12, behavior: "smooth" });
   }
 
   $("bump-ck").addEventListener("change", async () => {
     const ck = $("bump-ck"), quer = ck.checked;
-    ck.disabled = true; btn.disabled = true; erro.textContent = "";
+    ck.disabled = true; btn.disabled = true; pixBtn.disabled = true; erro.textContent = "";
     try {
       const r = await fetch(C.checkoutEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acao: "bump", id: piId, email: lead.email, bump: quer }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.ok) throw new Error("bump");
-      await elements.fetchUpdates();
+      if (elements) await elements.fetchUpdates();
       bump = quer; mostrarBump();
       if (quer) { C.trackCustom("BumpMarcado", { valor: 19.9 }); C.evento("bump_marcado", null, true); } else C.trackCustom("BumpDesmarcado", {});
     } catch (e) {
       ck.checked = !quer; erro.textContent = "Não conseguimos atualizar o pedido agora. Tente de novo.";
     }
-    ck.disabled = false; btn.disabled = false;
+    ck.disabled = false; btn.disabled = !peMontado; pixBtn.disabled = false;
   });
 
   let vigiando = false;
@@ -430,8 +470,25 @@
     }, 4000);
   }
 
+  async function gerarPix() {
+    if (!stripe || !clientSecret) return;
+    pixBtn.disabled = true; const antes = pixTxt.textContent; pixTxt.textContent = "Gerando o seu Pix…"; erro.textContent = "";
+    C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: "pix" });
+    C.evento("pix_clique");
+    const whats = String(lead.whats).replace(/\D/g, "");
+    let r = null;
+    try { r = await BenePix.gerar({ stripe, clientSecret, k: "app", email: lead.email, pk: sessionPk(), billing: { name: lead.nome, email: lead.email, phone: whats ? "+55" + whats : null } }); } catch (e) { r = null; }
+    pixBtn.disabled = false; pixTxt.textContent = antes;
+    if (r && r.pago) return obrigado(r.pago.id, r.pago.status);
+    if (r && r.pix) { C.evento("pix_gerado", null, true); return abrirPix(r.pix); }
+    const msg = r && r.error ? (r.error.message || "") : "";
+    C.evento("pix_erro", { msg: msg.slice(0, 120) }, true);
+    erro.textContent = (msg ? msg + " " : "Não conseguimos gerar o Pix agora. ") + "Tente de novo em alguns segundos ou toque em \"Prefiro pagar com cartão\".";
+  }
+
   $("form-pag").addEventListener("submit", async e => {
     e.preventDefault();
+    if (metodo === "pix") return gerarPix();
     if (!stripe || !elements) return;
     btn.disabled = true; const antes = txt.textContent; txt.textContent = metodo === "pix" ? "Gerando o Pix…" : "Processando…"; erro.textContent = "";
     C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo || "pagamento" });
@@ -456,9 +513,10 @@
     if (error) {
       btn.disabled = false; txt.textContent = antes;
       erro.textContent = error.message || "O pagamento não foi concluído. Confira os dados e tente de novo.";
+      if (error.type !== "validation_error") C.evento("cartao_erro", { code: error.decline_code || error.code || error.type || "" }, true);
       // cartão recusado: sugere o Pix, que não depende de limite e libera na hora
       if (metodo === "card" && error.type !== "validation_error") {
-        erro.textContent += " Se preferir, escolha Pix acima: não depende do limite do cartão e libera o acesso na hora.";
+        erro.textContent += " Se preferir, toque em \"Voltar para o Pix\": não depende do limite do cartão e libera o acesso na hora.";
       }
       return;
     }

@@ -81,7 +81,7 @@ window.BenePix = (function () {
         '<button class="japaguei" type="button">Já paguei</button>' +
         '<p class="confia">No app do banco, o nome de quem recebe pode aparecer diferente de "Bené": é a empresa que processa os nossos pagamentos com segurança.</p>' +
         (s.img ? "<details" + (desk ? " open" : "") + "><summary>Pagar lendo o QR Code (com outro aparelho)</summary><img class=\"qr\" alt=\"QR Code do Pix\" src=\"" + esc(s.img) + "\"></details>" : "") +
-        '<p class="validade">Este Pix vale até ' + esc(hora) + "</p>" +
+        '<p class="validade">Este Pix vale até ' + esc(hora) + " · Garantia de 7 dias</p>" +
         '<button class="trocar" type="button">Prefiro pagar com cartão</button>' +
       "</div>";
     el.hidden = false;
@@ -91,7 +91,7 @@ window.BenePix = (function () {
       try { await navigator.clipboard.writeText(s.code); ok = true; } catch (e) {}
       if (!ok) { try { ta.focus(); ta.select(); ta.setSelectionRange(0, 99999); ok = document.execCommand("copy"); } catch (e) {} }
       if (ok) { b.classList.add("ok"); bt.textContent = "Copiado! Agora abra o app do banco"; } else { ta.focus(); ta.select(); bt.textContent = "Segure o código abaixo e copie"; }
-      try { window.BENE_CONFIG && BENE_CONFIG.trackCustom("PixCopiado", {}); } catch (e) {}
+      try { window.BENE_CONFIG && BENE_CONFIG.trackCustom("PixCopiado", {}); BENE_CONFIG.evento("pix_copiado"); } catch (e) {}
     });
     ta.addEventListener("focus", function () { ta.select(); });
     el.querySelector(".trocar").addEventListener("click", function () { parar(); el.hidden = true; o.onCartao && o.onCartao(); });
@@ -99,7 +99,7 @@ window.BenePix = (function () {
     var jp = el.querySelector(".japaguei");
     jp.addEventListener("click", async function () {
       jp.disabled = true; jp.textContent = "Conferindo o pagamento…";
-      try { window.BENE_CONFIG && BENE_CONFIG.trackCustom("PixJaPaguei", {}); } catch (e) {}
+      try { window.BENE_CONFIG && BENE_CONFIG.trackCustom("PixJaPaguei", {}); BENE_CONFIG.evento("pix_ja_paguei", null, true); } catch (e) {}
       await conferir();
       if (!el.isConnected || !el.querySelector(".japaguei")) return;
       jp.disabled = false; jp.textContent = "Já paguei";
