@@ -44,7 +44,7 @@ async function salvarDados(b: Record<string, unknown>, sk: string) {
   const email = String(b.email ?? "").trim().toLowerCase().slice(0, 160);
   const whatsapp = String(b.whatsapp ?? "").replace(/\D/g, "").slice(0, 15);
   const variante = String(b.variante ?? "").slice(0, 40);
-  if (!/^pi_[A-Za-z0-9]{10,64}$/.test(id) || nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || whatsapp.length < 10) return json({ erro: "dados" }, 400);
+  if (!/^pi_[A-Za-z0-9]{10,64}$/.test(id) || nome.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || (whatsapp.length > 0 && whatsapp.length < 10)) return json({ erro: "dados" }, 400);
   const r0 = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, { headers: H(sk) });
   const pi = await r0.json();
   if (!r0.ok || !PRODUTOS[String(pi?.metadata?.produto)]) return json({ erro: "compra" }, 404);
@@ -53,7 +53,8 @@ async function salvarDados(b: Record<string, unknown>, sk: string) {
   let customer = String(pi.customer || "");
   if (!customer) {
     try {
-      const c = new URLSearchParams({ email, name: nome, phone: "+55" + whatsapp });
+      const c = new URLSearchParams({ email, name: nome });
+      if (whatsapp) c.set("phone", "+55" + whatsapp);
       c.set("metadata[origem]", "bene-checkout");
       const rc = await fetch("https://api.stripe.com/v1/customers", { method: "POST", headers: H(sk), body: c });
       const jc = await rc.json();
@@ -64,7 +65,7 @@ async function salvarDados(b: Record<string, unknown>, sk: string) {
   f.set("receipt_email", email);
   f.set("metadata[nome]", nome);
   f.set("metadata[email]", email);
-  f.set("metadata[whatsapp]", whatsapp);
+  if (whatsapp) f.set("metadata[whatsapp]", whatsapp);
   if (variante) f.set("metadata[variante]", variante);
   if (customer && !pi.customer) {
     f.set("customer", customer);
@@ -76,7 +77,7 @@ async function salvarDados(b: Record<string, unknown>, sk: string) {
   const m = (j.metadata ?? {}) as Record<string, string>;
   const utm = Object.fromEntries(["vid", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].filter((k) => m[k]).map((k) => [k, m[k]]));
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  await sb.from("bene_compras").upsert({ payment_intent: id, email, nome, whatsapp, valor: j.amount, variante: variante || m.variante || null, utm, produto: m.produto, status: "criado" }, { onConflict: "payment_intent" });
+  await sb.from("bene_compras").upsert({ payment_intent: id, email, nome, whatsapp: whatsapp || null, valor: j.amount, variante: variante || m.variante || null, utm, produto: m.produto, status: "criado" }, { onConflict: "payment_intent" });
   return json({ ok: true, umClique: !!customer });
 }
 

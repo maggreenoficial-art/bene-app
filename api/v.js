@@ -4,7 +4,7 @@
 const SB = "https://acbksachtpypwtbgwyxh.supabase.co/rest/v1/bene_visitas";
 // eventos do funil (rolagem, clique em comprar, lead, checkout…) vão para outra tabela
 const SB_EV = "https://acbksachtpypwtbgwyxh.supabase.co/rest/v1/bene_eventos";
-const EVENTOS = ["rolou_25", "rolou_50", "rolou_75", "rolou_100", "clique_comprar", "lead", "checkout_aberto", "pagamento_iniciado", "pix_gerado", "pix_copiado", "bump_marcado", "pago", "quiz_inicio", "quiz_resultado", "oferta_vista", "pag_visto", "pix_clique", "pix_erro", "pix_ja_paguei", "cartao_aberto", "cartao_erro", "pag_erro", "cartao_clique", "dados_inicio", "dados_erro", "email_corrigido", "clique_impresso", "vsl_som", "vsl_25", "vsl_50", "vsl_75", "vsl_95"];
+const EVENTOS = ["rolou_25", "rolou_50", "rolou_75", "rolou_100", "clique_comprar", "lead", "checkout_aberto", "pagamento_iniciado", "pix_gerado", "pix_copiado", "bump_marcado", "pago", "quiz_inicio", "quiz_resultado", "oferta_vista", "pag_visto", "pix_clique", "pix_erro", "pix_ja_paguei", "cartao_aberto", "cartao_erro", "pag_erro", "cartao_clique", "dados_inicio", "dados_erro", "email_corrigido", "clique_impresso", "vsl_som", "vsl_25", "vsl_50", "vsl_75", "vsl_95", "checkout_saida"];
 // chave pública "anon" (a mesma que pode ir no navegador); a tabela só aceita inserir, nunca ler
 const CHAVE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjYmtzYWNodHB5cHd0Ymd3eXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0Njc5NDQsImV4cCI6MjA4NzA0Mzk0NH0.U4qPmPr5ozsKOxQ8FfIE5rKOt2wms0s7KLuyE4Px1qk";
 

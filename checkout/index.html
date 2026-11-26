@@ -9,7 +9,7 @@
 <link rel="icon" href="/img/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link rel="preconnect" href="https://js.stripe.com"><link rel="preconnect" href="https://api.stripe.com"><link rel="preconnect" href="https://acbksachtpypwtbgwyxh.supabase.co">
 <script src="https://js.stripe.com/v3/" async></script>
 <script src="/config.js"></script>
@@ -135,7 +135,7 @@
         <label for="nome">Nome</label>
         <input type="text" id="nome" autocomplete="name" autocapitalize="words" placeholder="Seu nome">
         <p class="msg" id="m-nome"></p>
-        <label for="whats">WhatsApp</label>
+        <label for="whats">WhatsApp <small style="font-weight:600;color:#7a6a5f">(opcional)</small></label>
         <input type="tel" id="whats" inputmode="tel" autocomplete="tel-national" placeholder="(00) 00000-0000">
         <p class="msg" id="m-whats"></p>
         <label for="email">E-mail</label>
@@ -245,7 +245,7 @@
     const n = $("nome").value.trim(), e = $("email").value.trim().toLowerCase(), z = w.value.replace(/\D/g, "");
     const regras = [
       ["nome", "m-nome", n.length >= 2, "Escreva seu nome."],
-      ["whats", "m-whats", z.length >= 10 && /^[1-9][1-9]/.test(z), "Digite o WhatsApp com DDD."],
+      ["whats", "m-whats", z.length === 0 || (z.length >= 10 && /^[1-9][1-9]/.test(z)), "Confira o WhatsApp com DDD (ou deixe em branco)."],
       ["email", "m-email", /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e), "Confira o e-mail: é nele que chega o acesso."],
     ];
     let primeiro = null;
@@ -330,6 +330,7 @@
   }
 
   /* ---------- order bump ---------- */
+  $("bump").addEventListener("click", e => { if (e.target.id !== "bump-ck" && !(e.target.closest && e.target.closest("b"))) e.preventDefault(); });
   $("bump-ck").addEventListener("change", async () => {
     const ck = $("bump-ck"), quer = ck.checked;
     ck.disabled = true; btn.disabled = true; erro.textContent = "";
@@ -377,7 +378,7 @@
       return { ok: r.ok, j };
     }
     C.track("AddPaymentInfo", { value: total(), currency: "BRL", content_name: metodo });
-    const fone = "+55" + lead.whats;
+    const fone = lead.whats ? "+55" + lead.whats : undefined;
     if (metodo === "pix") {
       let res = null;
       try { res = await enviar("pix"); } catch (er) { try { res = await enviar("pix"); } catch (er2) { res = null; } }
@@ -389,7 +390,7 @@
         C.evento("pix_gerado", null, true); libera(); return abrirPix(px);
       }
       C.evento("pix_erro", { msg: String(j.msg || j.erro || "rede").slice(0, 120) }, true); libera();
-      erro.textContent = j.erro === "dados" ? "Confira seu nome, WhatsApp e e-mail e toque de novo." : "Não conseguimos gerar o Pix agora. Toque em Gerar Pix de novo.";
+      erro.textContent = j.erro === "dados" ? "Confira seu nome e e-mail e toque de novo." : "Não conseguimos gerar o Pix agora. Toque em Gerar Pix de novo.";
       return;
     }
     // cartão: grava os dados no pagamento
@@ -440,6 +441,13 @@
 
   rotulo();
   C.evento("checkout_aberto");
+  (function () {
+    const t0 = Date.now(); let rol = 0, foi = false;
+    addEventListener("scroll", () => { const h = document.documentElement; rol = Math.max(rol, Math.round(100 * (scrollY + innerHeight) / h.scrollHeight)); }, { passive: true });
+    function sai() { if (foi) return; foi = true; C.evento("checkout_saida", { s: Math.round((Date.now() - t0) / 1000), rol, tocou: comecou, metodo }, true); }
+    addEventListener("pagehide", sai);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") sai(); });
+  })();
   try { if (!sessionStorage.getItem("bene_pi_ic")) { sessionStorage.setItem("bene_pi_ic", "1"); C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); } } catch (e) { C.track("InitiateCheckout", { value: C.preco, currency: "BRL" }); }
 })();
 </script>
